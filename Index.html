@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a2540">
+<title>RCT Viewer — VPHA Warehouse</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; background: #0f172a; color: #0f172a; min-height: 100vh; }
+  
+  .app-header {
+    background: linear-gradient(135deg, #0a2540 0%, #1e3a8a 100%);
+    color: white; padding: 14px 16px;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .app-title { font-size: 15px; font-weight: 800; letter-spacing: 0.5px; }
+  .app-sub { font-size: 10px; opacity: 0.85; margin-top: 2px; }
+  .app-sync-info {
+    font-size: 10px; opacity: 0.8; margin-top: 4px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .app-sync-info button {
+    background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
+    color: white; padding: 3px 8px; border-radius: 4px;
+    font-size: 10px; cursor: pointer; font-weight: 700;
+  }
+  
+  .content { padding: 12px; padding-bottom: 40px; }
+  
+  .loading {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 60px 20px; color: white; text-align: center;
+  }
+  .spinner {
+    width: 48px; height: 48px;
+    border: 5px solid rgba(255,255,255,0.2); border-top-color: white;
+    border-radius: 50%; animation: spin 0.8s linear infinite;
+    margin-bottom: 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  
+  .error-box {
+    background: #fee2e2; color: #991b1b; padding: 20px;
+    border-radius: 12px; text-align: center; margin: 20px 0;
+  }
+  .error-box .err-icon { font-size: 40px; margin-bottom: 8px; }
+  .error-box .err-title { font-weight: 800; font-size: 15px; margin-bottom: 6px; }
+  .error-box .err-msg { font-size: 12px; line-height: 1.5; }
+  
+  .result-card {
+    background: white; border-radius: 14px; overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin-bottom: 12px;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  
+  .result-header {
+    padding: 20px 16px; text-align: center;
+    color: white; position: relative;
+  }
+  .result-header.rack { background: linear-gradient(135deg, #059669 0%, #047857 100%); }
+  .result-header.sub { background: linear-gradient(135deg, #0891b2 0%, #0369a1 100%); }
+  .result-header.zone { background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); }
+  .result-header.notfound { background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); }
+  
+  .result-icon { font-size: 40px; margin-bottom: 4px; }
+  .result-title { font-size: 32px; font-weight: 900; letter-spacing: 2px; line-height: 1; }
+  .result-sub { font-size: 11px; opacity: 0.9; margin-top: 6px; }
+  
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+    padding: 12px; background: #f8fafc;
+  }
+  .stat-item {
+    background: white; padding: 10px 6px; border-radius: 8px;
+    text-align: center; border-left: 3px solid #0891b2;
+  }
+  .stat-val { font-size: 18px; font-weight: 900; color: #0a2540; line-height: 1; }
+  .stat-lbl { font-size: 9px; color: #64748b; text-transform: uppercase; font-weight: 700; margin-top: 3px; }
+  
+  .hint-box {
+    background: #eff6ff; color: #1e40af; padding: 10px 12px;
+    font-size: 11px; text-align: center; border-radius: 6px;
+    margin: 8px 12px;
+  }
+  
+  .case-list, .rack-list { padding: 8px 12px 12px; }
+  
+  .case-card {
+    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;
+    padding: 12px; margin-bottom: 8px;
+    display: grid; grid-template-columns: 1fr auto; gap: 8px;
+    border-left: 4px solid #10b981;
+  }
+  .case-card.low { border-left-color: #dc2626; background: #fef2f2; }
+  .case-card.old { border-left-color: #f59e0b; background: #fffbeb; }
+  
+  .case-label { font-family: Consolas, monospace; font-weight: 800; color: #0a2540; font-size: 14px; }
+  .case-item { font-family: Consolas, monospace; font-weight: 700; color: #7c3aed; font-size: 12px; margin-top: 2px; }
+  .case-name { font-size: 11px; color: #64748b; margin-top: 3px; line-height: 1.3; }
+  .case-meta { font-size: 10px; color: #94a3b8; margin-top: 4px; }
+  .case-qty { font-family: Consolas, monospace; font-weight: 800; font-size: 18px; color: #0a2540; text-align: right; }
+  .case-qty-lbl { font-size: 10px; color: #64748b; text-align: right; }
+  
+  .rack-item {
+    background: white; border-radius: 10px; padding: 12px 14px;
+    margin-bottom: 6px; border-left: 4px solid;
+    display: grid; grid-template-columns: 90px 1fr 60px; gap: 8px;
+    align-items: center; cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .rack-item.full { border-color: #10b981; }
+  .rack-item.warn { border-color: #f59e0b; }
+  .rack-item.low { border-color: #dc2626; }
+  .rack-item.empty { border-color: #cbd5e1; opacity: 0.7; }
+  .rack-item:active { transform: scale(0.98); }
+  
+  .ri-addr { font-family: Consolas, monospace; font-weight: 900; font-size: 15px; color: #0a2540; }
+  .ri-info { font-size: 11px; color: #475569; }
+  .ri-info b { color: #0a2540; }
+  .ri-fill { text-align: right; font-weight: 800; font-size: 14px; }
+  .ri-empty { color: #94a3b8; font-style: italic; }
+  
+  .navigate-btn {
+    display: block; text-decoration: none;
+    background: linear-gradient(135deg, #0a2540 0%, #1e3a8a 100%);
+    color: white; padding: 14px; border-radius: 10px;
+    text-align: center; font-weight: 700; font-size: 13px;
+    margin-top: 8px;
+  }
+  .navigate-btn.zone { background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); }
+  .navigate-btn.sub { background: linear-gradient(135deg, #0891b2 0%, #0369a1 100%); }
+  
+  .action-bar {
+    position: fixed; bottom: 12px; left: 12px; right: 12px;
+    display: flex; gap: 8px; z-index: 50;
+  }
+  .action-btn {
+    flex: 1; background: white; color: #0a2540;
+    padding: 12px; border: none; border-radius: 10px;
+    font-weight: 700; font-size: 13px; cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  }
+  .action-btn.primary { background: #0a2540; color: white; }
+  
+  .footer-info {
+    text-align: center; color: rgba(255,255,255,0.6);
+    font-size: 10px; padding: 20px 12px 60px;
+  }
+  
+  .empty-state {
+    text-align: center; padding: 40px 20px; color: #64748b;
+  }
+  .empty-icon { font-size: 60px; margin-bottom: 12px; opacity: 0.5; }
+  
+  @media (min-width: 640px) {
+    body { max-width: 640px; margin: 0 auto; }
+    .content { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <div class="app-title">🏭 RCT VIEWER</div>
+  <div class="app-sub">PT VALEO PYEONGHWA ASEAN TRANSMISSION</div>
+  <div class="app-sync-info" id="sync-info">
+    <span>⏳ Loading data...</span>
+  </div>
+</div>
+
+<div class="content" id="content">
+  <div class="loading">
+    <div class="spinner"></div>
+    <div style="font-weight:700">Memuat data warehouse...</div>
+    <div style="font-size:11px;opacity:0.7;margin-top:4px">Fetching dari GitHub Gist</div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+  
+  // ═══ CONFIG ═══
+  const DATA_URL = 'https://gist.githubusercontent.com/biansyah07/517b094bdf8235ad31329e426b0cb4da/raw/rct-data.json';
+  
+  let allData = null;
+  let syncInfo = null;
+  
+  // ═══ FETCH DATA ═══
+  async function fetchData() {
+    try {
+      // Cache-buster untuk pastikan selalu ambil versi terbaru
+      const url = DATA_URL + '?t=' + Date.now();
+      const res = await fetch(url, { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const json = await res.json();
+      allData = json.data || [];
+      syncInfo = {
+        syncedAt: json.syncedAt,
+        syncedAtLocal: json.syncedAtLocal,
+        stats: json.stats || {},
+      };
+      updateSyncInfo();
+      route();
+    } catch (err) {
+      console.error(err);
+      document.getElementById('content').innerHTML = `
+        <div class="error-box">
+          <div class="err-icon">⚠️</div>
+          <div class="err-title">Gagal Memuat Data</div>
+          <div class="err-msg">
+            ${err.message}<br><br>
+            Kemungkinan:<br>
+            • Tidak ada koneksi internet<br>
+            • Data belum di-sync oleh admin<br>
+            • Server GitHub down
+          </div>
+          <button class="action-btn primary" style="margin-top:12px;padding:10px 20px" onclick="location.reload()">🔄 Coba Lagi</button>
+        </div>
+      `;
+    }
+  }
+  
+  function updateSyncInfo() {
+    const el = document.getElementById('sync-info');
+    if (!syncInfo) return;
+    const time = syncInfo.syncedAtLocal || 'unknown';
+    el.innerHTML = `
+      <span>✅ Data update: <b>${time}</b></span>
+      <button onclick="location.reload()">🔄 Refresh</button>
+    `;
+  }
+  
+  // ═══ ROUTER ═══
+  function route() {
+    const hash = (location.hash || '').replace('#', '').toUpperCase().trim();
+    
+    if (!hash) {
+      renderHome();
+      return;
+    }
+    
+    // Format: B1-1 (rack)
+    if (/^[A-Z]\d+-\d+$/.test(hash)) {
+      renderRack(hash);
+      return;
+    }
+    
+    // Format: B1 (sub-zone)
+    if (/^[A-Z]\d+$/.test(hash)) {
+      renderSubZone(hash);
+      return;
+    }
+    
+    // Format: B (zone)
+    if (/^[A-Z]$/.test(hash)) {
+      renderZone(hash);
+      return;
+    }
+    
+    // Unknown
+    renderNotFound(hash);
+  }
+  
+  window.addEventListener('hashchange', route);
+  
+  // ═══ RENDER: HOME ═══
+  function renderHome() {
+    const zones = [...new Set(allData.map(r => r.zone))].sort();
+    const stats = syncInfo?.stats || {};
+    
+    document.getElementById('content').innerHTML = `
+      <div class="result-card">
+        <div class="result-header zone">
+          <div class="result-icon">📦</div>
+          <div class="result-title" style="font-size:22px;letter-spacing:1px">WAREHOUSE</div>
+          <div class="result-sub">Scan QR di rak untuk lihat isi, atau pilih zone:</div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-val">${(stats.activeRacks || 0).toLocaleString()}</div>
+            <div class="stat-lbl">Active Racks</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-val">${(stats.activeCases || 0).toLocaleString()}</div>
+            <div class="stat-lbl">Active Cases</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-val">${(stats.activeItems || 0).toLocaleString()}</div>
+            <div class="stat-lbl">SKU Items</div>
+          </div>
+        </div>
+        <div class="rack-list">
+          <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px">🏢 Pilih Zone</div>
+          ${zones.map(z => `
+            <a href="#${z}" class="navigate-btn zone" style="margin-top:6px">
+              📍 ZONE ${z}
+            </a>
+          `).join('')}
+        </div>
+      </div>
+      <div class="footer-info">© 2026 Biansyah · Powered by MangoTree WMS</div>
+    `;
+  }
+  
+  // ═══ RENDER: RACK ═══
+  function renderRack(rackAddr) {
+    const cases = allData.filter(r => r.address === rackAddr && r.isActive === true && (Number(r.actualRemain) || 0) > 0);
+    const rackExists = allData.some(r => r.address === rackAddr);
+    
+    if (!rackExists) {
+      renderNotFound(rackAddr, 'rack');
+      return;
+    }
+    
+    // Extract sub-zone (B1-1 → B1)
+    const subZoneMatch = rackAddr.match(/^([A-Z]\d+)-\d+$/);
+    const subZone = subZoneMatch ? subZoneMatch[1] : '';
+    const zone = rackAddr[0];
+    
+    const totalPcs = cases.reduce((s, c) => s + (Number(c.actualRemain) || 0), 0);
+    const uniqueItems = new Set(cases.map(c => c.itemCd)).size;
+    cases.sort((a, b) => (a.arrivalNo || '').localeCompare(b.arrivalNo || ''));
+    
+    document.getElementById('content').innerHTML = `
+      <div class="result-card">
+        <div class="result-header rack">
+          <div class="result-icon">📍</div>
+          <div class="result-title">${rackAddr}</div>
+          <div class="result-sub">Detail Rak · Live dari WMS</div>
+        </div>
+        ${cases.length === 0 ? `
+          <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <div style="font-weight:700;font-size:15px;color:#0a2540">Rak ${rackAddr} Kosong</div>
+            <div style="font-size:12px;margin-top:6px">Tidak ada case aktif saat ini</div>
+          </div>
+        ` : `
+          <div class="stats-grid">
+            <div class="stat-item"><div class="stat-val">${cases.length}</div><div class="stat-lbl">Cases</div></div>
+            <div class="stat-item"><div class="stat-val">${uniqueItems}</div><div class="stat-lbl">Items</div></div>
+            <div class="stat-item"><div class="stat-val">${totalPcs.toLocaleString()}</div><div class="stat-lbl">Total Pcs</div></div>
+          </div>
+          <div class="case-list">
+            ${cases.map(c => {
+              const cls = c.status === 'LOW' ? 'low' : (c.isOld ? 'old' : '');
+              return `
+                <div class="case-card ${cls}">
+                  <div>
+                    <div class="case-label">${c.arrivalNo || '-'}</div>
+                    <div class="case-item">${c.itemCd || '-'}</div>
+                    <div class="case-name">${c.engItemNm || '-'}</div>
+                    <div class="case-meta">
+                      In: ${c.inDt || '-'} · Age: ${c.ageMonths || 0} mo
+                      ${c.invNo ? ` · Inv: ${c.invNo}` : ''}
+                    </div>
+                  </div>
+                  <div>
+                    <div class="case-qty">${(Number(c.actualRemain) || 0).toLocaleString()}</div>
+                    <div class="case-qty-lbl">${c.unt || 'PCS'}</div>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `}
+        ${subZone ? `<div style="padding:0 12px 8px"><a href="#${subZone}" class="navigate-btn sub">🔷 Lihat semua rak di ${subZone}</a></div>` : ''}
+        <div style="padding:0 12px 12px"><a href="#${zone}" class="navigate-btn zone">🏢 Lihat semua rak di Zone ${zone}</a></div>
+      </div>
+      <div class="footer-info">© 2026 Biansyah · Data ${syncInfo?.syncedAtLocal || ''}</div>
+    `;
+  }
+  
+  // ═══ RENDER: SUB-ZONE ═══
+  function renderSubZone(subId) {
+    // Group racks by address, filter yang mulai dengan subId + '-'
+    const racksMap = {};
+    allData.forEach(r => {
+      if (!r.address.startsWith(subId + '-')) return;
+      if (!racksMap[r.address]) {
+        racksMap[r.address] = { address: r.address, cases: [], activeCount: 0, totalPcs: 0 };
+      }
+      racksMap[r.address].cases.push(r);
+      if (r.isActive && (Number(r.actualRemain) || 0) > 0) {
+        racksMap[r.address].activeCount++;
+        racksMap[r.address].totalPcs += Number(r.actualRemain) || 0;
+      }
+    });
+    
+    const racks = Object.values(racksMap).sort((a, b) => 
+      a.address.localeCompare(b.address, undefined, { numeric: true })
+    );
+    
+    if (racks.length === 0) {
+      renderNotFound(subId, 'sub');
+      return;
+    }
+    
+    const zone = subId[0];
+    const activeRacks = racks.filter(r => r.activeCount > 0);
+    const totalCases = activeRacks.reduce((s, r) => s + r.activeCount, 0);
+    const totalPcs = activeRacks.reduce((s, r) => s + r.totalPcs, 0);
+    
+    document.getElementById('content').innerHTML = `
+      <div class="result-card">
+        <div class="result-header sub">
+          <div class="result-icon">🔷</div>
+          <div class="result-title">${subId}</div>
+          <div class="result-sub">Sub-Zone (Kolom Rak) · Live dari WMS</div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-item"><div class="stat-val">${activeRacks.length}/${racks.length}</div><div class="stat-lbl">Racks</div></div>
+          <div class="stat-item"><div class="stat-val">${totalCases}</div><div class="stat-lbl">Cases</div></div>
+          <div class="stat-item"><div class="stat-val">${totalPcs.toLocaleString()}</div><div class="stat-lbl">Total Pcs</div></div>
+        </div>
+        <div class="hint-box">👆 Tap rak untuk lihat detail</div>
+        <div class="rack-list">
+          ${racks.map(rack => {
+            const isEmpty = rack.activeCount === 0;
+            const initialTotal = rack.cases.reduce((s, c) => s + (Number(c.initial) || 0), 0);
+            const fill = initialTotal > 0 ? (rack.totalPcs / initialTotal * 100) : 0;
+            let cls = 'empty';
+            if (!isEmpty) {
+              if (fill >= 70) cls = 'full';
+              else if (fill >= 30) cls = 'warn';
+              else cls = 'low';
+            }
+            return `
+              <a href="#${rack.address}" style="text-decoration:none;color:inherit">
+                <div class="rack-item ${cls}">
+                  <div class="ri-addr">${rack.address}</div>
+                  <div class="ri-info">
+                    ${isEmpty ? '<span class="ri-empty">Kosong</span>' : 
+                      `<b>${rack.activeCount}</b>c · <b>${rack.totalPcs.toLocaleString()}</b> pcs`}
+                  </div>
+                  <div class="ri-fill">${isEmpty ? '—' : fill.toFixed(0) + '%'}</div>
+                </div>
+              </a>
+            `;
+          }).join('')}
+        </div>
+        <div style="padding:0 12px 12px"><a href="#${zone}" class="navigate-btn zone">🏢 Lihat semua rak di Zone ${zone}</a></div>
+      </div>
+      <div class="footer-info">© 2026 Biansyah · Data ${syncInfo?.syncedAtLocal || ''}</div>
+    `;
+  }
+  
+  // ═══ RENDER: ZONE ═══
+  function renderZone(zone) {
+    const racksMap = {};
+    allData.forEach(r => {
+      if (r.zone !== zone) return;
+      if (!racksMap[r.address]) {
+        racksMap[r.address] = { address: r.address, cases: [], activeCount: 0, totalPcs: 0 };
+      }
+      racksMap[r.address].cases.push(r);
+      if (r.isActive && (Number(r.actualRemain) || 0) > 0) {
+        racksMap[r.address].activeCount++;
+        racksMap[r.address].totalPcs += Number(r.actualRemain) || 0;
+      }
+    });
+    
+    const racks = Object.values(racksMap).sort((a, b) => 
+      a.address.localeCompare(b.address, undefined, { numeric: true })
+    );
+    
+    if (racks.length === 0) {
+      renderNotFound(zone, 'zone');
+      return;
+    }
+    
+    const activeRacks = racks.filter(r => r.activeCount > 0);
+    const totalCases = activeRacks.reduce((s, r) => s + r.activeCount, 0);
+    const totalPcs = activeRacks.reduce((s, r) => s + r.totalPcs, 0);
+    
+    // Group by sub-zone
+    const subZones = {};
+    racks.forEach(r => {
+      const m = r.address.match(/^([A-Z]\d+)-\d+$/);
+      if (!m) return;
+      const sub = m[1];
+      if (!subZones[sub]) subZones[sub] = [];
+      subZones[sub].push(r);
+    });
+    
+    const subZoneList = Object.keys(subZones).sort((a, b) => 
+      a.localeCompare(b, undefined, { numeric: true })
+    );
+    
+    document.getElementById('content').innerHTML = `
+      <div class="result-card">
+        <div class="result-header zone">
+          <div class="result-icon">🏢</div>
+          <div class="result-title">ZONE ${zone}</div>
+          <div class="result-sub">Overview Zone · Live dari WMS</div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-item"><div class="stat-val">${activeRacks.length}/${racks.length}</div><div class="stat-lbl">Racks</div></div>
+          <div class="stat-item"><div class="stat-val">${totalCases}</div><div class="stat-lbl">Cases</div></div>
+          <div class="stat-item"><div class="stat-val">${totalPcs.toLocaleString()}</div><div class="stat-lbl">Total Pcs</div></div>
+        </div>
+        <div class="hint-box">👆 Tap sub-zone untuk lihat rak-nya</div>
+        <div class="rack-list">
+          ${subZoneList.map(sub => {
+            const subRacks = subZones[sub];
+            const activeInSub = subRacks.filter(r => r.activeCount > 0).length;
+            const pcsInSub = subRacks.reduce((s, r) => s + r.totalPcs, 0);
+            return `
+              <a href="#${sub}" style="text-decoration:none;color:inherit">
+                <div class="rack-item ${activeInSub > 0 ? 'full' : 'empty'}">
+                  <div class="ri-addr">${sub}</div>
+                  <div class="ri-info">
+                    ${activeInSub === 0 ? '<span class="ri-empty">Semua kosong</span>' :
+                      `<b>${activeInSub}</b>/${subRacks.length} rak · <b>${pcsInSub.toLocaleString()}</b> pcs`}
+                  </div>
+                  <div class="ri-fill" style="color:#64748b">${subRacks.length}</div>
+                </div>
+              </a>
+            `;
+          }).join('')}
+        </div>
+      </div>
+      <div class="footer-info">© 2026 Biansyah · Data ${syncInfo?.syncedAtLocal || ''}</div>
+    `;
+  }
+  
+  // ═══ RENDER: NOT FOUND ═══
+  function renderNotFound(target, type = 'unknown') {
+    const typeLabel = { rack: 'Rak', sub: 'Sub-Zone', zone: 'Zone', unknown: 'Kode' }[type];
+    document.getElementById('content').innerHTML = `
+      <div class="result-card">
+        <div class="result-header notfound">
+          <div class="result-icon">❌</div>
+          <div class="result-title" style="font-size:24px">${target}</div>
+          <div class="result-sub">${typeLabel} tidak ditemukan</div>
+        </div>
+        <div class="empty-state">
+          <div class="empty-icon">🔍</div>
+          <div style="font-weight:700;color:#0a2540">Data tidak ada</div>
+          <div style="font-size:12px;margin-top:8px;line-height:1.5">
+            ${typeLabel} <b>${target}</b> tidak terdaftar di WMS.<br><br>
+            Format valid:<br>
+            • <code>B1-1</code> = Rak<br>
+            • <code>B1</code> = Sub-zone (kolom)<br>
+            • <code>B</code> = Zone
+          </div>
+          <a href="#" class="navigate-btn" style="max-width:200px;margin:16px auto 0">🏠 Ke Beranda</a>
+        </div>
+      </div>
+    `;
+  }
+  
+  // ═══ INIT ═══
+  fetchData();
+  
+})();
+</script>
+
+</body>
+</html>
