@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0a2540">
-<title>RCT Viewer — VPHA Warehouse</title>
+<title>RCT Viewer v1.1 — VPHA Warehouse</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body { font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; background: #0f172a; color: #0f172a; min-height: 100vh; }
@@ -18,14 +18,18 @@
   .app-title { font-size: 15px; font-weight: 800; letter-spacing: 0.5px; }
   .app-sub { font-size: 10px; opacity: 0.85; margin-top: 2px; }
   .app-sync-info {
-    font-size: 10px; opacity: 0.8; margin-top: 4px;
+    font-size: 10px; opacity: 0.9; margin-top: 6px;
     display: flex; align-items: center; gap: 6px;
+    padding: 4px 0 4px 8px;
+    transition: border-left 0.3s;
   }
   .app-sync-info button {
     background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
     color: white; padding: 3px 8px; border-radius: 4px;
     font-size: 10px; cursor: pointer; font-weight: 700;
+    margin-left: auto;
   }
+  .app-sync-info button:active { background: rgba(255,255,255,0.3); }
   
   .content { padding: 12px; padding-bottom: 40px; }
   
@@ -89,6 +93,14 @@
     margin: 8px 12px;
   }
   
+  #stale-banner {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e; padding: 12px 16px; border-radius: 10px;
+    margin-bottom: 12px; border-left: 4px solid #f59e0b;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 2px 8px rgba(245,158,11,0.2);
+  }
+  
   .case-list, .rack-list { padding: 8px 12px 12px; }
   
   .case-card {
@@ -136,27 +148,21 @@
   .navigate-btn.zone { background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); }
   .navigate-btn.sub { background: linear-gradient(135deg, #0891b2 0%, #0369a1 100%); }
   
-  .action-bar {
-    position: fixed; bottom: 12px; left: 12px; right: 12px;
-    display: flex; gap: 8px; z-index: 50;
-  }
-  .action-btn {
-    flex: 1; background: white; color: #0a2540;
-    padding: 12px; border: none; border-radius: 10px;
-    font-weight: 700; font-size: 13px; cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  }
-  .action-btn.primary { background: #0a2540; color: white; }
-  
   .footer-info {
     text-align: center; color: rgba(255,255,255,0.6);
-    font-size: 10px; padding: 20px 12px 60px;
+    font-size: 10px; padding: 20px 12px 60px; line-height: 1.5;
   }
   
   .empty-state {
     text-align: center; padding: 40px 20px; color: #64748b;
   }
   .empty-icon { font-size: 60px; margin-bottom: 12px; opacity: 0.5; }
+  
+  #version-warning {
+    background: #fee2e2; color: #991b1b; padding: 10px 14px;
+    border-radius: 8px; margin: 8px 12px 0; font-size: 11px;
+    border-left: 3px solid #dc2626; display: flex; align-items: center; gap: 8px;
+  }
   
   @media (min-width: 640px) {
     body { max-width: 640px; margin: 0 auto; }
@@ -188,6 +194,8 @@
   
   // ═══ CONFIG ═══
   const DATA_URL = 'https://gist.githubusercontent.com/biansyah07/517b094bdf8235ad31329e426b0cb4da/raw/rct-data.json';
+  const VIEWER_VERSION = '1.1.0';
+  const COMPATIBLE_VERSIONS = ['1.0.0', '1.1.0'];
   
   let allData = null;
   let syncInfo = null;
@@ -195,16 +203,23 @@
   // ═══ FETCH DATA ═══
   async function fetchData() {
     try {
-      // Cache-buster untuk pastikan selalu ambil versi terbaru
       const url = DATA_URL + '?t=' + Date.now();
       const res = await fetch(url, { cache: 'no-store' });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const json = await res.json();
+      
+      const dataVersion = json.version || 'unknown';
+      if (!COMPATIBLE_VERSIONS.includes(dataVersion)) {
+        console.warn('[Viewer] Version mismatch:', dataVersion);
+        showVersionWarning(dataVersion, VIEWER_VERSION);
+      }
+      
       allData = json.data || [];
       syncInfo = {
         syncedAt: json.syncedAt,
         syncedAtLocal: json.syncedAtLocal,
         stats: json.stats || {},
+        version: dataVersion,
       };
       updateSyncInfo();
       route();
@@ -221,54 +236,118 @@
             • Data belum di-sync oleh admin<br>
             • Server GitHub down
           </div>
-          <button class="action-btn primary" style="margin-top:12px;padding:10px 20px" onclick="location.reload()">🔄 Coba Lagi</button>
+          <button class="navigate-btn" style="margin-top:12px;max-width:200px;margin-left:auto;margin-right:auto" onclick="location.reload()">🔄 Coba Lagi</button>
         </div>
       `;
     }
   }
   
+  function showVersionWarning(dataVer, viewerVer) {
+    const existing = document.getElementById('version-warning');
+    if (existing) return;
+    
+    const banner = document.createElement('div');
+    banner.id = 'version-warning';
+    banner.innerHTML = `
+      <span style="font-size:18px">⚠️</span>
+      <div>
+        <b>Version mismatch</b><br>
+        Data v${dataVer} · Viewer v${viewerVer}<br>
+        <span style="opacity:0.8">Tampilan mungkin tidak lengkap</span>
+      </div>
+    `;
+    document.body.insertBefore(banner, document.getElementById('content'));
+  }
+  
   function updateSyncInfo() {
     const el = document.getElementById('sync-info');
     if (!syncInfo) return;
+    
     const time = syncInfo.syncedAtLocal || 'unknown';
+    const syncDate = new Date(syncInfo.syncedAt);
+    const now = new Date();
+    const diffMs = now.getTime() - syncDate.getTime();
+    const diffMin = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    let relativeTime;
+    if (diffMin < 1) relativeTime = 'baru saja';
+    else if (diffMin < 60) relativeTime = diffMin + ' menit lalu';
+    else if (diffHours < 24) relativeTime = diffHours + ' jam lalu';
+    else relativeTime = diffDays + ' hari lalu';
+    
+    let statusBadge = '';
+    let statusColor = '';
+    
+    if (diffHours < 1) {
+      statusColor = '#10b981';
+      statusBadge = '<span style="background:#10b981;padding:2px 6px;border-radius:3px;margin-left:6px;font-weight:800">🟢 FRESH</span>';
+    } else if (diffHours < 12) {
+      statusColor = '#0891b2';
+      statusBadge = '<span style="background:#0891b2;padding:2px 6px;border-radius:3px;margin-left:6px;font-weight:800">🔵 OK</span>';
+    } else if (diffHours < 24) {
+      statusColor = '#f59e0b';
+      statusBadge = '<span style="background:#f59e0b;padding:2px 6px;border-radius:3px;margin-left:6px;font-weight:800">🟡 STALE</span>';
+    } else {
+      statusColor = '#dc2626';
+      statusBadge = '<span style="background:#dc2626;padding:2px 6px;border-radius:3px;margin-left:6px;font-weight:800">🔴 OLD</span>';
+    }
+    
     el.innerHTML = `
-      <span>✅ Data update: <b>${time}</b></span>
-      <button onclick="location.reload()">🔄 Refresh</button>
+      <span>✅ Update: <b>${relativeTime}</b>${statusBadge}</span>
+      <button onclick="location.reload()">🔄</button>
     `;
+    el.style.borderLeft = '3px solid ' + statusColor;
+    
+    if (diffHours >= 24) {
+      showStaleBanner(diffDays, time);
+    }
+  }
+  
+  function showStaleBanner(days, lastSync) {
+    const existing = document.getElementById('stale-banner');
+    if (existing) return;
+    
+    const content = document.getElementById('content');
+    if (!content) return;
+    
+    const banner = document.createElement('div');
+    banner.id = 'stale-banner';
+    banner.innerHTML = `
+      <div style="font-size:24px">⚠️</div>
+      <div style="flex:1">
+        <div style="font-weight:800;font-size:13px">Data belum diupdate ${days} hari</div>
+        <div style="font-size:11px;margin-top:2px;opacity:0.9">
+          Terakhir sync: ${lastSync}. Hubungi admin untuk refresh.
+        </div>
+      </div>
+    `;
+    content.insertBefore(banner, content.firstChild);
   }
   
   // ═══ ROUTER ═══
   function route() {
     const hash = (location.hash || '').replace('#', '').toUpperCase().trim();
     
-    if (!hash) {
-      renderHome();
-      return;
-    }
-    
-    // Format: B1-1 (rack)
-    if (/^[A-Z]\d+-\d+$/.test(hash)) {
-      renderRack(hash);
-      return;
-    }
-    
-    // Format: B1 (sub-zone)
-    if (/^[A-Z]\d+$/.test(hash)) {
-      renderSubZone(hash);
-      return;
-    }
-    
-    // Format: B (zone)
-    if (/^[A-Z]$/.test(hash)) {
-      renderZone(hash);
-      return;
-    }
-    
-    // Unknown
+    if (!hash) { renderHome(); return; }
+    if (/^[A-Z]\d+-\d+$/.test(hash)) { renderRack(hash); return; }
+    if (/^[A-Z]\d+$/.test(hash)) { renderSubZone(hash); return; }
+    if (/^[A-Z]$/.test(hash)) { renderZone(hash); return; }
     renderNotFound(hash);
   }
   
   window.addEventListener('hashchange', route);
+  
+  function buildFooter() {
+    return `
+      <div class="footer-info">
+        © 2026 Biansyah · Viewer v${VIEWER_VERSION}
+        ${syncInfo ? `· Data v${syncInfo.version || '?'}` : ''}
+        <br>${syncInfo?.syncedAtLocal ? `Data: ${syncInfo.syncedAtLocal}` : ''}
+      </div>
+    `;
+  }
   
   // ═══ RENDER: HOME ═══
   function renderHome() {
@@ -298,14 +377,10 @@
         </div>
         <div class="rack-list">
           <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px">🏢 Pilih Zone</div>
-          ${zones.map(z => `
-            <a href="#${z}" class="navigate-btn zone" style="margin-top:6px">
-              📍 ZONE ${z}
-            </a>
-          `).join('')}
+          ${zones.map(z => `<a href="#${z}" class="navigate-btn zone" style="margin-top:6px">📍 ZONE ${z}</a>`).join('')}
         </div>
       </div>
-      <div class="footer-info">© 2026 Biansyah · Powered by MangoTree WMS</div>
+      ${buildFooter()}
     `;
   }
   
@@ -314,12 +389,8 @@
     const cases = allData.filter(r => r.address === rackAddr && r.isActive === true && (Number(r.actualRemain) || 0) > 0);
     const rackExists = allData.some(r => r.address === rackAddr);
     
-    if (!rackExists) {
-      renderNotFound(rackAddr, 'rack');
-      return;
-    }
+    if (!rackExists) { renderNotFound(rackAddr, 'rack'); return; }
     
-    // Extract sub-zone (B1-1 → B1)
     const subZoneMatch = rackAddr.match(/^([A-Z]\d+)-\d+$/);
     const subZone = subZoneMatch ? subZoneMatch[1] : '';
     const zone = rackAddr[0];
@@ -373,13 +444,12 @@
         ${subZone ? `<div style="padding:0 12px 8px"><a href="#${subZone}" class="navigate-btn sub">🔷 Lihat semua rak di ${subZone}</a></div>` : ''}
         <div style="padding:0 12px 12px"><a href="#${zone}" class="navigate-btn zone">🏢 Lihat semua rak di Zone ${zone}</a></div>
       </div>
-      <div class="footer-info">© 2026 Biansyah · Data ${syncInfo?.syncedAtLocal || ''}</div>
+      ${buildFooter()}
     `;
   }
   
   // ═══ RENDER: SUB-ZONE ═══
   function renderSubZone(subId) {
-    // Group racks by address, filter yang mulai dengan subId + '-'
     const racksMap = {};
     allData.forEach(r => {
       if (!r.address.startsWith(subId + '-')) return;
@@ -397,10 +467,7 @@
       a.address.localeCompare(b.address, undefined, { numeric: true })
     );
     
-    if (racks.length === 0) {
-      renderNotFound(subId, 'sub');
-      return;
-    }
+    if (racks.length === 0) { renderNotFound(subId, 'sub'); return; }
     
     const zone = subId[0];
     const activeRacks = racks.filter(r => r.activeCount > 0);
@@ -447,7 +514,7 @@
         </div>
         <div style="padding:0 12px 12px"><a href="#${zone}" class="navigate-btn zone">🏢 Lihat semua rak di Zone ${zone}</a></div>
       </div>
-      <div class="footer-info">© 2026 Biansyah · Data ${syncInfo?.syncedAtLocal || ''}</div>
+      ${buildFooter()}
     `;
   }
   
@@ -470,16 +537,12 @@
       a.address.localeCompare(b.address, undefined, { numeric: true })
     );
     
-    if (racks.length === 0) {
-      renderNotFound(zone, 'zone');
-      return;
-    }
+    if (racks.length === 0) { renderNotFound(zone, 'zone'); return; }
     
     const activeRacks = racks.filter(r => r.activeCount > 0);
     const totalCases = activeRacks.reduce((s, r) => s + r.activeCount, 0);
     const totalPcs = activeRacks.reduce((s, r) => s + r.totalPcs, 0);
     
-    // Group by sub-zone
     const subZones = {};
     racks.forEach(r => {
       const m = r.address.match(/^([A-Z]\d+)-\d+$/);
@@ -526,11 +589,10 @@
           }).join('')}
         </div>
       </div>
-      <div class="footer-info">© 2026 Biansyah · Data ${syncInfo?.syncedAtLocal || ''}</div>
+      ${buildFooter()}
     `;
   }
   
-  // ═══ RENDER: NOT FOUND ═══
   function renderNotFound(target, type = 'unknown') {
     const typeLabel = { rack: 'Rak', sub: 'Sub-Zone', zone: 'Zone', unknown: 'Kode' }[type];
     document.getElementById('content').innerHTML = `
@@ -547,18 +609,17 @@
             ${typeLabel} <b>${target}</b> tidak terdaftar di WMS.<br><br>
             Format valid:<br>
             • <code>B1-1</code> = Rak<br>
-            • <code>B1</code> = Sub-zone (kolom)<br>
+            • <code>B1</code> = Sub-zone<br>
             • <code>B</code> = Zone
           </div>
           <a href="#" class="navigate-btn" style="max-width:200px;margin:16px auto 0">🏠 Ke Beranda</a>
         </div>
       </div>
+      ${buildFooter()}
     `;
   }
   
-  // ═══ INIT ═══
   fetchData();
-  
 })();
 </script>
 
