@@ -173,8 +173,8 @@
       <div class="app-sub">PT VALEO PYEONGHWA ASEAN TRANSMISSION</div>
     </div>
     <!-- Badge Status User (Login) -->
-    <div id="user-badge" style="display: none; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 6px; padding: 4px 8px; text-align: center; min-width: 65px; flex-shrink: 0;">
-      <div style="font-size: 10px; font-weight: 800; color: #38bdf8;" id="user-id-display">-</div>
+    <div id="user-badge" style="display: none; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 6px; padding: 4px 8px; text-align: center; min-width: 80px; flex-shrink: 0;">
+      <div style="font-size: 10px; font-weight: 800; color: #38bdf8; white-space: nowrap;" id="user-id-display">-</div>
       <div style="margin-top: 1px;"><a href="javascript:void(0)" onclick="window.logout()" style="color: #f87171; text-decoration: none; font-weight: 800; font-size: 8px; letter-spacing: 0.3px;">KELUAR ❌</a></div>
     </div>
   </div>
@@ -378,18 +378,19 @@
       const val = inputEl.value.trim();
       const digits = val.replace(/[^0-9]/g, ''); // Ambil angka saja
       
-      // DAFTAR PUTIH ID YANG DIIZINKAN (Strict Whitelist)
+      // 🚨 DAFTAR PUTIH ID YANG DIIZINKAN & NAMA (SISTEM WHITELIST)
       const allowedUsers = {
-        '18': 'VPH18',       // Anda
-        '39': 'VPH39',       // Bos Anda
-        '0' : 'GUEST 👤'     // Tamu Rahasia
+        '18': 'VPH18 - AdmRB',   // ID Anda
+        '39': 'VPH39 - Spv.AB',   // ID Bos Anda
+        '10': 'VPH10 - PMgr.SG',  // ID PMgr.SG
+        '0' : 'GUEST 👤'          // ID Tamu Rahasia (Ketik 0)
       };
 
       if (allowedUsers[digits]) {
         const generatedId = allowedUsers[digits];
-        localStorage.setItem('rct_user_id', generatedId); // simpan di browser
-        updateUserHeader(); // perbarui info header
-        route(); // teruskan navigasi ke halaman tujuan awal
+        localStorage.setItem('rct_user_id', generatedId); // simpan ke browser
+        updateUserHeader(); // perbarui badge header pojok kanan atas
+        route(); // lanjutkan ke rak yang di-scan
       } else {
         alert('❌ AKSES DITOLAK!\nNomor ID tidak terdaftar di sistem.');
         inputEl.value = '';
@@ -714,7 +715,7 @@
   
   // ═══ INIT ═══
   fetchData();
-  console.log('📄 Viewer v1.3.5 · Gist ID:', GIST_ID);
+  console.log('📄 Viewer v1.4.0 · Gist ID:', GIST_ID);
   
 })();
 </script>
