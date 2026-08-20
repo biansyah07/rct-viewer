@@ -343,20 +343,19 @@
         <div class="result-header zone" style="background: linear-gradient(135deg, #0a2540 0%, #1e3a8a 100%); padding: 30px 20px;">
           <div class="result-icon">🔒</div>
           <div class="result-title" style="font-size:20px;letter-spacing:1px">LOGIN AKSES</div>
-          <div class="result-sub">Sistem terproteksi. Masukkan kode ID Anda untuk mengakses data.</div>
+          <div class="result-sub">Sistem Terproteksi. Masukkan Kode ID Anda untuk masuk.</div>
         </div>
         
         <div style="padding: 24px 20px;">
           <form id="login-form">
             <div style="margin-bottom: 20px;">
-              <label for="employee-id-input" style="display: block; font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;">Masukkan Kode ID:</label>
+              <label for="employee-id-input" style="display: block; font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;">Masukkan No ID:</label>
               <div style="display: flex; align-items: center; border: 2px solid #cbd5e1; border-radius: 8px; padding: 0 12px; background: #f8fafc;">
                 <span style="font-weight: 900; color: #64748b; font-family: Consolas, monospace; font-size: 18px; margin-right: 6px; user-select: none;">VPH</span>
-                <input type="tel" pattern="[0-9]*" inputmode="numeric" id="employee-id-input" placeholder="18" style="width: 100%; border: none; background: transparent; padding: 12px 0; font-size: 18px; font-weight: 900; font-family: Consolas, monospace; color: #0a2540; outline: none;" required autofocus>
+                <input type="tel" pattern="[0-9]*" inputmode="numeric" id="employee-id-input" placeholder="••••" style="width: 100%; border: none; background: transparent; padding: 12px 0; font-size: 18px; font-weight: 900; font-family: Consolas, monospace; color: #0a2540; outline: none;" required autofocus>
               </div>
-              <div style="font-size: 11px; color: #64748b; margin-top: 8px; line-height: 1.4;">
-                💡 Cukup masukkan <b>angka ID saja</b>.<br>
-                Contoh: ketik <b>18</b> untuk <i>VPH18</i> atau <b>39</b> untuk <i>VPH39</i>.
+              <div style="font-size: 11px; color: #64748b; margin-top: 10px; line-height: 1.4;">
+                🔒 Masukkan nomor ID khusus Anda (hanya angka). Hubungi Admin WMS jika Anda belum memiliki akses.
               </div>
             </div>
             
@@ -379,23 +378,23 @@
       const val = inputEl.value.trim();
       const digits = val.replace(/[^0-9]/g, ''); // Ambil angka saja
       
-      if (digits === '') {
-        alert('ID tidak valid! Harap masukkan nomor ID berupa angka.');
-        return;
-      }
-      
-      let generatedId;
-      
-      // LOGIC PINTU BELAKANG (SECRET CODE)
-      if (digits === '0') {
-        generatedId = 'TAMU 👤'; // Jika input 0, diset sebagai tamu
+      // DAFTAR PUTIH ID YANG DIIZINKAN (Strict Whitelist)
+      const allowedUsers = {
+        '18': 'VPH18',       // Anda
+        '39': 'VPH39',       // Bos Anda
+        '0' : 'GUEST 👤'     // Tamu Rahasia
+      };
+
+      if (allowedUsers[digits]) {
+        const generatedId = allowedUsers[digits];
+        localStorage.setItem('rct_user_id', generatedId); // simpan di browser
+        updateUserHeader(); // perbarui info header
+        route(); // teruskan navigasi ke halaman tujuan awal
       } else {
-        generatedId = 'VPH' + digits; // Selain itu, diset sebagai karyawan
+        alert('❌ AKSES DITOLAK!\nNomor ID tidak terdaftar di sistem.');
+        inputEl.value = '';
+        inputEl.focus();
       }
-      
-      localStorage.setItem('rct_user_id', generatedId); // simpan di browser
-      updateUserHeader(); // perbarui info header
-      route(); // teruskan navigasi ke halaman tujuan awal
     });
   }
 
@@ -715,7 +714,7 @@
   
   // ═══ INIT ═══
   fetchData();
-  console.log('📄 Viewer v1.3.0 · Gist ID:', GIST_ID);
+  console.log('📄 Viewer v1.3.5 · Gist ID:', GIST_ID);
   
 })();
 </script>
