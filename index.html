@@ -167,8 +167,17 @@
 <body>
 
 <div class="app-header">
-  <div class="app-title">🏭 RCT VIEWER</div>
-  <div class="app-sub">PT VALEO PYEONGHWA ASEAN TRANSMISSION</div>
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+    <div>
+      <div class="app-title">🏭 RCT VIEWER</div>
+      <div class="app-sub">PT VALEO PYEONGHWA ASEAN TRANSMISSION</div>
+    </div>
+    <!-- Badge Status User (Login) -->
+    <div id="user-badge" style="display: none; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 6px; padding: 4px 8px; text-align: center; min-width: 65px; flex-shrink: 0;">
+      <div style="font-size: 10px; font-weight: 800; color: #38bdf8;" id="user-id-display">-</div>
+      <div style="margin-top: 1px;"><a href="javascript:void(0)" onclick="window.logout()" style="color: #f87171; text-decoration: none; font-weight: 800; font-size: 8px; letter-spacing: 0.3px;">KELUAR ❌</a></div>
+    </div>
+  </div>
   <div class="app-sync-info" id="sync-info">
     <span>⏳ Loading data...</span>
   </div>
@@ -186,14 +195,39 @@
 (function() {
   'use strict';
   
-    // ═══ CONFIG ═══
+  // ═══ CONFIG ═══
   const GIST_ID = '63d8a8f7a35183a3ad28455587fc68fd';
   const DATA_URL = 'https://gist.githubusercontent.com/biansyah07/' + GIST_ID + '/raw/rct-data.json';
   const AUTO_REFRESH_MS = 5 * 60 * 1000; // Auto-refresh tiap 5 menit
   
   let allData = null;
   let syncInfo = null;
-  
+
+  // ═══ AUTHENTICATION SYSTEM ═══
+  function isLoggedIn() {
+    return !!localStorage.getItem('rct_user_id');
+  }
+
+  function updateUserHeader() {
+    const userId = localStorage.getItem('rct_user_id');
+    const badge = document.getElementById('user-badge');
+    const display = document.getElementById('user-id-display');
+    if (userId && badge && display) {
+      display.textContent = userId;
+      badge.style.display = 'block';
+    } else if (badge) {
+      badge.style.display = 'none';
+    }
+  }
+
+  window.logout = function() {
+    if (confirm('Apakah Anda ingin keluar dari akun RCT Viewer?')) {
+      localStorage.removeItem('rct_user_id');
+      updateUserHeader();
+      route();
+    }
+  };
+
   // ═══ FETCH DATA ═══
   async function fetchData() {
     try {
@@ -209,6 +243,7 @@
         stats: json.stats || {},
       };
       updateSyncInfo();
+      updateUserHeader();
       route();
     } catch (err) {
       console.error(err);
@@ -229,7 +264,7 @@
     }
   }
   
-    function updateSyncInfo() {
+  function updateSyncInfo() {
     const el = document.getElementById('sync-info');
     if (!syncInfo) return;
     const time = syncInfo.syncedAtLocal || 'unknown';
@@ -264,6 +299,12 @@
   
   // ═══ ROUTER ═══
   function route() {
+    // PROTEKSI: Jika belum login, paksa render halaman login
+    if (!isLoggedIn()) {
+      renderLogin();
+      return;
+    }
+
     const hash = (location.hash || '').replace('#', '').toUpperCase().trim();
     
     if (!hash) {
@@ -295,6 +336,69 @@
   
   window.addEventListener('hashchange', route);
   
+  // ═══ RENDER: LOGIN ═══
+  function renderLogin() {
+    document.getElementById('content').innerHTML = `
+      <div class="result-card" style="max-width: 420px; margin: 30px auto; overflow: hidden;">
+        <div class="result-header zone" style="background: linear-gradient(135deg, #0a2540 0%, #1e3a8a 100%); padding: 30px 20px;">
+          <div class="result-icon">🔒</div>
+          <div class="result-title" style="font-size:20px;letter-spacing:1px">LOGIN AKSES</div>
+          <div class="result-sub">Sistem terproteksi. Masukkan kode ID Anda untuk mengakses data.</div>
+        </div>
+        
+        <div style="padding: 24px 20px;">
+          <form id="login-form">
+            <div style="margin-bottom: 20px;">
+              <label for="employee-id-input" style="display: block; font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;">Masukkan Kode ID:</label>
+              <div style="display: flex; align-items: center; border: 2px solid #cbd5e1; border-radius: 8px; padding: 0 12px; background: #f8fafc;">
+                <span style="font-weight: 900; color: #64748b; font-family: Consolas, monospace; font-size: 18px; margin-right: 6px; user-select: none;">VPH</span>
+                <input type="tel" pattern="[0-9]*" inputmode="numeric" id="employee-id-input" placeholder="18" style="width: 100%; border: none; background: transparent; padding: 12px 0; font-size: 18px; font-weight: 900; font-family: Consolas, monospace; color: #0a2540; outline: none;" required autofocus>
+              </div>
+              <div style="font-size: 11px; color: #64748b; margin-top: 8px; line-height: 1.4;">
+                💡 Cukup masukkan <b>angka ID saja</b>.<br>
+                Contoh: ketik <b>18</b> untuk <i>VPH18</i> atau <b>39</b> untuk <i>VPH39</i>.
+              </div>
+            </div>
+            
+            <button type="submit" class="navigate-btn zone" style="width: 100%; border: none; cursor: pointer; padding: 14px; font-size: 13px; font-weight: bold; background: linear-gradient(135deg, #0a2540 0%, #1e3a8a 100%); border-radius: 8px;">
+              🔓 MASUK KE SISTEM
+            </button>
+          </form>
+        </div>
+      </div>
+      <div class="footer-info">© 2026 PT Valeo Pyeonghwa Asean Transmission</div>
+    `;
+
+    // Berikan fokus otomatis ke input field
+    const inputEl = document.getElementById('employee-id-input');
+    if (inputEl) inputEl.focus();
+
+    // Event listener saat form dikirim
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const val = inputEl.value.trim();
+      const digits = val.replace(/[^0-9]/g, ''); // Ambil angka saja
+      
+      if (digits === '') {
+        alert('ID tidak valid! Harap masukkan nomor ID berupa angka.');
+        return;
+      }
+      
+      let generatedId;
+      
+      // LOGIC PINTU BELAKANG (SECRET CODE)
+      if (digits === '0') {
+        generatedId = 'TAMU 👤'; // Jika input 0, diset sebagai tamu
+      } else {
+        generatedId = 'VPH' + digits; // Selain itu, diset sebagai karyawan
+      }
+      
+      localStorage.setItem('rct_user_id', generatedId); // simpan di browser
+      updateUserHeader(); // perbarui info header
+      route(); // teruskan navigasi ke halaman tujuan awal
+    });
+  }
+
   // ═══ RENDER: HOME ═══
   function renderHome() {
     const zones = [...new Set(allData.map(r => r.zone))].sort();
@@ -581,7 +685,7 @@
     `;
   }
 
-    // ═══ AUTO-REFRESH tiap 5 menit ═══
+  // ═══ AUTO-REFRESH tiap 5 menit ═══
   setInterval(async () => {
     try {
       const url = DATA_URL + '?t=' + Date.now();
@@ -600,7 +704,9 @@
           stats: json.stats || {},
         };
         updateSyncInfo();
-        route(); // re-render current view
+        if (isLoggedIn()) {
+          route(); // re-render current view if logged in
+        }
       }
     } catch (e) {
       console.warn('Auto-refresh failed:', e.message);
@@ -609,7 +715,7 @@
   
   // ═══ INIT ═══
   fetchData();
-  console.log('📄 Viewer v1.1.1 · Gist ID:', GIST_ID);
+  console.log('📄 Viewer v1.3.0 · Gist ID:', GIST_ID);
   
 })();
 </script>
