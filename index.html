@@ -163,7 +163,7 @@
   }
   .empty-icon { font-size: 60px; margin-bottom: 12px; opacity: 0.5; }
 
-  /* === MODAL BOM — tinggi + list padat === */
+  /* === MODAL BOM — TINGGI PAS & LIST PADAT === */
   .modal-overlay {
     position: fixed; inset: 0;
     background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px);
@@ -280,6 +280,7 @@
   </div>
 </div>
 
+<!-- MODAL BOM REVERSE VIEW -->
 <div class="modal-overlay" id="bom-modal" onclick="closeBOMModal(event)">
   <div class="modal-content" onclick="event.stopPropagation()">
     <div class="modal-header">
@@ -373,17 +374,13 @@
     var hint = document.getElementById('loading-hint');
     try {
       if (hint) hint.textContent = 'Menghubungi GitHub Gist...';
-      console.log('[RCT Viewer] fetch start', DATA_URL);
-
       var url = DATA_URL + '?t=' + Date.now();
       var res = await fetchWithTimeout(url, FETCH_TIMEOUT_MS);
-      console.log('[RCT Viewer] HTTP', res.status);
 
       if (!res.ok) throw new Error('HTTP ' + res.status + ' dari Gist');
 
       if (hint) hint.textContent = 'Mengunduh & parse JSON...';
       var text = await res.text();
-      console.log('[RCT Viewer] bytes', text.length);
 
       var json;
       try {
@@ -400,21 +397,13 @@
         stats: json.stats || {}
       };
 
-      console.log('[RCT Viewer] rows', allData.length, 'bom keys', Object.keys(bomData).length);
-
       updateSyncInfo();
       updateUserHeader();
       route();
     } catch (err) {
       console.error('[RCT Viewer] fetchData error', err);
       var m = (err && err.message) ? err.message : String(err);
-      showFatalError(
-        m +
-        '<br><br>Cek:<br>' +
-        '• Internet / VPN<br>' +
-        '• Gist masih public: gist.github.com/' + GIST_ID + '<br>' +
-        '• Buka raw: gist.githubusercontent.com/biansyah07/' + GIST_ID + '/raw/rct-data.json'
-      );
+      showFatalError(m);
     }
   }
   
@@ -456,7 +445,6 @@
       if (/^[A-Z]$/.test(hash)) { renderZone(hash); return; }
       renderNotFound(hash);
     } catch (e) {
-      console.error('[RCT Viewer] route error', e);
       showFatalError('Error tampilan: ' + (e.message || e));
     }
   }
@@ -733,22 +721,33 @@
       '</div>';
   }
 
+  // ═══ FUNGSI AMAN MODAL BOM REVERSE (MULTI-KEY MATCHING) ═══
   window.showBOM = function(itemCd) {
     if (!itemCd) return;
+    var rawCd = String(itemCd).trim();
+    var upperCd = rawCd.toUpperCase();
+
     var itemObj = null;
     for (var i = 0; i < allData.length; i++) {
-      if (String(allData[i].itemCd || '').trim() === String(itemCd).trim()) {
+      var cd = String(allData[i].itemCd || '').trim();
+      if (cd === rawCd || cd.toUpperCase() === upperCd) {
         itemObj = allData[i];
         break;
       }
     }
     var itemNm = itemObj ? (itemObj.engItemNm || itemObj.itemNm || '-') : '-';
 
-    document.getElementById('bom-target-code').textContent = itemCd;
+    document.getElementById('bom-target-code').textContent = rawCd;
     document.getElementById('bom-target-name').textContent = itemNm;
 
     var container = document.getElementById('bom-list-container');
-    var list = bomData[itemCd] || bomData[String(itemCd).toUpperCase()] || [];
+
+    // Mencegah error item kosong: Cek berbagai variasi penulisan key di bomData
+    var list = bomData[rawCd] || 
+               bomData[upperCd] || 
+               bomData[rawCd.toLowerCase()] || 
+               bomData[rawCd.replace(/\s+/g, '')] || 
+               [];
 
     if (!list.length) {
       container.innerHTML =
@@ -756,13 +755,13 @@
           '<div style="font-size:48px;margin-bottom:12px;opacity:0.6">📋</div>' +
           '<div style="font-weight:800;font-size:15px;color:#0a2540;">Data Model Belum Dihubungkan</div>' +
           '<div style="font-size:12px;margin-top:8px;line-height:1.5;color:#475569;">' +
-            'Item <b style="color:#0a2540">' + itemCd + '</b> belum ada di mapping BOM Gist.<br><br>' +
+            'Item <b style="color:#0a2540">' + rawCd + '</b> belum ada di mapping BOM Gist.<br><br>' +
             '<i>Sync ulang dari PC Control Tower (☁️ Sync).</i>' +
           '</div>' +
         '</div>';
     } else {
       var rows = list.map(function(bom) {
-        var type = String(bom.type || bom.bomType || 'BOM').toUpperCase();
+        var type = String(bom.type || bom.bomType || 'COMP').toUpperCase();
         var pillCls = type === 'COMP' ? 'comp' : (type === 'FING' ? 'fing' : '');
         var parentCd = bom.parentCd || bom.itemNumber || bom.itemCd || '-';
         var parentNm = bom.parentNm || bom.itemName || bom.engItemNm || '-';
@@ -817,7 +816,6 @@
       .catch(function() {});
   }, AUTO_REFRESH_MS);
   
-  console.log('[RCT Viewer] boot');
   fetchData();
 })();
 </script>
