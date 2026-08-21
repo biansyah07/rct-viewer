@@ -96,15 +96,26 @@
     padding: 12px; margin-bottom: 8px;
     display: grid; grid-template-columns: 1fr auto; gap: 8px;
     border-left: 4px solid #10b981;
+    position: relative; cursor: pointer; transition: transform 0.1s, box-shadow 0.1s;
   }
+  .case-card:active { transform: scale(0.98); background: #f1f5f9; }
   .case-card.low { border-left-color: #dc2626; background: #fef2f2; }
   .case-card.old { border-left-color: #f59e0b; background: #fffbeb; }
   
-  .case-label { font-family: Consolas, monospace; font-weight: 800; color: #0a2540; font-size: 14px; }
+  /* Badge UI BOM Clickable */
+  .case-card::after {
+    content: "🔍 Cek Model";
+    position: absolute; top: 12px; right: 12px;
+    font-size: 9px; font-weight: 800; color: #0a2540;
+    background: #e2e8f0; padding: 3px 8px; border-radius: 6px;
+    opacity: 0.8; letter-spacing: 0.5px;
+  }
+
+  .case-label { font-family: Consolas, monospace; font-weight: 800; color: #0a2540; font-size: 14px; margin-top: 2px;}
   .case-item { font-family: Consolas, monospace; font-weight: 700; color: #7c3aed; font-size: 12px; margin-top: 2px; }
-  .case-name { font-size: 11px; color: #64748b; margin-top: 3px; line-height: 1.3; }
+  .case-name { font-size: 11px; color: #64748b; margin-top: 3px; line-height: 1.3; padding-right: 20px;}
   .case-meta { font-size: 10px; color: #94a3b8; margin-top: 4px; }
-  .case-qty { font-family: Consolas, monospace; font-weight: 800; font-size: 18px; color: #0a2540; text-align: right; }
+  .case-qty { font-family: Consolas, monospace; font-weight: 800; font-size: 18px; color: #0a2540; text-align: right; margin-top: 20px;}
   .case-qty-lbl { font-size: 10px; color: #64748b; text-align: right; }
   
   .rack-item {
@@ -157,6 +168,59 @@
     text-align: center; padding: 40px 20px; color: #64748b;
   }
   .empty-icon { font-size: 60px; margin-bottom: 12px; opacity: 0.5; }
+
+  /* === BOM REVERSE BOTTOM SHEET MODAL === */
+  .modal-overlay {
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px);
+    z-index: 999; display: flex; flex-direction: column; justify-content: flex-end;
+    opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+  }
+  .modal-overlay.active { opacity: 1; pointer-events: auto; }
+  
+  .modal-content {
+    background: #f8fafc; border-radius: 24px 24px 0 0;
+    width: 100%; max-width: 640px; margin: 0 auto;
+    max-height: 85vh; display: flex; flex-direction: column;
+    transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.3, 0, 0, 1);
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.3);
+  }
+  .modal-overlay.active .modal-content { transform: translateY(0); }
+  
+  .modal-header {
+    background: linear-gradient(135deg, #0a2540 0%, #1e3a8a 100%);
+    color: white; padding: 20px; border-radius: 24px 24px 0 0; position: relative;
+  }
+  .close-btn {
+    position: absolute; top: 18px; right: 18px; background: rgba(255,255,255,0.15);
+    border: none; color: white; width: 32px; height: 32px; border-radius: 50%;
+    font-size: 14px; cursor: pointer; font-weight: bold; transition: background 0.2s;
+  }
+  .close-btn:active { background: rgba(255,255,255,0.3); }
+  .bom-title { font-size: 16px; font-weight: 800; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;}
+  .bom-subtitle { font-size: 11px; opacity: 0.85; margin-top: 4px; }
+  .bom-target-item {
+    background: rgba(0,0,0,0.25); padding: 12px; border-radius: 10px; margin-top: 14px;
+    border-left: 3px solid #38bdf8;
+  }
+  .bom-target-code { font-family: Consolas, monospace; font-size: 16px; font-weight: 900; color: #38bdf8; }
+  .bom-target-name { font-size: 12px; margin-top: 4px; opacity: 0.9; line-height: 1.3;}
+  
+  .modal-body { padding: 16px; overflow-y: auto; flex: 1; }
+  .bom-list-item {
+    background: white; border: 1px solid #e2e8f0; border-radius: 12px;
+    padding: 14px; margin-bottom: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+  }
+  .bom-badge {
+    display: inline-block; background: #dbeafe; color: #1e40af;
+    font-size: 9px; font-weight: 800; padding: 4px 8px; border-radius: 6px; margin-bottom: 8px; letter-spacing: 0.5px;
+  }
+  .bom-badge.comp { background: #fce7f3; color: #9d174d; }
+  .bom-parent-code { font-family: Consolas, monospace; font-size: 15px; font-weight: 900; color: #0a2540; }
+  .bom-parent-name { font-size: 11px; color: #475569; margin-top: 5px; line-height: 1.4; font-weight: 500;}
+  .bom-qty-box { text-align: right; }
+  .bom-qty-lbl { font-size: 10px; color: #64748b; font-weight: 700; text-transform: uppercase;}
+  .bom-qty-val { font-size: 16px; font-weight: 900; color: #0a2540; font-family: Consolas, monospace;}
   
   @media (min-width: 640px) {
     body { max-width: 640px; margin: 0 auto; }
@@ -172,7 +236,6 @@
       <div class="app-title">🏭 RCT VIEWER</div>
       <div class="app-sub">PT VALEO PYEONGHWA ASEAN TRANSMISSION</div>
     </div>
-    <!-- Badge Status User (Login) -->
     <div id="user-badge" style="display: none; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 6px; padding: 4px 8px; text-align: center; min-width: 80px; flex-shrink: 0;">
       <div style="font-size: 10px; font-weight: 800; color: #38bdf8; white-space: nowrap;" id="user-id-display">-</div>
       <div style="margin-top: 1px;"><a href="javascript:void(0)" onclick="window.logout()" style="color: #f87171; text-decoration: none; font-weight: 800; font-size: 8px; letter-spacing: 0.3px;">KELUAR ❌</a></div>
@@ -191,6 +254,24 @@
   </div>
 </div>
 
+<!-- MODAL BOM REVERSE VIEW -->
+<div class="modal-overlay" id="bom-modal" onclick="closeBOMModal(event)">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <button class="close-btn" onclick="closeBOMModal(event)">✕</button>
+      <div class="bom-title"><span>🛠️</span> BOM Reverse View</div>
+      <div class="bom-subtitle">Item ini digunakan pada Model / Komponen berikut:</div>
+      <div class="bom-target-item">
+        <div class="bom-target-code" id="bom-target-code">-</div>
+        <div class="bom-target-name" id="bom-target-name">-</div>
+      </div>
+    </div>
+    <div class="modal-body" id="bom-list-container">
+      <!-- Isi list akan diinject via JS -->
+    </div>
+  </div>
+</div>
+
 <script>
 (function() {
   'use strict';
@@ -198,15 +279,14 @@
   // ═══ CONFIG ═══
   const GIST_ID = '63d8a8f7a35183a3ad28455587fc68fd';
   const DATA_URL = 'https://gist.githubusercontent.com/biansyah07/' + GIST_ID + '/raw/rct-data.json';
-  const AUTO_REFRESH_MS = 5 * 60 * 1000; // Auto-refresh tiap 5 menit
+  const AUTO_REFRESH_MS = 5 * 60 * 1000;
   
   let allData = null;
   let syncInfo = null;
+  let bomData = {}; // Menyimpan mapping BOM Reverse dari JSON
 
   // ═══ AUTHENTICATION SYSTEM ═══
-  function isLoggedIn() {
-    return !!localStorage.getItem('rct_user_id');
-  }
+  function isLoggedIn() { return !!localStorage.getItem('rct_user_id'); }
 
   function updateUserHeader() {
     const userId = localStorage.getItem('rct_user_id');
@@ -231,7 +311,6 @@
   // ═══ FETCH DATA ═══
   async function fetchData() {
     try {
-      // Cache-buster untuk pastikan selalu ambil versi terbaru
       const url = DATA_URL + '?t=' + Date.now();
       const res = await fetch(url, { cache: 'no-store' });
       if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -242,6 +321,10 @@
         syncedAtLocal: json.syncedAtLocal,
         stats: json.stats || {},
       };
+      
+      // Ambil data BOM dari JSON jika script sync PC sudah menyediakan
+      bomData = json.bom || {};
+
       updateSyncInfo();
       updateUserHeader();
       route();
@@ -251,13 +334,7 @@
         <div class="error-box">
           <div class="err-icon">⚠️</div>
           <div class="err-title">Gagal Memuat Data</div>
-          <div class="err-msg">
-            ${err.message}<br><br>
-            Kemungkinan:<br>
-            • Tidak ada koneksi internet<br>
-            • Data belum di-sync oleh admin<br>
-            • Server GitHub down
-          </div>
+          <div class="err-msg">${err.message}<br><br>Kemungkinan tidak ada koneksi atau data belum disync admin.</div>
           <button class="action-btn primary" style="margin-top:12px;padding:10px 20px" onclick="location.reload()">🔄 Coba Lagi</button>
         </div>
       `;
@@ -268,8 +345,6 @@
     const el = document.getElementById('sync-info');
     if (!syncInfo) return;
     const time = syncInfo.syncedAtLocal || 'unknown';
-    
-    // Hitung berapa lama data-nya
     let ageText = '';
     if (syncInfo.syncedAt) {
       const ageMs = Date.now() - new Date(syncInfo.syncedAt).getTime();
@@ -278,62 +353,26 @@
       else if (ageMin < 1440) ageText = ' (' + Math.floor(ageMin / 60) + 'h lalu)';
       else ageText = ' (' + Math.floor(ageMin / 1440) + ' hari lalu)';
     }
-    
-    // Warning kalau data > 1 jam
-    const ageMs = syncInfo.syncedAt ? Date.now() - new Date(syncInfo.syncedAt).getTime() : 0;
-    const isOld = ageMs > 60 * 60 * 1000;
-    
-    el.innerHTML = 
-      '<span>' + (isOld ? '⚠️' : '✅') + ' Update: <b>' + time + '</b>' + ageText + '</span>' +
+    const isOld = syncInfo.syncedAt ? (Date.now() - new Date(syncInfo.syncedAt).getTime()) > 60 * 60 * 1000 : false;
+    el.innerHTML = '<span>' + (isOld ? '⚠️' : '✅') + ' Update: <b>' + time + '</b>' + ageText + '</span>' +
       '<button onclick="window.forceReload()">🔄 Refresh</button>';
   }
   
-  // Force full reload
   window.forceReload = function() {
-    // Clear any cache & reload
-    if ('caches' in window) {
-      caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-    }
+    if ('caches' in window) caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
     location.reload(true);
   };
   
   // ═══ ROUTER ═══
   function route() {
-    // PROTEKSI: Jika belum login, paksa render halaman login
-    if (!isLoggedIn()) {
-      renderLogin();
-      return;
-    }
-
+    if (!isLoggedIn()) { renderLogin(); return; }
     const hash = (location.hash || '').replace('#', '').toUpperCase().trim();
-    
-    if (!hash) {
-      renderHome();
-      return;
-    }
-    
-    // Format: B1-1 (rack)
-    if (/^[A-Z]\d+-\d+$/.test(hash)) {
-      renderRack(hash);
-      return;
-    }
-    
-    // Format: B1 (sub-zone)
-    if (/^[A-Z]\d+$/.test(hash)) {
-      renderSubZone(hash);
-      return;
-    }
-    
-    // Format: B (zone)
-    if (/^[A-Z]$/.test(hash)) {
-      renderZone(hash);
-      return;
-    }
-    
-    // Unknown
+    if (!hash) { renderHome(); return; }
+    if (/^[A-Z]\d+-\d+$/.test(hash)) { renderRack(hash); return; }
+    if (/^[A-Z]\d+$/.test(hash)) { renderSubZone(hash); return; }
+    if (/^[A-Z]$/.test(hash)) { renderZone(hash); return; }
     renderNotFound(hash);
   }
-  
   window.addEventListener('hashchange', route);
   
   // ═══ RENDER: LOGIN ═══
@@ -343,61 +382,38 @@
         <div class="result-header zone" style="background: linear-gradient(135deg, #0a2540 0%, #1e3a8a 100%); padding: 30px 20px;">
           <div class="result-icon">🔒</div>
           <div class="result-title" style="font-size:20px;letter-spacing:1px">LOGIN AKSES</div>
-          <div class="result-sub">Sistem Terproteksi. Masukkan Kode ID Anda untuk masuk.</div>
+          <div class="result-sub">Sistem Terproteksi. Masukkan Kode ID Anda.</div>
         </div>
-        
         <div style="padding: 24px 20px;">
           <form id="login-form">
             <div style="margin-bottom: 20px;">
-              <label for="employee-id-input" style="display: block; font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.5px;">Masukkan No ID:</label>
+              <label for="employee-id-input" style="display: block; font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 8px;">Masukkan No ID:</label>
               <div style="display: flex; align-items: center; border: 2px solid #cbd5e1; border-radius: 8px; padding: 0 12px; background: #f8fafc;">
-                <span style="font-weight: 900; color: #64748b; font-family: Consolas, monospace; font-size: 18px; margin-right: 6px; user-select: none;">VPH</span>
+                <span style="font-weight: 900; color: #64748b; font-family: Consolas, monospace; font-size: 18px; margin-right: 6px;">VPH</span>
                 <input type="tel" pattern="[0-9]*" inputmode="numeric" id="employee-id-input" placeholder="••••" style="width: 100%; border: none; background: transparent; padding: 12px 0; font-size: 18px; font-weight: 900; font-family: Consolas, monospace; color: #0a2540; outline: none;" required autofocus>
               </div>
-              <div style="font-size: 11px; color: #64748b; margin-top: 10px; line-height: 1.4;">
-                🔒 Masukkan nomor ID khusus Anda (hanya angka). Hubungi Admin WMS jika Anda belum memiliki akses.
-              </div>
             </div>
-            
-            <button type="submit" class="navigate-btn zone" style="width: 100%; border: none; cursor: pointer; padding: 14px; font-size: 13px; font-weight: bold; background: linear-gradient(135deg, #0a2540 0%, #1e3a8a 100%); border-radius: 8px;">
-              🔓 MASUK KE SISTEM
-            </button>
+            <button type="submit" class="navigate-btn zone" style="width: 100%; border: none; cursor: pointer;">🔓 MASUK KE SISTEM</button>
           </form>
         </div>
       </div>
-      <div class="footer-info">© 2026 PT Valeo Pyeonghwa Asean Transmission</div>
     `;
-
-    // Berikan fokus otomatis ke input field
     const inputEl = document.getElementById('employee-id-input');
     if (inputEl) inputEl.focus();
-
-    // Event listener saat form dikirim
     document.getElementById('login-form').addEventListener('submit', function(e) {
       e.preventDefault();
       const val = inputEl.value.trim();
-      const digits = val.replace(/[^0-9]/g, ''); // Ambil angka saja
-      
-      // 🚨 DAFTAR PUTIH ID YANG DIIZINKAN & NAMA (SISTEM WHITELIST)
+      const digits = val.replace(/[^0-9]/g, '');
       const allowedUsers = {
-        '18': 'VPH18 - Adm.RB',   // ID Robby
-        '39': 'VPH39 - Spv.AB',   // ID Bos
-        '10': 'VPH10 - PMgr.SG',  // ID PMgr.SG
-        '21': 'VPH21 - Danang',  // ID Feeder.disc
-        '77': 'VPH77 - Fiki',  // ID Feeder.cover
-        '01': 'VPH01 - Wh.Park',  // ID Wh.Park
-        '0' : 'GUEST 👤'          // ID Tamu Rahasia (Ketik 0)
+        '18': 'VPH18 - Adm.RB', '39': 'VPH39 - Spv.AB', '10': 'VPH10 - PMgr.SG',
+        '21': 'VPH21 - Danang', '77': 'VPH77 - Fiki', '01': 'VPH01 - Wh.Park', '0' : 'GUEST 👤'
       };
-
       if (allowedUsers[digits]) {
-        const generatedId = allowedUsers[digits];
-        localStorage.setItem('rct_user_id', generatedId); // simpan ke browser
-        updateUserHeader(); // perbarui badge header pojok kanan atas
-        route(); // lanjutkan ke rak yang di-scan
+        localStorage.setItem('rct_user_id', allowedUsers[digits]);
+        updateUserHeader(); route();
       } else {
-        alert('❌ AKSES DITOLAK!\nNomor ID tidak terdaftar di sistem.');
-        inputEl.value = '';
-        inputEl.focus();
+        alert('❌ AKSES DITOLAK!\nNomor ID tidak terdaftar.');
+        inputEl.value = ''; inputEl.focus();
       }
     });
   }
@@ -406,38 +422,22 @@
   function renderHome() {
     const zones = [...new Set(allData.map(r => r.zone))].sort();
     const stats = syncInfo?.stats || {};
-    
     document.getElementById('content').innerHTML = `
       <div class="result-card">
         <div class="result-header zone">
           <div class="result-icon">📦</div>
           <div class="result-title" style="font-size:22px;letter-spacing:1px">WAREHOUSE</div>
-          <div class="result-sub">Scan QR di rak untuk lihat isi, atau pilih zone:</div>
         </div>
         <div class="stats-grid">
-          <div class="stat-item">
-            <div class="stat-val">${(stats.activeRacks || 0).toLocaleString()}</div>
-            <div class="stat-lbl">Active Racks</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-val">${(stats.activeCases || 0).toLocaleString()}</div>
-            <div class="stat-lbl">Active Cases</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-val">${(stats.activeItems || 0).toLocaleString()}</div>
-            <div class="stat-lbl">SKU Items</div>
-          </div>
+          <div class="stat-item"><div class="stat-val">${(stats.activeRacks || 0).toLocaleString()}</div><div class="stat-lbl">Active Racks</div></div>
+          <div class="stat-item"><div class="stat-val">${(stats.activeCases || 0).toLocaleString()}</div><div class="stat-lbl">Active Cases</div></div>
+          <div class="stat-item"><div class="stat-val">${(stats.activeItems || 0).toLocaleString()}</div><div class="stat-lbl">SKU Items</div></div>
         </div>
         <div class="rack-list">
           <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px">🏢 Pilih Zone</div>
-          ${zones.map(z => `
-            <a href="#${z}" class="navigate-btn zone" style="margin-top:6px">
-              📍 ZONE ${z}
-            </a>
-          `).join('')}
+          ${zones.map(z => `<a href="#${z}" class="navigate-btn zone" style="margin-top:6px">📍 ZONE ${z}</a>`).join('')}
         </div>
       </div>
-      <div class="footer-info">© 2026 Biansyah · Powered by MangoTree WMS</div>
     `;
   }
   
@@ -445,17 +445,11 @@
   function renderRack(rackAddr) {
     const cases = allData.filter(r => r.address === rackAddr && r.isActive === true && (Number(r.actualRemain) || 0) > 0);
     const rackExists = allData.some(r => r.address === rackAddr);
+    if (!rackExists) { renderNotFound(rackAddr, 'rack'); return; }
     
-    if (!rackExists) {
-      renderNotFound(rackAddr, 'rack');
-      return;
-    }
-    
-    // Extract sub-zone (B1-1 → B1)
     const subZoneMatch = rackAddr.match(/^([A-Z]\d+)-\d+$/);
     const subZone = subZoneMatch ? subZoneMatch[1] : '';
     const zone = rackAddr[0];
-    
     const totalPcs = cases.reduce((s, c) => s + (Number(c.actualRemain) || 0), 0);
     const uniqueItems = new Set(cases.map(c => c.itemCd)).size;
     cases.sort((a, b) => (a.arrivalNo || '').localeCompare(b.arrivalNo || ''));
@@ -470,8 +464,7 @@
         ${cases.length === 0 ? `
           <div class="empty-state">
             <div class="empty-icon">📭</div>
-            <div style="font-weight:700;font-size:15px;color:#0a2540">Rak ${rackAddr} Kosong</div>
-            <div style="font-size:12px;margin-top:6px">Tidak ada case aktif saat ini</div>
+            <div style="font-weight:700;font-size:15px;color:#0a2540">Rak Kosong</div>
           </div>
         ` : `
           <div class="stats-grid">
@@ -482,16 +475,17 @@
           <div class="case-list">
             ${cases.map(c => {
               const cls = c.status === 'LOW' ? 'low' : (c.isOld ? 'old' : '');
+              const safeCd = String(c.itemCd || '').replace(/'/g, "\\'");
+              const safeNm = String(c.engItemNm || '').replace(/'/g, "\\'");
+              
+              // Event klik pada Case Card untuk mentrigger BOM Modal
               return `
-                <div class="case-card ${cls}">
+                <div class="case-card ${cls}" onclick="showBOM('${safeCd}', '${safeNm}')">
                   <div>
                     <div class="case-label">${c.arrivalNo || '-'}</div>
                     <div class="case-item">${c.itemCd || '-'}</div>
                     <div class="case-name">${c.engItemNm || '-'}</div>
-                    <div class="case-meta">
-                      In: ${c.inDt || '-'} · Age: ${c.ageMonths || 0} mo
-                      ${c.invNo ? ` · Inv: ${c.invNo}` : ''}
-                    </div>
+                    <div class="case-meta">In: ${c.inDt || '-'} · Age: ${c.ageMonths || 0} mo ${c.invNo ? ` · Inv: ${c.invNo}` : ''}</div>
                   </div>
                   <div>
                     <div class="case-qty">${(Number(c.actualRemain) || 0).toLocaleString()}</div>
@@ -505,34 +499,22 @@
         ${subZone ? `<div style="padding:0 12px 8px"><a href="#${subZone}" class="navigate-btn sub">🔷 Lihat semua rak di ${subZone}</a></div>` : ''}
         <div style="padding:0 12px 12px"><a href="#${zone}" class="navigate-btn zone">🏢 Lihat semua rak di Zone ${zone}</a></div>
       </div>
-      <div class="footer-info">© 2026 Biansyah · Data ${syncInfo?.syncedAtLocal || ''}</div>
     `;
   }
   
   // ═══ RENDER: SUB-ZONE ═══
   function renderSubZone(subId) {
-    // Group racks by address, filter yang mulai dengan subId + '-'
     const racksMap = {};
     allData.forEach(r => {
       if (!r.address.startsWith(subId + '-')) return;
-      if (!racksMap[r.address]) {
-        racksMap[r.address] = { address: r.address, cases: [], activeCount: 0, totalPcs: 0 };
-      }
+      if (!racksMap[r.address]) racksMap[r.address] = { address: r.address, cases: [], activeCount: 0, totalPcs: 0 };
       racksMap[r.address].cases.push(r);
       if (r.isActive && (Number(r.actualRemain) || 0) > 0) {
-        racksMap[r.address].activeCount++;
-        racksMap[r.address].totalPcs += Number(r.actualRemain) || 0;
+        racksMap[r.address].activeCount++; racksMap[r.address].totalPcs += Number(r.actualRemain) || 0;
       }
     });
-    
-    const racks = Object.values(racksMap).sort((a, b) => 
-      a.address.localeCompare(b.address, undefined, { numeric: true })
-    );
-    
-    if (racks.length === 0) {
-      renderNotFound(subId, 'sub');
-      return;
-    }
+    const racks = Object.values(racksMap).sort((a, b) => a.address.localeCompare(b.address, undefined, { numeric: true }));
+    if (racks.length === 0) { renderNotFound(subId, 'sub'); return; }
     
     const zone = subId[0];
     const activeRacks = racks.filter(r => r.activeCount > 0);
@@ -558,19 +540,12 @@
             const initialTotal = rack.cases.reduce((s, c) => s + (Number(c.initial) || 0), 0);
             const fill = initialTotal > 0 ? (rack.totalPcs / initialTotal * 100) : 0;
             let cls = 'empty';
-            if (!isEmpty) {
-              if (fill >= 70) cls = 'full';
-              else if (fill >= 30) cls = 'warn';
-              else cls = 'low';
-            }
+            if (!isEmpty) { if (fill >= 70) cls = 'full'; else if (fill >= 30) cls = 'warn'; else cls = 'low'; }
             return `
               <a href="#${rack.address}" style="text-decoration:none;color:inherit">
                 <div class="rack-item ${cls}">
                   <div class="ri-addr">${rack.address}</div>
-                  <div class="ri-info">
-                    ${isEmpty ? '<span class="ri-empty">Kosong</span>' : 
-                      `<b>${rack.activeCount}</b>c · <b>${rack.totalPcs.toLocaleString()}</b> pcs`}
-                  </div>
+                  <div class="ri-info">${isEmpty ? '<span class="ri-empty">Kosong</span>' : `<b>${rack.activeCount}</b>c · <b>${rack.totalPcs.toLocaleString()}</b> pcs`}</div>
                   <div class="ri-fill">${isEmpty ? '—' : fill.toFixed(0) + '%'}</div>
                 </div>
               </a>
@@ -579,7 +554,6 @@
         </div>
         <div style="padding:0 12px 12px"><a href="#${zone}" class="navigate-btn zone">🏢 Lihat semua rak di Zone ${zone}</a></div>
       </div>
-      <div class="footer-info">© 2026 Biansyah · Data ${syncInfo?.syncedAtLocal || ''}</div>
     `;
   }
   
@@ -588,30 +562,18 @@
     const racksMap = {};
     allData.forEach(r => {
       if (r.zone !== zone) return;
-      if (!racksMap[r.address]) {
-        racksMap[r.address] = { address: r.address, cases: [], activeCount: 0, totalPcs: 0 };
-      }
+      if (!racksMap[r.address]) racksMap[r.address] = { address: r.address, cases: [], activeCount: 0, totalPcs: 0 };
       racksMap[r.address].cases.push(r);
       if (r.isActive && (Number(r.actualRemain) || 0) > 0) {
-        racksMap[r.address].activeCount++;
-        racksMap[r.address].totalPcs += Number(r.actualRemain) || 0;
+        racksMap[r.address].activeCount++; racksMap[r.address].totalPcs += Number(r.actualRemain) || 0;
       }
     });
-    
-    const racks = Object.values(racksMap).sort((a, b) => 
-      a.address.localeCompare(b.address, undefined, { numeric: true })
-    );
-    
-    if (racks.length === 0) {
-      renderNotFound(zone, 'zone');
-      return;
-    }
+    const racks = Object.values(racksMap).sort((a, b) => a.address.localeCompare(b.address, undefined, { numeric: true }));
+    if (racks.length === 0) { renderNotFound(zone, 'zone'); return; }
     
     const activeRacks = racks.filter(r => r.activeCount > 0);
     const totalCases = activeRacks.reduce((s, r) => s + r.activeCount, 0);
     const totalPcs = activeRacks.reduce((s, r) => s + r.totalPcs, 0);
-    
-    // Group by sub-zone
     const subZones = {};
     racks.forEach(r => {
       const m = r.address.match(/^([A-Z]\d+)-\d+$/);
@@ -620,10 +582,7 @@
       if (!subZones[sub]) subZones[sub] = [];
       subZones[sub].push(r);
     });
-    
-    const subZoneList = Object.keys(subZones).sort((a, b) => 
-      a.localeCompare(b, undefined, { numeric: true })
-    );
+    const subZoneList = Object.keys(subZones).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
     
     document.getElementById('content').innerHTML = `
       <div class="result-card">
@@ -647,10 +606,7 @@
               <a href="#${sub}" style="text-decoration:none;color:inherit">
                 <div class="rack-item ${activeInSub > 0 ? 'full' : 'empty'}">
                   <div class="ri-addr">${sub}</div>
-                  <div class="ri-info">
-                    ${activeInSub === 0 ? '<span class="ri-empty">Semua kosong</span>' :
-                      `<b>${activeInSub}</b>/${subRacks.length} rak · <b>${pcsInSub.toLocaleString()}</b> pcs`}
-                  </div>
+                  <div class="ri-info">${activeInSub === 0 ? '<span class="ri-empty">Semua kosong</span>' : `<b>${activeInSub}</b>/${subRacks.length} rak · <b>${pcsInSub.toLocaleString()}</b> pcs`}</div>
                   <div class="ri-fill" style="color:#64748b">${subRacks.length}</div>
                 </div>
               </a>
@@ -658,7 +614,6 @@
           }).join('')}
         </div>
       </div>
-      <div class="footer-info">© 2026 Biansyah · Data ${syncInfo?.syncedAtLocal || ''}</div>
     `;
   }
   
@@ -675,50 +630,95 @@
         <div class="empty-state">
           <div class="empty-icon">🔍</div>
           <div style="font-weight:700;color:#0a2540">Data tidak ada</div>
-          <div style="font-size:12px;margin-top:8px;line-height:1.5">
-            ${typeLabel} <b>${target}</b> tidak terdaftar di WMS.<br><br>
-            Format valid:<br>
-            • <code>B1-1</code> = Rak<br>
-            • <code>B1</code> = Sub-zone (kolom)<br>
-            • <code>B</code> = Zone
-          </div>
+          <div style="font-size:12px;margin-top:8px;line-height:1.5">${typeLabel} <b>${target}</b> tidak terdaftar di WMS.</div>
           <a href="#" class="navigate-btn" style="max-width:200px;margin:16px auto 0">🏠 Ke Beranda</a>
         </div>
       </div>
     `;
   }
 
-  // ═══ AUTO-REFRESH tiap 5 menit ═══
+  // ═══ BOM REVERSE FUNCTIONALITY ═══
+  window.showBOM = function(itemCd, itemNm) {
+    if (!itemCd) return;
+    
+    // Set Header Info
+    document.getElementById('bom-target-code').textContent = itemCd;
+    document.getElementById('bom-target-name').textContent = itemNm || '-';
+
+    const container = document.getElementById('bom-list-container');
+    
+    // Tarik list BOM dari variabel bomData (hasil fetch json.bom dari PC)
+    const list = bomData[itemCd] || bomData[String(itemCd).toUpperCase()] || [];
+
+    if (!list.length) {
+      container.innerHTML = `
+        <div style="text-align:center; padding:30px 20px; color:#64748b;">
+          <div style="font-size:48px; margin-bottom:12px; opacity:0.5">🤷‍♂️</div>
+          <div style="font-weight:800; font-size:14px; color:#0a2540;">Data Model Belum Tersedia</div>
+          <div style="font-size:12px; margin-top:8px; line-height:1.5;">
+            Item <b>${itemCd}</b> belum di-sync relasi BOM-nya dari MangoTree WMS ke aplikasi ini.
+          </div>
+        </div>
+      `;
+    } else {
+      container.innerHTML = `
+        <div style="font-size:10px; font-weight:800; color:#64748b; margin-bottom:10px; text-transform:uppercase;">
+          ✅ Ditemukan ${list.length} Parent Model / Penggunaan:
+        </div>
+        ${list.map(bom => {
+          const type = (bom.type || bom.bomType || 'BOM').toUpperCase();
+          const badgeCls = type === 'COMP' ? 'comp' : '';
+          const parentCd = bom.parentCd || bom.itemNumber || bom.itemCd || '-';
+          const parentNm = bom.parentNm || bom.itemName || bom.engItemNm || '-';
+          const qty = bom.qty != null ? bom.qty : (bom.quantity != null ? bom.quantity : 1);
+          
+          return `
+            <div class="bom-list-item">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div>
+                  <span class="bom-badge ${badgeCls}">${type}</span>
+                  <div class="bom-parent-code">${parentCd}</div>
+                </div>
+                <div class="bom-qty-box">
+                  <div class="bom-qty-lbl">Qty Req</div>
+                  <div class="bom-qty-val">${qty}</div>
+                </div>
+              </div>
+              <div class="bom-parent-name">${parentNm}</div>
+            </div>
+          `;
+        }).join('')}
+      `;
+    }
+
+    // Tampilkan Modal UI Bottom Sheet
+    document.getElementById('bom-modal').classList.add('active');
+    document.body.style.overflow = 'hidden'; // Disable scroll di bg
+  };
+
+  window.closeBOMModal = function(e) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    document.getElementById('bom-modal').classList.remove('active');
+    document.body.style.overflow = ''; // Enable scroll bg kembali
+  };
+
+  // AUTO REFRESH Tiap 5 Menit
   setInterval(async () => {
     try {
-      const url = DATA_URL + '?t=' + Date.now();
-      const res = await fetch(url, { cache: 'no-store' });
+      const res = await fetch(DATA_URL + '?t=' + Date.now(), { cache: 'no-store' });
       if (!res.ok) return;
       const json = await res.json();
-      const newSyncTime = json.syncedAt;
-      
-      // Hanya reload UI kalau data baru berbeda dari yang lama
-      if (newSyncTime !== syncInfo?.syncedAt) {
-        console.log('🔄 Data baru terdeteksi, update UI');
+      if (json.syncedAt !== syncInfo?.syncedAt) {
         allData = json.data || [];
-        syncInfo = {
-          syncedAt: json.syncedAt,
-          syncedAtLocal: json.syncedAtLocal,
-          stats: json.stats || {},
-        };
+        bomData = json.bom || {}; // Update bom data juga kalau ada perubahan
+        syncInfo = { syncedAt: json.syncedAt, syncedAtLocal: json.syncedAtLocal, stats: json.stats || {} };
         updateSyncInfo();
-        if (isLoggedIn()) {
-          route(); // re-render current view if logged in
-        }
+        if (isLoggedIn()) route();
       }
-    } catch (e) {
-      console.warn('Auto-refresh failed:', e.message);
-    }
+    } catch (e) {}
   }, AUTO_REFRESH_MS);
   
-  // ═══ INIT ═══
   fetchData();
-  console.log('📄 Viewer v1.4.0 · Gist ID:', GIST_ID);
   
 })();
 </script>
