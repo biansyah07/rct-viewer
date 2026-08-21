@@ -19,7 +19,7 @@
   .app-sub { font-size: 10px; opacity: 0.85; margin-top: 2px; }
   .app-sync-info {
     font-size: 10px; opacity: 0.8; margin-top: 4px;
-    display: flex; align-items: center; gap: 6px;
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
   }
   .app-sync-info button {
     background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
@@ -47,7 +47,7 @@
   }
   .error-box .err-icon { font-size: 40px; margin-bottom: 8px; }
   .error-box .err-title { font-weight: 800; font-size: 15px; margin-bottom: 6px; }
-  .error-box .err-msg { font-size: 12px; line-height: 1.5; }
+  .error-box .err-msg { font-size: 12px; line-height: 1.5; word-break: break-word; }
   
   .result-card {
     background: white; border-radius: 14px; overflow: hidden;
@@ -147,6 +147,12 @@
   .navigate-btn.zone { background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); }
   .navigate-btn.sub { background: linear-gradient(135deg, #0891b2 0%, #0369a1 100%); }
   
+  .action-btn {
+    background: #0a2540; color: white; border: none; border-radius: 8px;
+    padding: 10px 16px; font-weight: 700; font-size: 13px; cursor: pointer;
+  }
+  .action-btn.primary { background: #0a2540; color: white; }
+  
   .footer-info {
     text-align: center; color: rgba(255,255,255,0.6);
     font-size: 10px; padding: 20px 12px 60px;
@@ -157,7 +163,7 @@
   }
   .empty-icon { font-size: 60px; margin-bottom: 12px; opacity: 0.5; }
 
-  /* === MODAL BOM REVERSE VIEW (FIX HEIGHT & COMPACT LIST) === */
+  /* === MODAL BOM — tinggi + list padat === */
   .modal-overlay {
     position: fixed; inset: 0;
     background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px);
@@ -178,6 +184,8 @@
   .modal-overlay.active .modal-content { transform: translateY(0); }
   
   @media (min-width: 640px) {
+    body { max-width: 640px; margin: 0 auto; }
+    .content { padding: 16px; }
     .modal-overlay { justify-content: center; padding: 24px 16px; }
     .modal-content {
       border-radius: 16px; height: min(85vh, 720px); max-height: 85vh;
@@ -194,10 +202,10 @@
   .close-btn {
     position: absolute; top: 14px; right: 14px; background: rgba(255,255,255,0.15);
     border: none; color: white; width: 32px; height: 32px; border-radius: 50%;
-    font-size: 14px; cursor: pointer; font-weight: bold; transition: background 0.2s;
+    font-size: 14px; cursor: pointer; font-weight: bold;
   }
   .close-btn:active { background: rgba(255,255,255,0.3); }
-  .bom-title { font-size: 16px; font-weight: 800; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;}
+  .bom-title { font-size: 16px; font-weight: 800; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; padding-right: 36px;}
   .bom-subtitle { font-size: 11px; opacity: 0.85; margin-top: 4px; }
   .bom-target-item {
     background: rgba(0,0,0,0.25); padding: 10px 12px; border-radius: 10px; margin-top: 12px;
@@ -215,10 +223,9 @@
     padding: 12px;
   }
 
-  /* BOM LIST KOMPAK (TABLE) */
   .bom-count {
     font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;
-    letter-spacing: 0.4px; margin-bottom: 8px; padding: 0 2px; flex-shrink: 0;
+    letter-spacing: 0.4px; margin-bottom: 8px; flex-shrink: 0;
   }
   .bom-table-wrap {
     flex: 1; min-height: 0; overflow: auto; -webkit-overflow-scrolling: touch;
@@ -245,11 +252,6 @@
   }
   .bom-pill.comp { background: #fce7f3; color: #9d174d; }
   .bom-pill.fing { background: #d1fae5; color: #065f46; }
-
-  @media (min-width: 640px) {
-    body { max-width: 640px; margin: 0 auto; }
-    .content { padding: 16px; }
-  }
 </style>
 </head>
 <body>
@@ -274,15 +276,14 @@
   <div class="loading">
     <div class="spinner"></div>
     <div style="font-weight:700">Memuat data warehouse...</div>
-    <div style="font-size:11px;opacity:0.7;margin-top:4px">Fetching dari GitHub Gist</div>
+    <div style="font-size:11px;opacity:0.7;margin-top:4px" id="loading-hint">Fetching dari GitHub Gist</div>
   </div>
 </div>
 
-<!-- MODAL BOM REVERSE VIEW -->
 <div class="modal-overlay" id="bom-modal" onclick="closeBOMModal(event)">
   <div class="modal-content" onclick="event.stopPropagation()">
     <div class="modal-header">
-      <button class="close-btn" onclick="closeBOMModal(event)">✕</button>
+      <button class="close-btn" type="button" onclick="closeBOMModal(event)">✕</button>
       <div class="bom-title"><span>🛠️</span> BOM Reverse View</div>
       <div class="bom-subtitle">Item ini digunakan pada Model / Komponen berikut:</div>
       <div class="bom-target-item">
@@ -291,9 +292,7 @@
       </div>
     </div>
     <div class="modal-body">
-      <div id="bom-list-container">
-        <!-- Isi list diinject JS -->
-      </div>
+      <div id="bom-list-container"></div>
     </div>
   </div>
 </div>
@@ -302,20 +301,21 @@
 (function() {
   'use strict';
   
-  const GIST_ID = '63d8a8f7a35183a3ad28455587fc68fd';
-  const DATA_URL = 'https://gist.githubusercontent.com/biansyah07/' + GIST_ID + '/raw/rct-data.json';
-  const AUTO_REFRESH_MS = 5 * 60 * 1000;
+  var GIST_ID = '63d8a8f7a35183a3ad28455587fc68fd';
+  var DATA_URL = 'https://gist.githubusercontent.com/biansyah07/' + GIST_ID + '/raw/rct-data.json';
+  var AUTO_REFRESH_MS = 5 * 60 * 1000;
+  var FETCH_TIMEOUT_MS = 25000;
   
-  let allData = [];
-  let syncInfo = null;
-  let bomData = {};
+  var allData = [];
+  var syncInfo = null;
+  var bomData = {};
 
   function isLoggedIn() { return !!localStorage.getItem('rct_user_id'); }
 
   function updateUserHeader() {
-    const userId = localStorage.getItem('rct_user_id');
-    const badge = document.getElementById('user-badge');
-    const display = document.getElementById('user-id-display');
+    var userId = localStorage.getItem('rct_user_id');
+    var badge = document.getElementById('user-badge');
+    var display = document.getElementById('user-id-display');
     if (userId && badge && display) {
       display.textContent = userId;
       badge.style.display = 'block';
@@ -332,383 +332,460 @@
     }
   };
 
+  function showFatalError(msg) {
+    var el = document.getElementById('content');
+    if (!el) return;
+    el.innerHTML =
+      '<div class="error-box">' +
+        '<div class="err-icon">⚠️</div>' +
+        '<div class="err-title">Gagal Memuat Data</div>' +
+        '<div class="err-msg">' + msg + '</div>' +
+        '<button class="action-btn primary" style="margin-top:12px" onclick="location.reload()">🔄 Coba Lagi</button>' +
+      '</div>';
+  }
+
+  function fetchWithTimeout(url, ms) {
+    return new Promise(function(resolve, reject) {
+      var done = false;
+      var timer = setTimeout(function() {
+        if (done) return;
+        done = true;
+        reject(new Error('Timeout ' + (ms / 1000) + 's — Gist lambat / jaringan bermasalah'));
+      }, ms);
+
+      fetch(url, { cache: 'no-store', mode: 'cors' })
+        .then(function(res) {
+          if (done) return;
+          done = true;
+          clearTimeout(timer);
+          resolve(res);
+        })
+        .catch(function(err) {
+          if (done) return;
+          done = true;
+          clearTimeout(timer);
+          reject(err);
+        });
+    });
+  }
+
   async function fetchData() {
+    var hint = document.getElementById('loading-hint');
     try {
-      const url = DATA_URL + '?t=' + Date.now();
-      const res = await fetch(url, { cache: 'no-store' });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const json = await res.json();
-      allData = json.data || [];
+      if (hint) hint.textContent = 'Menghubungi GitHub Gist...';
+      console.log('[RCT Viewer] fetch start', DATA_URL);
+
+      var url = DATA_URL + '?t=' + Date.now();
+      var res = await fetchWithTimeout(url, FETCH_TIMEOUT_MS);
+      console.log('[RCT Viewer] HTTP', res.status);
+
+      if (!res.ok) throw new Error('HTTP ' + res.status + ' dari Gist');
+
+      if (hint) hint.textContent = 'Mengunduh & parse JSON...';
+      var text = await res.text();
+      console.log('[RCT Viewer] bytes', text.length);
+
+      var json;
+      try {
+        json = JSON.parse(text);
+      } catch (pe) {
+        throw new Error('JSON Gist rusak / bukan JSON valid');
+      }
+
+      allData = Array.isArray(json.data) ? json.data : [];
+      bomData = (json.bom && typeof json.bom === 'object') ? json.bom : {};
       syncInfo = {
         syncedAt: json.syncedAt,
         syncedAtLocal: json.syncedAtLocal,
-        stats: json.stats || {},
+        stats: json.stats || {}
       };
-      
-      bomData = json.bom || {};
+
+      console.log('[RCT Viewer] rows', allData.length, 'bom keys', Object.keys(bomData).length);
 
       updateSyncInfo();
       updateUserHeader();
       route();
     } catch (err) {
-      console.error(err);
-      document.getElementById('content').innerHTML = `
-        <div class="error-box">
-          <div class="err-icon">⚠️</div>
-          <div class="err-title">Gagal Memuat Data</div>
-          <div class="err-msg">${err.message}<br><br>Gagal mengambil data dari Gist.</div>
-          <button class="action-btn primary" style="margin-top:12px;padding:10px 20px" onclick="location.reload()">🔄 Coba Lagi</button>
-        </div>
-      `;
+      console.error('[RCT Viewer] fetchData error', err);
+      var m = (err && err.message) ? err.message : String(err);
+      showFatalError(
+        m +
+        '<br><br>Cek:<br>' +
+        '• Internet / VPN<br>' +
+        '• Gist masih public: gist.github.com/' + GIST_ID + '<br>' +
+        '• Buka raw: gist.githubusercontent.com/biansyah07/' + GIST_ID + '/raw/rct-data.json'
+      );
     }
   }
   
   function updateSyncInfo() {
-    const el = document.getElementById('sync-info');
-    if (!syncInfo) return;
-    const time = syncInfo.syncedAtLocal || 'unknown';
-    let ageText = '';
+    var el = document.getElementById('sync-info');
+    if (!syncInfo || !el) return;
+    var time = syncInfo.syncedAtLocal || 'unknown';
+    var ageText = '';
+    var isOld = false;
     if (syncInfo.syncedAt) {
-      const ageMs = Date.now() - new Date(syncInfo.syncedAt).getTime();
-      const ageMin = Math.floor(ageMs / 60000);
+      var ageMs = Date.now() - new Date(syncInfo.syncedAt).getTime();
+      var ageMin = Math.floor(ageMs / 60000);
       if (ageMin < 60) ageText = ' (' + ageMin + 'm lalu)';
       else if (ageMin < 1440) ageText = ' (' + Math.floor(ageMin / 60) + 'h lalu)';
       else ageText = ' (' + Math.floor(ageMin / 1440) + ' hari lalu)';
+      isOld = ageMs > 60 * 60 * 1000;
     }
-    const isOld = syncInfo.syncedAt ? (Date.now() - new Date(syncInfo.syncedAt).getTime()) > 60 * 60 * 1000 : false;
-    el.innerHTML = '<span>' + (isOld ? '⚠️' : '✅') + ' Update: <b>' + time + '</b>' + ageText + '</span>' +
-      '<button onclick="window.forceReload()">🔄 Refresh</button>';
+    var bomN = Object.keys(bomData || {}).length;
+    el.innerHTML =
+      '<span>' + (isOld ? '⚠️' : '✅') + ' Update: <b>' + time + '</b>' + ageText +
+      (bomN ? ' · BOM ' + bomN : '') + '</span>' +
+      '<button type="button" onclick="window.forceReload()">🔄 Refresh</button>';
   }
   
   window.forceReload = function() {
-    if ('caches' in window) caches.keys().then(keys => keys.forEach(k => caches.delete(k)));
-    location.reload(true);
+    if ('caches' in window) {
+      caches.keys().then(function(keys) { keys.forEach(function(k) { caches.delete(k); }); });
+    }
+    location.reload();
   };
   
   function route() {
-    if (!isLoggedIn()) { renderLogin(); return; }
-    const hash = (location.hash || '').replace('#', '').toUpperCase().trim();
-    if (!hash) { renderHome(); return; }
-    if (/^[A-Z]\d+-\d+$/.test(hash)) { renderRack(hash); return; }
-    if (/^[A-Z]\d+$/.test(hash)) { renderSubZone(hash); return; }
-    if (/^[A-Z]$/.test(hash)) { renderZone(hash); return; }
-    renderNotFound(hash);
+    try {
+      if (!isLoggedIn()) { renderLogin(); return; }
+      var hash = (location.hash || '').replace('#', '').toUpperCase().trim();
+      if (!hash) { renderHome(); return; }
+      if (/^[A-Z]\d+-\d+$/.test(hash)) { renderRack(hash); return; }
+      if (/^[A-Z]\d+$/.test(hash)) { renderSubZone(hash); return; }
+      if (/^[A-Z]$/.test(hash)) { renderZone(hash); return; }
+      renderNotFound(hash);
+    } catch (e) {
+      console.error('[RCT Viewer] route error', e);
+      showFatalError('Error tampilan: ' + (e.message || e));
+    }
   }
   window.addEventListener('hashchange', route);
   
   function renderLogin() {
-    document.getElementById('content').innerHTML = `
-      <div class="result-card" style="max-width: 420px; margin: 30px auto; overflow: hidden;">
-        <div class="result-header zone" style="background: linear-gradient(135deg, #0a2540 0%, #1e3a8a 100%); padding: 30px 20px;">
-          <div class="result-icon">🔒</div>
-          <div class="result-title" style="font-size:20px;letter-spacing:1px">LOGIN AKSES</div>
-          <div class="result-sub">Sistem Terproteksi. Masukkan Kode ID Anda.</div>
-        </div>
-        <div style="padding: 24px 20px;">
-          <form id="login-form">
-            <div style="margin-bottom: 20px;">
-              <label for="employee-id-input" style="display: block; font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 8px;">Masukkan No ID:</label>
-              <div style="display: flex; align-items: center; border: 2px solid #cbd5e1; border-radius: 8px; padding: 0 12px; background: #f8fafc;">
-                <span style="font-weight: 900; color: #64748b; font-family: Consolas, monospace; font-size: 18px; margin-right: 6px;">VPH</span>
-                <input type="tel" pattern="[0-9]*" inputmode="numeric" id="employee-id-input" placeholder="••••" style="width: 100%; border: none; background: transparent; padding: 12px 0; font-size: 18px; font-weight: 900; font-family: Consolas, monospace; color: #0a2540; outline: none;" required autofocus>
-              </div>
-            </div>
-            <button type="submit" class="navigate-btn zone" style="width: 100%; border: none; cursor: pointer;">🔓 MASUK KE SISTEM</button>
-          </form>
-        </div>
-      </div>
-    `;
-    const inputEl = document.getElementById('employee-id-input');
+    document.getElementById('content').innerHTML =
+      '<div class="result-card" style="max-width: 420px; margin: 30px auto; overflow: hidden;">' +
+        '<div class="result-header zone" style="background: linear-gradient(135deg, #0a2540 0%, #1e3a8a 100%); padding: 30px 20px;">' +
+          '<div class="result-icon">🔒</div>' +
+          '<div class="result-title" style="font-size:20px;letter-spacing:1px">LOGIN AKSES</div>' +
+          '<div class="result-sub">Sistem Terproteksi. Masukkan Kode ID Anda.</div>' +
+        '</div>' +
+        '<div style="padding: 24px 20px;">' +
+          '<form id="login-form">' +
+            '<div style="margin-bottom: 20px;">' +
+              '<label for="employee-id-input" style="display:block;font-size:11px;font-weight:800;color:#475569;text-transform:uppercase;margin-bottom:8px;">Masukkan No ID:</label>' +
+              '<div style="display:flex;align-items:center;border:2px solid #cbd5e1;border-radius:8px;padding:0 12px;background:#f8fafc;">' +
+                '<span style="font-weight:900;color:#64748b;font-family:Consolas,monospace;font-size:18px;margin-right:6px;">VPH</span>' +
+                '<input type="tel" pattern="[0-9]*" inputmode="numeric" id="employee-id-input" placeholder="••••" style="width:100%;border:none;background:transparent;padding:12px 0;font-size:18px;font-weight:900;font-family:Consolas,monospace;color:#0a2540;outline:none;" required autofocus>' +
+              '</div>' +
+            '</div>' +
+            '<button type="submit" class="navigate-btn zone" style="width:100%;border:none;cursor:pointer;">🔓 MASUK KE SISTEM</button>' +
+          '</form>' +
+        '</div>' +
+      '</div>';
+    var inputEl = document.getElementById('employee-id-input');
     if (inputEl) inputEl.focus();
     document.getElementById('login-form').addEventListener('submit', function(e) {
       e.preventDefault();
-      const val = inputEl.value.trim();
-      const digits = val.replace(/[^0-9]/g, '');
-      const allowedUsers = {
+      var digits = inputEl.value.trim().replace(/[^0-9]/g, '');
+      var allowedUsers = {
         '18': 'VPH18 - Adm.RB', '39': 'VPH39 - Spv.AB', '10': 'VPH10 - PMgr.SG',
-        '21': 'VPH21 - Danang', '77': 'VPH77 - Fiki', '01': 'VPH01 - Wh.Park', '0' : 'GUEST 👤'
+        '21': 'VPH21 - Danang', '77': 'VPH77 - Fiki', '01': 'VPH01 - Wh.Park', '0': 'GUEST 👤'
       };
       if (allowedUsers[digits]) {
         localStorage.setItem('rct_user_id', allowedUsers[digits]);
-        updateUserHeader(); route();
+        updateUserHeader();
+        route();
       } else {
         alert('❌ AKSES DITOLAK!\nNomor ID tidak terdaftar.');
-        inputEl.value = ''; inputEl.focus();
+        inputEl.value = '';
+        inputEl.focus();
       }
     });
   }
 
   function renderHome() {
-    const zones = [...new Set(allData.map(r => r.zone))].sort();
-    const stats = syncInfo?.stats || {};
-    document.getElementById('content').innerHTML = `
-      <div class="result-card">
-        <div class="result-header zone">
-          <div class="result-icon">📦</div>
-          <div class="result-title" style="font-size:22px;letter-spacing:1px">WAREHOUSE</div>
-        </div>
-        <div class="stats-grid">
-          <div class="stat-item"><div class="stat-val">${(stats.activeRacks || 0).toLocaleString()}</div><div class="stat-lbl">Active Racks</div></div>
-          <div class="stat-item"><div class="stat-val">${(stats.activeCases || 0).toLocaleString()}</div><div class="stat-lbl">Active Cases</div></div>
-          <div class="stat-item"><div class="stat-val">${(stats.activeItems || 0).toLocaleString()}</div><div class="stat-lbl">SKU Items</div></div>
-        </div>
-        <div class="rack-list">
-          <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px">🏢 Pilih Zone</div>
-          ${zones.map(z => `<a href="#${z}" class="navigate-btn zone" style="margin-top:6px">📍 ZONE ${z}</a>`).join('')}
-        </div>
-      </div>
-    `;
+    var zones = [];
+    var seen = {};
+    allData.forEach(function(r) {
+      if (r.zone && !seen[r.zone]) { seen[r.zone] = 1; zones.push(r.zone); }
+    });
+    zones.sort();
+    var stats = (syncInfo && syncInfo.stats) ? syncInfo.stats : {};
+    document.getElementById('content').innerHTML =
+      '<div class="result-card">' +
+        '<div class="result-header zone">' +
+          '<div class="result-icon">📦</div>' +
+          '<div class="result-title" style="font-size:22px;letter-spacing:1px">WAREHOUSE</div>' +
+        '</div>' +
+        '<div class="stats-grid">' +
+          '<div class="stat-item"><div class="stat-val">' + Number(stats.activeRacks || 0).toLocaleString() + '</div><div class="stat-lbl">Active Racks</div></div>' +
+          '<div class="stat-item"><div class="stat-val">' + Number(stats.activeCases || 0).toLocaleString() + '</div><div class="stat-lbl">Active Cases</div></div>' +
+          '<div class="stat-item"><div class="stat-val">' + Number(stats.activeItems || 0).toLocaleString() + '</div><div class="stat-lbl">SKU Items</div></div>' +
+        '</div>' +
+        '<div class="rack-list">' +
+          '<div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px">🏢 Pilih Zone</div>' +
+          zones.map(function(z) {
+            return '<a href="#' + z + '" class="navigate-btn zone" style="margin-top:6px">📍 ZONE ' + z + '</a>';
+          }).join('') +
+        '</div>' +
+      '</div>';
   }
   
   function renderRack(rackAddr) {
-    const cases = allData.filter(r => r.address === rackAddr && r.isActive === true && (Number(r.actualRemain) || 0) > 0);
-    const rackExists = allData.some(r => r.address === rackAddr);
+    var cases = allData.filter(function(r) {
+      return r.address === rackAddr && r.isActive === true && (Number(r.actualRemain) || 0) > 0;
+    });
+    var rackExists = allData.some(function(r) { return r.address === rackAddr; });
     if (!rackExists) { renderNotFound(rackAddr, 'rack'); return; }
     
-    const subZoneMatch = rackAddr.match(/^([A-Z]\d+)-\d+$/);
-    const subZone = subZoneMatch ? subZoneMatch[1] : '';
-    const zone = rackAddr[0];
-    const totalPcs = cases.reduce((s, c) => s + (Number(c.actualRemain) || 0), 0);
-    const uniqueItems = new Set(cases.map(c => c.itemCd)).size;
-    cases.sort((a, b) => (a.arrivalNo || '').localeCompare(b.arrivalNo || ''));
+    var subZoneMatch = rackAddr.match(/^([A-Z]\d+)-\d+$/);
+    var subZone = subZoneMatch ? subZoneMatch[1] : '';
+    var zone = rackAddr.charAt(0);
+    var totalPcs = cases.reduce(function(s, c) { return s + (Number(c.actualRemain) || 0); }, 0);
+    var uniqueItems = {};
+    cases.forEach(function(c) { if (c.itemCd) uniqueItems[c.itemCd] = 1; });
+    cases.sort(function(a, b) {
+      return String(a.arrivalNo || '').localeCompare(String(b.arrivalNo || ''));
+    });
     
-    document.getElementById('content').innerHTML = `
-      <div class="result-card">
-        <div class="result-header rack">
-          <div class="result-icon">📍</div>
-          <div class="result-title">${rackAddr}</div>
-          <div class="result-sub">Detail Rak · Live dari WMS</div>
-        </div>
-        ${cases.length === 0 ? `
-          <div class="empty-state">
-            <div class="empty-icon">📭</div>
-            <div style="font-weight:700;font-size:15px;color:#0a2540">Rak Kosong</div>
-          </div>
-        ` : `
-          <div class="stats-grid">
-            <div class="stat-item"><div class="stat-val">${cases.length}</div><div class="stat-lbl">Cases</div></div>
-            <div class="stat-item"><div class="stat-val">${uniqueItems}</div><div class="stat-lbl">Items</div></div>
-            <div class="stat-item"><div class="stat-val">${totalPcs.toLocaleString()}</div><div class="stat-lbl">Total Pcs</div></div>
-          </div>
-          <div class="case-list">
-            ${cases.map(c => {
-              const cls = c.status === 'LOW' ? 'low' : (c.isOld ? 'old' : '');
-              const itemCdSafe = String(c.itemCd || '').trim();
-              
-              return `
-                <div class="case-card ${cls}" onclick="window.showBOM('${itemCdSafe}')">
-                  <div>
-                    <div class="case-label">${c.arrivalNo || '-'}</div>
-                    <div class="case-item">${c.itemCd || '-'}</div>
-                    <div class="case-name">${c.engItemNm || '-'}</div>
-                    <div class="case-meta">In: ${c.inDt || '-'} · Age: ${c.ageMonths || 0} mo ${c.invNo ? ` · Inv: ${c.invNo}` : ''}</div>
-                  </div>
-                  <div>
-                    <div class="case-qty">${(Number(c.actualRemain) || 0).toLocaleString()}</div>
-                    <div class="case-qty-lbl">${c.unt || 'PCS'}</div>
-                  </div>
-                </div>
-              `;
-            }).join('')}
-          </div>
-        `}
-        ${subZone ? `<div style="padding:0 12px 8px"><a href="#${subZone}" class="navigate-btn sub">🔷 Lihat semua rak di ${subZone}</a></div>` : ''}
-        <div style="padding:0 12px 12px"><a href="#${zone}" class="navigate-btn zone">🏢 Lihat semua rak di Zone ${zone}</a></div>
-      </div>
-    `;
+    var html = '<div class="result-card">' +
+      '<div class="result-header rack">' +
+        '<div class="result-icon">📍</div>' +
+        '<div class="result-title">' + rackAddr + '</div>' +
+        '<div class="result-sub">Detail Rak · Live dari WMS</div>' +
+      '</div>';
+
+    if (cases.length === 0) {
+      html += '<div class="empty-state"><div class="empty-icon">📭</div><div style="font-weight:700;font-size:15px;color:#0a2540">Rak Kosong</div></div>';
+    } else {
+      html += '<div class="stats-grid">' +
+        '<div class="stat-item"><div class="stat-val">' + cases.length + '</div><div class="stat-lbl">Cases</div></div>' +
+        '<div class="stat-item"><div class="stat-val">' + Object.keys(uniqueItems).length + '</div><div class="stat-lbl">Items</div></div>' +
+        '<div class="stat-item"><div class="stat-val">' + totalPcs.toLocaleString() + '</div><div class="stat-lbl">Total Pcs</div></div>' +
+      '</div><div class="case-list">';
+
+      cases.forEach(function(c) {
+        var cls = c.status === 'LOW' ? 'low' : (c.isOld ? 'old' : '');
+        var itemCdSafe = String(c.itemCd || '').trim().replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        html +=
+          '<div class="case-card ' + cls + '" onclick="window.showBOM(\'' + itemCdSafe + '\')">' +
+            '<div>' +
+              '<div class="case-label">' + (c.arrivalNo || '-') + '</div>' +
+              '<div class="case-item">' + (c.itemCd || '-') + '</div>' +
+              '<div class="case-name">' + (c.engItemNm || '-') + '</div>' +
+              '<div class="case-meta">In: ' + (c.inDt || '-') + ' · Age: ' + (c.ageMonths || 0) + ' mo' +
+                (c.invNo ? ' · Inv: ' + c.invNo : '') + '</div>' +
+            '</div>' +
+            '<div>' +
+              '<div class="case-qty">' + (Number(c.actualRemain) || 0).toLocaleString() + '</div>' +
+              '<div class="case-qty-lbl">' + (c.unt || 'PCS') + '</div>' +
+            '</div>' +
+          '</div>';
+      });
+      html += '</div>';
+    }
+
+    if (subZone) {
+      html += '<div style="padding:0 12px 8px"><a href="#' + subZone + '" class="navigate-btn sub">🔷 Lihat semua rak di ' + subZone + '</a></div>';
+    }
+    html += '<div style="padding:0 12px 12px"><a href="#' + zone + '" class="navigate-btn zone">🏢 Lihat semua rak di Zone ' + zone + '</a></div></div>';
+    document.getElementById('content').innerHTML = html;
   }
   
   function renderSubZone(subId) {
-    const racksMap = {};
-    allData.forEach(r => {
-      if (!r.address.startsWith(subId + '-')) return;
+    var racksMap = {};
+    allData.forEach(function(r) {
+      if (!r.address || r.address.indexOf(subId + '-') !== 0) return;
       if (!racksMap[r.address]) racksMap[r.address] = { address: r.address, cases: [], activeCount: 0, totalPcs: 0 };
       racksMap[r.address].cases.push(r);
       if (r.isActive && (Number(r.actualRemain) || 0) > 0) {
-        racksMap[r.address].activeCount++; racksMap[r.address].totalPcs += Number(r.actualRemain) || 0;
+        racksMap[r.address].activeCount++;
+        racksMap[r.address].totalPcs += Number(r.actualRemain) || 0;
       }
     });
-    const racks = Object.values(racksMap).sort((a, b) => a.address.localeCompare(b.address, undefined, { numeric: true }));
-    if (racks.length === 0) { renderNotFound(subId, 'sub'); return; }
+    var racks = Object.keys(racksMap).map(function(k) { return racksMap[k]; });
+    racks.sort(function(a, b) {
+      return a.address.localeCompare(b.address, undefined, { numeric: true });
+    });
+    if (!racks.length) { renderNotFound(subId, 'sub'); return; }
     
-    const zone = subId[0];
-    const activeRacks = racks.filter(r => r.activeCount > 0);
-    const totalCases = activeRacks.reduce((s, r) => s + r.activeCount, 0);
-    const totalPcs = activeRacks.reduce((s, r) => s + r.totalPcs, 0);
+    var zone = subId.charAt(0);
+    var activeRacks = racks.filter(function(r) { return r.activeCount > 0; });
+    var totalCases = activeRacks.reduce(function(s, r) { return s + r.activeCount; }, 0);
+    var totalPcs = activeRacks.reduce(function(s, r) { return s + r.totalPcs; }, 0);
     
-    document.getElementById('content').innerHTML = `
-      <div class="result-card">
-        <div class="result-header sub">
-          <div class="result-icon">🔷</div>
-          <div class="result-title">${subId}</div>
-          <div class="result-sub">Sub-Zone (Kolom Rak) · Live dari WMS</div>
-        </div>
-        <div class="stats-grid">
-          <div class="stat-item"><div class="stat-val">${activeRacks.length}/${racks.length}</div><div class="stat-lbl">Racks</div></div>
-          <div class="stat-item"><div class="stat-val">${totalCases}</div><div class="stat-lbl">Cases</div></div>
-          <div class="stat-item"><div class="stat-val">${totalPcs.toLocaleString()}</div><div class="stat-lbl">Total Pcs</div></div>
-        </div>
-        <div class="hint-box">👆 Tap rak untuk lihat detail</div>
-        <div class="rack-list">
-          ${racks.map(rack => {
-            const isEmpty = rack.activeCount === 0;
-            const initialTotal = rack.cases.reduce((s, c) => s + (Number(c.initial) || 0), 0);
-            const fill = initialTotal > 0 ? (rack.totalPcs / initialTotal * 100) : 0;
-            let cls = 'empty';
-            if (!isEmpty) { if (fill >= 70) cls = 'full'; else if (fill >= 30) cls = 'warn'; else cls = 'low'; }
-            return `
-              <a href="#${rack.address}" style="text-decoration:none;color:inherit">
-                <div class="rack-item ${cls}">
-                  <div class="ri-addr">${rack.address}</div>
-                  <div class="ri-info">${isEmpty ? '<span class="ri-empty">Kosong</span>' : `<b>${rack.activeCount}</b>c · <b>${rack.totalPcs.toLocaleString()}</b> pcs`}</div>
-                  <div class="ri-fill">${isEmpty ? '—' : fill.toFixed(0) + '%'}</div>
-                </div>
-              </a>
-            `;
-          }).join('')}
-        </div>
-        <div style="padding:0 12px 12px"><a href="#${zone}" class="navigate-btn zone">🏢 Lihat semua rak di Zone ${zone}</a></div>
-      </div>
-    `;
+    var listHtml = racks.map(function(rack) {
+      var isEmpty = rack.activeCount === 0;
+      var initialTotal = rack.cases.reduce(function(s, c) { return s + (Number(c.initial) || 0); }, 0);
+      var fill = initialTotal > 0 ? (rack.totalPcs / initialTotal * 100) : 0;
+      var cls = 'empty';
+      if (!isEmpty) {
+        if (fill >= 70) cls = 'full';
+        else if (fill >= 30) cls = 'warn';
+        else cls = 'low';
+      }
+      return '<a href="#' + rack.address + '" style="text-decoration:none;color:inherit">' +
+        '<div class="rack-item ' + cls + '">' +
+          '<div class="ri-addr">' + rack.address + '</div>' +
+          '<div class="ri-info">' + (isEmpty ? '<span class="ri-empty">Kosong</span>' :
+            '<b>' + rack.activeCount + '</b>c · <b>' + rack.totalPcs.toLocaleString() + '</b> pcs') + '</div>' +
+          '<div class="ri-fill">' + (isEmpty ? '—' : fill.toFixed(0) + '%') + '</div>' +
+        '</div></a>';
+    }).join('');
+
+    document.getElementById('content').innerHTML =
+      '<div class="result-card">' +
+        '<div class="result-header sub">' +
+          '<div class="result-icon">🔷</div>' +
+          '<div class="result-title">' + subId + '</div>' +
+          '<div class="result-sub">Sub-Zone (Kolom Rak) · Live dari WMS</div>' +
+        '</div>' +
+        '<div class="stats-grid">' +
+          '<div class="stat-item"><div class="stat-val">' + activeRacks.length + '/' + racks.length + '</div><div class="stat-lbl">Racks</div></div>' +
+          '<div class="stat-item"><div class="stat-val">' + totalCases + '</div><div class="stat-lbl">Cases</div></div>' +
+          '<div class="stat-item"><div class="stat-val">' + totalPcs.toLocaleString() + '</div><div class="stat-lbl">Total Pcs</div></div>' +
+        '</div>' +
+        '<div class="hint-box">👆 Tap rak untuk lihat detail</div>' +
+        '<div class="rack-list">' + listHtml + '</div>' +
+        '<div style="padding:0 12px 12px"><a href="#' + zone + '" class="navigate-btn zone">🏢 Lihat semua rak di Zone ' + zone + '</a></div>' +
+      '</div>';
   }
   
   function renderZone(zone) {
-    const racksMap = {};
-    allData.forEach(r => {
+    var racksMap = {};
+    allData.forEach(function(r) {
       if (r.zone !== zone) return;
       if (!racksMap[r.address]) racksMap[r.address] = { address: r.address, cases: [], activeCount: 0, totalPcs: 0 };
       racksMap[r.address].cases.push(r);
       if (r.isActive && (Number(r.actualRemain) || 0) > 0) {
-        racksMap[r.address].activeCount++; racksMap[r.address].totalPcs += Number(r.actualRemain) || 0;
+        racksMap[r.address].activeCount++;
+        racksMap[r.address].totalPcs += Number(r.actualRemain) || 0;
       }
     });
-    const racks = Object.values(racksMap).sort((a, b) => a.address.localeCompare(b.address, undefined, { numeric: true }));
-    if (racks.length === 0) { renderNotFound(zone, 'zone'); return; }
+    var racks = Object.keys(racksMap).map(function(k) { return racksMap[k]; });
+    racks.sort(function(a, b) {
+      return a.address.localeCompare(b.address, undefined, { numeric: true });
+    });
+    if (!racks.length) { renderNotFound(zone, 'zone'); return; }
     
-    const activeRacks = racks.filter(r => r.activeCount > 0);
-    const totalCases = activeRacks.reduce((s, r) => s + r.activeCount, 0);
-    const totalPcs = activeRacks.reduce((s, r) => s + r.totalPcs, 0);
-    const subZones = {};
-    racks.forEach(r => {
-      const m = r.address.match(/^([A-Z]\d+)-\d+$/);
+    var activeRacks = racks.filter(function(r) { return r.activeCount > 0; });
+    var totalCases = activeRacks.reduce(function(s, r) { return s + r.activeCount; }, 0);
+    var totalPcs = activeRacks.reduce(function(s, r) { return s + r.totalPcs; }, 0);
+    var subZones = {};
+    racks.forEach(function(r) {
+      var m = r.address.match(/^([A-Z]\d+)-\d+$/);
       if (!m) return;
-      const sub = m[1];
+      var sub = m[1];
       if (!subZones[sub]) subZones[sub] = [];
       subZones[sub].push(r);
     });
-    const subZoneList = Object.keys(subZones).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+    var subZoneList = Object.keys(subZones).sort(function(a, b) {
+      return a.localeCompare(b, undefined, { numeric: true });
+    });
     
-    document.getElementById('content').innerHTML = `
-      <div class="result-card">
-        <div class="result-header zone">
-          <div class="result-icon">🏢</div>
-          <div class="result-title">ZONE ${zone}</div>
-          <div class="result-sub">Overview Zone · Live dari WMS</div>
-        </div>
-        <div class="stats-grid">
-          <div class="stat-item"><div class="stat-val">${activeRacks.length}/${racks.length}</div><div class="stat-lbl">Racks</div></div>
-          <div class="stat-item"><div class="stat-val">${totalCases}</div><div class="stat-lbl">Cases</div></div>
-          <div class="stat-item"><div class="stat-val">${totalPcs.toLocaleString()}</div><div class="stat-lbl">Total Pcs</div></div>
-        </div>
-        <div class="hint-box">👆 Tap sub-zone untuk lihat rak-nya</div>
-        <div class="rack-list">
-          ${subZoneList.map(sub => {
-            const subRacks = subZones[sub];
-            const activeInSub = subRacks.filter(r => r.activeCount > 0).length;
-            const pcsInSub = subRacks.reduce((s, r) => s + r.totalPcs, 0);
-            return `
-              <a href="#${sub}" style="text-decoration:none;color:inherit">
-                <div class="rack-item ${activeInSub > 0 ? 'full' : 'empty'}">
-                  <div class="ri-addr">${sub}</div>
-                  <div class="ri-info">${activeInSub === 0 ? '<span class="ri-empty">Semua kosong</span>' : `<b>${activeInSub}</b>/${subRacks.length} rak · <b>${pcsInSub.toLocaleString()}</b> pcs`}</div>
-                  <div class="ri-fill" style="color:#64748b">${subRacks.length}</div>
-                </div>
-              </a>
-            `;
-          }).join('')}
-        </div>
-      </div>
-    `;
+    var listHtml = subZoneList.map(function(sub) {
+      var subRacks = subZones[sub];
+      var activeInSub = subRacks.filter(function(r) { return r.activeCount > 0; }).length;
+      var pcsInSub = subRacks.reduce(function(s, r) { return s + r.totalPcs; }, 0);
+      return '<a href="#' + sub + '" style="text-decoration:none;color:inherit">' +
+        '<div class="rack-item ' + (activeInSub > 0 ? 'full' : 'empty') + '">' +
+          '<div class="ri-addr">' + sub + '</div>' +
+          '<div class="ri-info">' + (activeInSub === 0 ? '<span class="ri-empty">Semua kosong</span>' :
+            '<b>' + activeInSub + '</b>/' + subRacks.length + ' rak · <b>' + pcsInSub.toLocaleString() + '</b> pcs') + '</div>' +
+          '<div class="ri-fill" style="color:#64748b">' + subRacks.length + '</div>' +
+        '</div></a>';
+    }).join('');
+
+    document.getElementById('content').innerHTML =
+      '<div class="result-card">' +
+        '<div class="result-header zone">' +
+          '<div class="result-icon">🏢</div>' +
+          '<div class="result-title">ZONE ' + zone + '</div>' +
+          '<div class="result-sub">Overview Zone · Live dari WMS</div>' +
+        '</div>' +
+        '<div class="stats-grid">' +
+          '<div class="stat-item"><div class="stat-val">' + activeRacks.length + '/' + racks.length + '</div><div class="stat-lbl">Racks</div></div>' +
+          '<div class="stat-item"><div class="stat-val">' + totalCases + '</div><div class="stat-lbl">Cases</div></div>' +
+          '<div class="stat-item"><div class="stat-val">' + totalPcs.toLocaleString() + '</div><div class="stat-lbl">Total Pcs</div></div>' +
+        '</div>' +
+        '<div class="hint-box">👆 Tap sub-zone untuk lihat rak-nya</div>' +
+        '<div class="rack-list">' + listHtml + '</div>' +
+      '</div>';
   }
   
-  function renderNotFound(target, type = 'unknown') {
-    const typeLabel = { rack: 'Rak', sub: 'Sub-Zone', zone: 'Zone', unknown: 'Kode' }[type];
-    document.getElementById('content').innerHTML = `
-      <div class="result-card">
-        <div class="result-header notfound">
-          <div class="result-icon">❌</div>
-          <div class="result-title" style="font-size:24px">${target}</div>
-          <div class="result-sub">${typeLabel} tidak ditemukan</div>
-        </div>
-        <div class="empty-state">
-          <div class="empty-icon">🔍</div>
-          <div style="font-weight:700;color:#0a2540">Data tidak ada</div>
-          <div style="font-size:12px;margin-top:8px;line-height:1.5">${typeLabel} <b>${target}</b> tidak terdaftar di WMS.</div>
-          <a href="#" class="navigate-btn" style="max-width:200px;margin:16px auto 0">🏠 Ke Beranda</a>
-        </div>
-      </div>
-    `;
+  function renderNotFound(target, type) {
+    type = type || 'unknown';
+    var typeLabel = { rack: 'Rak', sub: 'Sub-Zone', zone: 'Zone', unknown: 'Kode' }[type] || 'Kode';
+    document.getElementById('content').innerHTML =
+      '<div class="result-card">' +
+        '<div class="result-header notfound">' +
+          '<div class="result-icon">❌</div>' +
+          '<div class="result-title" style="font-size:24px">' + target + '</div>' +
+          '<div class="result-sub">' + typeLabel + ' tidak ditemukan</div>' +
+        '</div>' +
+        '<div class="empty-state">' +
+          '<div class="empty-icon">🔍</div>' +
+          '<div style="font-weight:700;color:#0a2540">Data tidak ada</div>' +
+          '<div style="font-size:12px;margin-top:8px;line-height:1.5">' + typeLabel + ' <b>' + target + '</b> tidak terdaftar di WMS.</div>' +
+          '<a href="#" class="navigate-btn" style="max-width:200px;margin:16px auto 0">🏠 Ke Beranda</a>' +
+        '</div>' +
+      '</div>';
   }
 
-  // ═══ FUNGSI AMAN MODAL BOM REVERSE ═══
   window.showBOM = function(itemCd) {
     if (!itemCd) return;
-    
-    // Cari nama item secara aman dari memori allData (mencegah error petik/simbol)
-    const itemObj = allData.find(x => String(x.itemCd).trim() === String(itemCd).trim());
-    const itemNm = itemObj ? (itemObj.engItemNm || itemObj.itemNm || '-') : '-';
+    var itemObj = null;
+    for (var i = 0; i < allData.length; i++) {
+      if (String(allData[i].itemCd || '').trim() === String(itemCd).trim()) {
+        itemObj = allData[i];
+        break;
+      }
+    }
+    var itemNm = itemObj ? (itemObj.engItemNm || itemObj.itemNm || '-') : '-';
 
     document.getElementById('bom-target-code').textContent = itemCd;
     document.getElementById('bom-target-name').textContent = itemNm;
 
-    const container = document.getElementById('bom-list-container');
-    const list = bomData[itemCd] || bomData[String(itemCd).toUpperCase()] || [];
+    var container = document.getElementById('bom-list-container');
+    var list = bomData[itemCd] || bomData[String(itemCd).toUpperCase()] || [];
 
     if (!list.length) {
-      container.innerHTML = `
-        <div style="text-align:center; padding:35px 20px; color:#64748b;">
-          <div style="font-size:48px; margin-bottom:12px; opacity:0.6">📋</div>
-          <div style="font-weight:800; font-size:15px; color:#0a2540;">Data Model Belum Dihubungkan</div>
-          <div style="font-size:12px; margin-top:8px; line-height:1.5; color:#475569;">
-            Item <b style="color:#0a2540">${itemCd}</b> belum ada relasi BOM Reverse-nya di data Gist.<br><br>
-            <i>(Fitur UI sudah aktif & siap. Tinggal tunggu sync BOM dari PC)</i>
-          </div>
-        </div>
-      `;
+      container.innerHTML =
+        '<div style="text-align:center;padding:35px 20px;color:#64748b;">' +
+          '<div style="font-size:48px;margin-bottom:12px;opacity:0.6">📋</div>' +
+          '<div style="font-weight:800;font-size:15px;color:#0a2540;">Data Model Belum Dihubungkan</div>' +
+          '<div style="font-size:12px;margin-top:8px;line-height:1.5;color:#475569;">' +
+            'Item <b style="color:#0a2540">' + itemCd + '</b> belum ada di mapping BOM Gist.<br><br>' +
+            '<i>Sync ulang dari PC Control Tower (☁️ Sync).</i>' +
+          '</div>' +
+        '</div>';
     } else {
-      container.innerHTML = `
-        <div class="bom-count">🧩 Digunakan pada ${list.length} Model / Assembly</div>
-        <div class="bom-table-wrap">
-          <table class="bom-table">
-            <thead>
-              <tr>
-                <th style="width:48px">Type</th>
-                <th>Model / Parent</th>
-                <th style="width:36px;text-align:right">Qty</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${list.map(bom => {
-                const type = String(bom.type || bom.bomType || 'BOM').toUpperCase();
-                const pillCls = type === 'COMP' ? 'comp' : (type === 'FING' ? 'fing' : '');
-                const parentCd = bom.parentCd || bom.itemNumber || bom.itemCd || '-';
-                const parentNm = bom.parentNm || bom.itemName || bom.engItemNm || '-';
-                const qty = bom.qty != null ? bom.qty : (bom.quantity != null ? bom.quantity : 1);
-                return `
-                  <tr>
-                    <td class="bom-td-type"><span class="bom-pill ${pillCls}">${type}</span></td>
-                    <td>
-                      <div class="bom-td-code">${parentCd}</div>
-                      <div class="bom-td-name">${parentNm}</div>
-                    </td>
-                    <td class="bom-td-qty">${qty}</td>
-                  </tr>
-                `;
-              }).join('')}
-            </tbody>
-          </table>
-        </div>
-      `;
+      var rows = list.map(function(bom) {
+        var type = String(bom.type || bom.bomType || 'BOM').toUpperCase();
+        var pillCls = type === 'COMP' ? 'comp' : (type === 'FING' ? 'fing' : '');
+        var parentCd = bom.parentCd || bom.itemNumber || bom.itemCd || '-';
+        var parentNm = bom.parentNm || bom.itemName || bom.engItemNm || '-';
+        var qty = bom.qty != null ? bom.qty : (bom.quantity != null ? bom.quantity : 1);
+        return '<tr>' +
+          '<td class="bom-td-type"><span class="bom-pill ' + pillCls + '">' + type + '</span></td>' +
+          '<td><div class="bom-td-code">' + parentCd + '</div><div class="bom-td-name">' + parentNm + '</div></td>' +
+          '<td class="bom-td-qty">' + qty + '</td>' +
+        '</tr>';
+      }).join('');
+
+      container.innerHTML =
+        '<div class="bom-count">🧩 Digunakan pada ' + list.length + ' Model / Assembly</div>' +
+        '<div class="bom-table-wrap">' +
+          '<table class="bom-table">' +
+            '<thead><tr>' +
+              '<th style="width:48px">Type</th>' +
+              '<th>Model / Parent</th>' +
+              '<th style="width:36px;text-align:right">Qty</th>' +
+            '</tr></thead>' +
+            '<tbody>' + rows + '</tbody>' +
+          '</table>' +
+        '</div>';
     }
 
     document.getElementById('bom-modal').classList.add('active');
@@ -721,25 +798,28 @@
     document.body.style.overflow = '';
   };
 
-  setInterval(async () => {
-    try {
-      const res = await fetch(DATA_URL + '?t=' + Date.now(), { cache: 'no-store' });
-      if (!res.ok) return;
-      const json = await res.json();
-      if (json.syncedAt !== syncInfo?.syncedAt) {
-        allData = json.data || [];
-        bomData = json.bom || {};
-        syncInfo = { syncedAt: json.syncedAt, syncedAtLocal: json.syncedAtLocal, stats: json.stats || {} };
+  setInterval(function() {
+    fetchWithTimeout(DATA_URL + '?t=' + Date.now(), FETCH_TIMEOUT_MS)
+      .then(function(res) { return res.ok ? res.json() : null; })
+      .then(function(json) {
+        if (!json) return;
+        if (json.syncedAt === (syncInfo && syncInfo.syncedAt)) return;
+        allData = Array.isArray(json.data) ? json.data : [];
+        bomData = (json.bom && typeof json.bom === 'object') ? json.bom : {};
+        syncInfo = {
+          syncedAt: json.syncedAt,
+          syncedAtLocal: json.syncedAtLocal,
+          stats: json.stats || {}
+        };
         updateSyncInfo();
         if (isLoggedIn()) route();
-      }
-    } catch (e) {}
+      })
+      .catch(function() {});
   }, AUTO_REFRESH_MS);
   
+  console.log('[RCT Viewer] boot');
   fetchData();
-  
 })();
 </script>
-
 </body>
 </html>
