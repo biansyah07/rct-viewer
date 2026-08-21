@@ -157,58 +157,94 @@
   }
   .empty-icon { font-size: 60px; margin-bottom: 12px; opacity: 0.5; }
 
-  /* === MODAL BOM REVERSE VIEW === */
+  /* === MODAL BOM REVERSE VIEW (FIX HEIGHT & COMPACT LIST) === */
   .modal-overlay {
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    position: fixed; inset: 0;
     background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px);
-    z-index: 999; display: flex; flex-direction: column; justify-content: flex-end;
-    opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+    z-index: 999; display: flex; flex-direction: column;
+    justify-content: flex-end; align-items: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.25s ease; padding: 0;
   }
   .modal-overlay.active { opacity: 1; pointer-events: auto; }
   
   .modal-content {
-    background: #f8fafc; border-radius: 24px 24px 0 0;
-    width: 100%; max-width: 640px; margin: 0 auto;
-    max-height: 85vh; display: flex; flex-direction: column;
-    transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
-    box-shadow: 0 -10px 40px rgba(0,0,0,0.3);
+    background: #f8fafc; border-radius: 20px 20px 0 0; width: 100%; max-width: 640px;
+    height: min(92vh, 780px); max-height: 92vh; margin: 0 auto;
+    display: flex; flex-direction: column; transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.2, 1);
+    box-shadow: 0 -12px 40px rgba(0,0,0,0.35); overflow: hidden;
+    padding-bottom: env(safe-area-inset-bottom, 0);
   }
   .modal-overlay.active .modal-content { transform: translateY(0); }
   
+  @media (min-width: 640px) {
+    .modal-overlay { justify-content: center; padding: 24px 16px; }
+    .modal-content {
+      border-radius: 16px; height: min(85vh, 720px); max-height: 85vh;
+      transform: translateY(24px) scale(0.98); opacity: 0.96;
+    }
+    .modal-overlay.active .modal-content { transform: translateY(0) scale(1); opacity: 1; }
+  }
+
   .modal-header {
-    background: linear-gradient(135deg, #0a2540 0%, #1e3a8a 100%);
-    color: white; padding: 20px; border-radius: 24px 24px 0 0; position: relative;
+    background: linear-gradient(135deg, #0a2540 0%, #1e3a8a 100%); color: white;
+    padding: 16px 16px 14px; border-radius: inherit; border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0; position: relative; flex-shrink: 0;
   }
   .close-btn {
-    position: absolute; top: 18px; right: 18px; background: rgba(255,255,255,0.15);
+    position: absolute; top: 14px; right: 14px; background: rgba(255,255,255,0.15);
     border: none; color: white; width: 32px; height: 32px; border-radius: 50%;
-    font-size: 14px; cursor: pointer; font-weight: bold;
+    font-size: 14px; cursor: pointer; font-weight: bold; transition: background 0.2s;
   }
   .close-btn:active { background: rgba(255,255,255,0.3); }
   .bom-title { font-size: 16px; font-weight: 800; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;}
   .bom-subtitle { font-size: 11px; opacity: 0.85; margin-top: 4px; }
   .bom-target-item {
-    background: rgba(0,0,0,0.25); padding: 12px; border-radius: 10px; margin-top: 14px;
+    background: rgba(0,0,0,0.25); padding: 10px 12px; border-radius: 10px; margin-top: 12px;
     border-left: 3px solid #38bdf8;
   }
-  .bom-target-code { font-family: Consolas, monospace; font-size: 16px; font-weight: 900; color: #38bdf8; }
-  .bom-target-name { font-size: 12px; margin-top: 4px; opacity: 0.9; line-height: 1.3;}
+  .bom-target-code { font-family: Consolas, monospace; font-size: 15px; font-weight: 900; color: #38bdf8; }
+  .bom-target-name { font-size: 11px; margin-top: 4px; opacity: 0.9; line-height: 1.3;}
   
-  .modal-body { padding: 16px; overflow-y: auto; flex: 1; }
-  .bom-list-item {
-    background: white; border: 1px solid #e2e8f0; border-radius: 12px;
-    padding: 14px; margin-bottom: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+  .modal-body {
+    padding: 0; overflow: hidden; flex: 1; min-height: 0;
+    display: flex; flex-direction: column; background: #fff;
   }
-  .bom-badge {
-    display: inline-block; background: #dbeafe; color: #1e40af;
-    font-size: 9px; font-weight: 800; padding: 4px 8px; border-radius: 6px; margin-bottom: 8px; letter-spacing: 0.5px;
+  #bom-list-container {
+    flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column;
+    padding: 12px;
   }
-  .bom-badge.comp { background: #fce7f3; color: #9d174d; }
-  .bom-parent-code { font-family: Consolas, monospace; font-size: 15px; font-weight: 900; color: #0a2540; }
-  .bom-parent-name { font-size: 11px; color: #475569; margin-top: 5px; line-height: 1.4; font-weight: 500;}
-  .bom-qty-box { text-align: right; }
-  .bom-qty-lbl { font-size: 10px; color: #64748b; font-weight: 700; text-transform: uppercase;}
-  .bom-qty-val { font-size: 16px; font-weight: 900; color: #0a2540; font-family: Consolas, monospace;}
+
+  /* BOM LIST KOMPAK (TABLE) */
+  .bom-count {
+    font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;
+    letter-spacing: 0.4px; margin-bottom: 8px; padding: 0 2px; flex-shrink: 0;
+  }
+  .bom-table-wrap {
+    flex: 1; min-height: 0; overflow: auto; -webkit-overflow-scrolling: touch;
+    border: 1px solid #e2e8f0; border-radius: 10px; background: #fff;
+  }
+  .bom-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .bom-table thead th {
+    background: #f1f5f9; color: #475569; font-size: 9px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 0.3px; padding: 8px 10px;
+    text-align: left; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 2;
+  }
+  .bom-table tbody tr { border-bottom: 1px solid #f1f5f9; }
+  .bom-table tbody tr:nth-child(even) { background: #f8fafc; }
+  .bom-table tbody tr:active { background: #e0f2fe; }
+  .bom-table td { padding: 6px 10px; vertical-align: middle; line-height: 1.25; }
+  .bom-td-code { font-family: Consolas, ui-monospace, monospace; font-weight: 800; font-size: 12px; color: #0a2540; }
+  .bom-td-name { font-size: 10px; color: #64748b; margin-top: 2px; }
+  .bom-td-type { width: 48px; text-align: center; }
+  .bom-td-qty { width: 36px; text-align: right; font-family: Consolas, monospace; font-weight: 800; font-size: 13px; color: #0a2540; }
+  
+  .bom-pill {
+    display: inline-block; font-size: 8px; font-weight: 800; padding: 3px 5px;
+    border-radius: 4px; background: #dbeafe; color: #1e40af;
+  }
+  .bom-pill.comp { background: #fce7f3; color: #9d174d; }
+  .bom-pill.fing { background: #d1fae5; color: #065f46; }
 
   @media (min-width: 640px) {
     body { max-width: 640px; margin: 0 auto; }
@@ -254,8 +290,10 @@
         <div class="bom-target-name" id="bom-target-name">-</div>
       </div>
     </div>
-    <div class="modal-body" id="bom-list-container">
-      <!-- Isi list diinject JS -->
+    <div class="modal-body">
+      <div id="bom-list-container">
+        <!-- Isi list diinject JS -->
+      </div>
     </div>
   </div>
 </div>
@@ -639,32 +677,37 @@
       `;
     } else {
       container.innerHTML = `
-        <div style="font-size:11px; font-weight:800; color:#64748b; margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px;">
-          🧩 Digunakan pada ${list.length} Model / Assembly:
+        <div class="bom-count">🧩 Digunakan pada ${list.length} Model / Assembly</div>
+        <div class="bom-table-wrap">
+          <table class="bom-table">
+            <thead>
+              <tr>
+                <th style="width:48px">Type</th>
+                <th>Model / Parent</th>
+                <th style="width:36px;text-align:right">Qty</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${list.map(bom => {
+                const type = String(bom.type || bom.bomType || 'BOM').toUpperCase();
+                const pillCls = type === 'COMP' ? 'comp' : (type === 'FING' ? 'fing' : '');
+                const parentCd = bom.parentCd || bom.itemNumber || bom.itemCd || '-';
+                const parentNm = bom.parentNm || bom.itemName || bom.engItemNm || '-';
+                const qty = bom.qty != null ? bom.qty : (bom.quantity != null ? bom.quantity : 1);
+                return `
+                  <tr>
+                    <td class="bom-td-type"><span class="bom-pill ${pillCls}">${type}</span></td>
+                    <td>
+                      <div class="bom-td-code">${parentCd}</div>
+                      <div class="bom-td-name">${parentNm}</div>
+                    </td>
+                    <td class="bom-td-qty">${qty}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
         </div>
-        ${list.map(bom => {
-          const type = (bom.type || bom.bomType || 'BOM').toUpperCase();
-          const badgeCls = type === 'COMP' ? 'comp' : '';
-          const parentCd = bom.parentCd || bom.itemNumber || bom.itemCd || '-';
-          const parentNm = bom.parentNm || bom.itemName || bom.engItemNm || '-';
-          const qty = bom.qty != null ? bom.qty : (bom.quantity != null ? bom.quantity : 1);
-          
-          return `
-            <div class="bom-list-item">
-              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
-                <div>
-                  <span class="bom-badge ${badgeCls}">${type}</span>
-                  <div class="bom-parent-code">${parentCd}</div>
-                </div>
-                <div class="bom-qty-box">
-                  <div class="bom-qty-lbl">Qty</div>
-                  <div class="bom-qty-val">${qty}</div>
-                </div>
-              </div>
-              <div class="bom-parent-name">${parentNm}</div>
-            </div>
-          `;
-        }).join('')}
       `;
     }
 
