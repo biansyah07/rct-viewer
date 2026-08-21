@@ -96,24 +96,24 @@
     padding: 12px; margin-bottom: 8px;
     display: grid; grid-template-columns: 1fr auto; gap: 8px;
     border-left: 4px solid #10b981;
-    position: relative; cursor: pointer; transition: transform 0.1s, box-shadow 0.1s;
+    position: relative; cursor: pointer; transition: all 0.15s ease;
   }
+  .case-card:hover { border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
   .case-card:active { transform: scale(0.98); background: #f1f5f9; }
   .case-card.low { border-left-color: #dc2626; background: #fef2f2; }
   .case-card.old { border-left-color: #f59e0b; background: #fffbeb; }
   
-  /* Badge UI BOM Clickable */
   .case-card::after {
     content: "🔍 Cek Model";
     position: absolute; top: 12px; right: 12px;
-    font-size: 9px; font-weight: 800; color: #0a2540;
-    background: #e2e8f0; padding: 3px 8px; border-radius: 6px;
-    opacity: 0.8; letter-spacing: 0.5px;
+    font-size: 9px; font-weight: 800; color: #0284c7;
+    background: #e0f2fe; padding: 3px 8px; border-radius: 6px;
+    opacity: 0.9; letter-spacing: 0.3px; border: 1px solid #bae6fd;
   }
 
   .case-label { font-family: Consolas, monospace; font-weight: 800; color: #0a2540; font-size: 14px; margin-top: 2px;}
   .case-item { font-family: Consolas, monospace; font-weight: 700; color: #7c3aed; font-size: 12px; margin-top: 2px; }
-  .case-name { font-size: 11px; color: #64748b; margin-top: 3px; line-height: 1.3; padding-right: 20px;}
+  .case-name { font-size: 11px; color: #64748b; margin-top: 3px; line-height: 1.3; padding-right: 25px;}
   .case-meta { font-size: 10px; color: #94a3b8; margin-top: 4px; }
   .case-qty { font-family: Consolas, monospace; font-weight: 800; font-size: 18px; color: #0a2540; text-align: right; margin-top: 20px;}
   .case-qty-lbl { font-size: 10px; color: #64748b; text-align: right; }
@@ -147,18 +147,6 @@
   .navigate-btn.zone { background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); }
   .navigate-btn.sub { background: linear-gradient(135deg, #0891b2 0%, #0369a1 100%); }
   
-  .action-bar {
-    position: fixed; bottom: 12px; left: 12px; right: 12px;
-    display: flex; gap: 8px; z-index: 50;
-  }
-  .action-btn {
-    flex: 1; background: white; color: #0a2540;
-    padding: 12px; border: none; border-radius: 10px;
-    font-weight: 700; font-size: 13px; cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  }
-  .action-btn.primary { background: #0a2540; color: white; }
-  
   .footer-info {
     text-align: center; color: rgba(255,255,255,0.6);
     font-size: 10px; padding: 20px 12px 60px;
@@ -169,12 +157,12 @@
   }
   .empty-icon { font-size: 60px; margin-bottom: 12px; opacity: 0.5; }
 
-  /* === BOM REVERSE BOTTOM SHEET MODAL === */
+  /* === MODAL BOM REVERSE VIEW === */
   .modal-overlay {
     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px);
     z-index: 999; display: flex; flex-direction: column; justify-content: flex-end;
-    opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+    opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
   }
   .modal-overlay.active { opacity: 1; pointer-events: auto; }
   
@@ -182,7 +170,7 @@
     background: #f8fafc; border-radius: 24px 24px 0 0;
     width: 100%; max-width: 640px; margin: 0 auto;
     max-height: 85vh; display: flex; flex-direction: column;
-    transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.3, 0, 0, 1);
+    transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
     box-shadow: 0 -10px 40px rgba(0,0,0,0.3);
   }
   .modal-overlay.active .modal-content { transform: translateY(0); }
@@ -194,7 +182,7 @@
   .close-btn {
     position: absolute; top: 18px; right: 18px; background: rgba(255,255,255,0.15);
     border: none; color: white; width: 32px; height: 32px; border-radius: 50%;
-    font-size: 14px; cursor: pointer; font-weight: bold; transition: background 0.2s;
+    font-size: 14px; cursor: pointer; font-weight: bold;
   }
   .close-btn:active { background: rgba(255,255,255,0.3); }
   .bom-title { font-size: 16px; font-weight: 800; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;}
@@ -221,7 +209,7 @@
   .bom-qty-box { text-align: right; }
   .bom-qty-lbl { font-size: 10px; color: #64748b; font-weight: 700; text-transform: uppercase;}
   .bom-qty-val { font-size: 16px; font-weight: 900; color: #0a2540; font-family: Consolas, monospace;}
-  
+
   @media (min-width: 640px) {
     body { max-width: 640px; margin: 0 auto; }
     .content { padding: 16px; }
@@ -267,7 +255,7 @@
       </div>
     </div>
     <div class="modal-body" id="bom-list-container">
-      <!-- Isi list akan diinject via JS -->
+      <!-- Isi list diinject JS -->
     </div>
   </div>
 </div>
@@ -276,16 +264,14 @@
 (function() {
   'use strict';
   
-  // ═══ CONFIG ═══
   const GIST_ID = '63d8a8f7a35183a3ad28455587fc68fd';
   const DATA_URL = 'https://gist.githubusercontent.com/biansyah07/' + GIST_ID + '/raw/rct-data.json';
   const AUTO_REFRESH_MS = 5 * 60 * 1000;
   
-  let allData = null;
+  let allData = [];
   let syncInfo = null;
-  let bomData = {}; // Menyimpan mapping BOM Reverse dari JSON
+  let bomData = {};
 
-  // ═══ AUTHENTICATION SYSTEM ═══
   function isLoggedIn() { return !!localStorage.getItem('rct_user_id'); }
 
   function updateUserHeader() {
@@ -308,7 +294,6 @@
     }
   };
 
-  // ═══ FETCH DATA ═══
   async function fetchData() {
     try {
       const url = DATA_URL + '?t=' + Date.now();
@@ -322,7 +307,6 @@
         stats: json.stats || {},
       };
       
-      // Ambil data BOM dari JSON jika script sync PC sudah menyediakan
       bomData = json.bom || {};
 
       updateSyncInfo();
@@ -334,7 +318,7 @@
         <div class="error-box">
           <div class="err-icon">⚠️</div>
           <div class="err-title">Gagal Memuat Data</div>
-          <div class="err-msg">${err.message}<br><br>Kemungkinan tidak ada koneksi atau data belum disync admin.</div>
+          <div class="err-msg">${err.message}<br><br>Gagal mengambil data dari Gist.</div>
           <button class="action-btn primary" style="margin-top:12px;padding:10px 20px" onclick="location.reload()">🔄 Coba Lagi</button>
         </div>
       `;
@@ -363,7 +347,6 @@
     location.reload(true);
   };
   
-  // ═══ ROUTER ═══
   function route() {
     if (!isLoggedIn()) { renderLogin(); return; }
     const hash = (location.hash || '').replace('#', '').toUpperCase().trim();
@@ -375,7 +358,6 @@
   }
   window.addEventListener('hashchange', route);
   
-  // ═══ RENDER: LOGIN ═══
   function renderLogin() {
     document.getElementById('content').innerHTML = `
       <div class="result-card" style="max-width: 420px; margin: 30px auto; overflow: hidden;">
@@ -418,7 +400,6 @@
     });
   }
 
-  // ═══ RENDER: HOME ═══
   function renderHome() {
     const zones = [...new Set(allData.map(r => r.zone))].sort();
     const stats = syncInfo?.stats || {};
@@ -441,7 +422,6 @@
     `;
   }
   
-  // ═══ RENDER: RACK ═══
   function renderRack(rackAddr) {
     const cases = allData.filter(r => r.address === rackAddr && r.isActive === true && (Number(r.actualRemain) || 0) > 0);
     const rackExists = allData.some(r => r.address === rackAddr);
@@ -475,12 +455,10 @@
           <div class="case-list">
             ${cases.map(c => {
               const cls = c.status === 'LOW' ? 'low' : (c.isOld ? 'old' : '');
-              const safeCd = String(c.itemCd || '').replace(/'/g, "\\'");
-              const safeNm = String(c.engItemNm || '').replace(/'/g, "\\'");
+              const itemCdSafe = String(c.itemCd || '').trim();
               
-              // Event klik pada Case Card untuk mentrigger BOM Modal
               return `
-                <div class="case-card ${cls}" onclick="showBOM('${safeCd}', '${safeNm}')">
+                <div class="case-card ${cls}" onclick="window.showBOM('${itemCdSafe}')">
                   <div>
                     <div class="case-label">${c.arrivalNo || '-'}</div>
                     <div class="case-item">${c.itemCd || '-'}</div>
@@ -502,7 +480,6 @@
     `;
   }
   
-  // ═══ RENDER: SUB-ZONE ═══
   function renderSubZone(subId) {
     const racksMap = {};
     allData.forEach(r => {
@@ -557,7 +534,6 @@
     `;
   }
   
-  // ═══ RENDER: ZONE ═══
   function renderZone(zone) {
     const racksMap = {};
     allData.forEach(r => {
@@ -617,7 +593,6 @@
     `;
   }
   
-  // ═══ RENDER: NOT FOUND ═══
   function renderNotFound(target, type = 'unknown') {
     const typeLabel = { rack: 'Rak', sub: 'Sub-Zone', zone: 'Zone', unknown: 'Kode' }[type];
     document.getElementById('content').innerHTML = `
@@ -637,33 +612,35 @@
     `;
   }
 
-  // ═══ BOM REVERSE FUNCTIONALITY ═══
-  window.showBOM = function(itemCd, itemNm) {
+  // ═══ FUNGSI AMAN MODAL BOM REVERSE ═══
+  window.showBOM = function(itemCd) {
     if (!itemCd) return;
     
-    // Set Header Info
+    // Cari nama item secara aman dari memori allData (mencegah error petik/simbol)
+    const itemObj = allData.find(x => String(x.itemCd).trim() === String(itemCd).trim());
+    const itemNm = itemObj ? (itemObj.engItemNm || itemObj.itemNm || '-') : '-';
+
     document.getElementById('bom-target-code').textContent = itemCd;
-    document.getElementById('bom-target-name').textContent = itemNm || '-';
+    document.getElementById('bom-target-name').textContent = itemNm;
 
     const container = document.getElementById('bom-list-container');
-    
-    // Tarik list BOM dari variabel bomData (hasil fetch json.bom dari PC)
     const list = bomData[itemCd] || bomData[String(itemCd).toUpperCase()] || [];
 
     if (!list.length) {
       container.innerHTML = `
-        <div style="text-align:center; padding:30px 20px; color:#64748b;">
-          <div style="font-size:48px; margin-bottom:12px; opacity:0.5">🤷‍♂️</div>
-          <div style="font-weight:800; font-size:14px; color:#0a2540;">Data Model Belum Tersedia</div>
-          <div style="font-size:12px; margin-top:8px; line-height:1.5;">
-            Item <b>${itemCd}</b> belum di-sync relasi BOM-nya dari MangoTree WMS ke aplikasi ini.
+        <div style="text-align:center; padding:35px 20px; color:#64748b;">
+          <div style="font-size:48px; margin-bottom:12px; opacity:0.6">📋</div>
+          <div style="font-weight:800; font-size:15px; color:#0a2540;">Data Model Belum Dihubungkan</div>
+          <div style="font-size:12px; margin-top:8px; line-height:1.5; color:#475569;">
+            Item <b style="color:#0a2540">${itemCd}</b> belum ada relasi BOM Reverse-nya di data Gist.<br><br>
+            <i>(Fitur UI sudah aktif & siap. Tinggal tunggu sync BOM dari PC)</i>
           </div>
         </div>
       `;
     } else {
       container.innerHTML = `
-        <div style="font-size:10px; font-weight:800; color:#64748b; margin-bottom:10px; text-transform:uppercase;">
-          ✅ Ditemukan ${list.length} Parent Model / Penggunaan:
+        <div style="font-size:11px; font-weight:800; color:#64748b; margin-bottom:12px; text-transform:uppercase; letter-spacing:0.5px;">
+          🧩 Digunakan pada ${list.length} Model / Assembly:
         </div>
         ${list.map(bom => {
           const type = (bom.type || bom.bomType || 'BOM').toUpperCase();
@@ -680,7 +657,7 @@
                   <div class="bom-parent-code">${parentCd}</div>
                 </div>
                 <div class="bom-qty-box">
-                  <div class="bom-qty-lbl">Qty Req</div>
+                  <div class="bom-qty-lbl">Qty</div>
                   <div class="bom-qty-val">${qty}</div>
                 </div>
               </div>
@@ -691,18 +668,16 @@
       `;
     }
 
-    // Tampilkan Modal UI Bottom Sheet
     document.getElementById('bom-modal').classList.add('active');
-    document.body.style.overflow = 'hidden'; // Disable scroll di bg
+    document.body.style.overflow = 'hidden';
   };
 
   window.closeBOMModal = function(e) {
     if (e) { e.preventDefault(); e.stopPropagation(); }
     document.getElementById('bom-modal').classList.remove('active');
-    document.body.style.overflow = ''; // Enable scroll bg kembali
+    document.body.style.overflow = '';
   };
 
-  // AUTO REFRESH Tiap 5 Menit
   setInterval(async () => {
     try {
       const res = await fetch(DATA_URL + '?t=' + Date.now(), { cache: 'no-store' });
@@ -710,7 +685,7 @@
       const json = await res.json();
       if (json.syncedAt !== syncInfo?.syncedAt) {
         allData = json.data || [];
-        bomData = json.bom || {}; // Update bom data juga kalau ada perubahan
+        bomData = json.bom || {};
         syncInfo = { syncedAt: json.syncedAt, syncedAtLocal: json.syncedAtLocal, stats: json.stats || {} };
         updateSyncInfo();
         if (isLoggedIn()) route();
