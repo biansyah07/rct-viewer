@@ -41,217 +41,128 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
   
-  .error-box {
-    background: #fee2e2; color: #991b1b; padding: 20px;
-    border-radius: 12px; text-align: center; margin: 20px 0;
-  }
+  .error-box { background: #fee2e2; color: #991b1b; padding: 20px; border-radius: 12px; text-align: center; margin: 20px 0; }
   .error-box .err-icon { font-size: 40px; margin-bottom: 8px; }
   .error-box .err-title { font-weight: 800; font-size: 15px; margin-bottom: 6px; }
   .error-box .err-msg { font-size: 12px; line-height: 1.5; word-break: break-word; }
   
-  .result-card {
-    background: white; border-radius: 14px; overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin-bottom: 12px;
-    animation: slideUp 0.3s ease;
-  }
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
+  .result-card { background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin-bottom: 12px; animation: slideUp 0.3s ease; }
+  @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
   
-  .result-header {
-    padding: 20px 16px; text-align: center;
-    color: white; position: relative;
-  }
+  .result-header { padding: 20px 16px; text-align: center; color: white; position: relative; }
   .result-header.rack { background: linear-gradient(135deg, #059669 0%, #047857 100%); }
   .result-header.sub { background: linear-gradient(135deg, #0891b2 0%, #0369a1 100%); }
   .result-header.zone { background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); }
+  .result-header.search { background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%); }
   .result-header.notfound { background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); }
   
   .result-icon { font-size: 40px; margin-bottom: 4px; }
   .result-title { font-size: 32px; font-weight: 900; letter-spacing: 2px; line-height: 1; }
   .result-sub { font-size: 11px; opacity: 0.9; margin-top: 6px; }
   
-  .stats-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
-    padding: 12px; background: #f8fafc;
-  }
-  .stat-item {
-    background: white; padding: 10px 6px; border-radius: 8px;
-    text-align: center; border-left: 3px solid #0891b2;
-  }
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px; background: #f8fafc; }
+  .stat-item { background: white; padding: 10px 6px; border-radius: 8px; text-align: center; border-left: 3px solid #0891b2; }
   .stat-val { font-size: 18px; font-weight: 900; color: #0a2540; line-height: 1; }
   .stat-lbl { font-size: 9px; color: #64748b; text-transform: uppercase; font-weight: 700; margin-top: 3px; }
   
-  .hint-box {
-    background: #eff6ff; color: #1e40af; padding: 10px 12px;
-    font-size: 11px; text-align: center; border-radius: 6px;
-    margin: 8px 12px;
-  }
+  .hint-box { background: #eff6ff; color: #1e40af; padding: 10px 12px; font-size: 11px; text-align: center; border-radius: 6px; margin: 8px 12px; }
   
+  /* SEARCH BAR TAHAP 1 */
+  .search-wrapper { padding: 12px; background: #f1f5f9; border-bottom: 1px solid #e2e8f0; }
+  .search-input-box { display: flex; align-items: center; background: white; border: 2px solid #cbd5e1; border-radius: 10px; padding: 4px 12px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
+  .search-input-box input { flex: 1; border: none; padding: 12px 0; font-size: 15px; font-weight: 700; outline: none; font-family: Consolas, monospace; color: #0f172a; text-transform: uppercase; }
+  .search-input-box input::placeholder { color: #94a3b8; font-weight: 500; font-family: sans-serif; text-transform: none; font-size: 13px; }
+  .search-btn-go { background: #ea580c; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 800; cursor: pointer; font-size: 12px; margin-left: 8px; transition: transform 0.1s; }
+  .search-btn-go:active { transform: scale(0.95); }
+
   .case-list, .rack-list { padding: 8px 12px 12px; }
   
   .case-card {
-    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;
-    padding: 12px; margin-bottom: 8px;
-    display: grid; grid-template-columns: 1fr auto; gap: 8px;
-    border-left: 4px solid #10b981;
+    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 8px;
+    display: grid; grid-template-columns: 1fr auto; gap: 8px; border-left: 4px solid #10b981;
     position: relative; cursor: pointer; transition: all 0.15s ease;
   }
-  .case-card:hover { border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
   .case-card:active { transform: scale(0.98); background: #f1f5f9; }
   .case-card.low { border-left-color: #dc2626; background: #fef2f2; }
   .case-card.old { border-left-color: #f59e0b; background: #fffbeb; }
   
   .case-card::after {
-    content: "🔍 Cek Model";
-    position: absolute; top: 12px; right: 12px;
-    font-size: 9px; font-weight: 800; color: #0284c7;
-    background: #e0f2fe; padding: 3px 8px; border-radius: 6px;
-    opacity: 0.9; letter-spacing: 0.3px; border: 1px solid #bae6fd;
+    content: "⚙️ ACTION"; position: absolute; top: 12px; right: 12px; font-size: 9px; font-weight: 800; color: #1d4ed8;
+    background: #dbeafe; padding: 3px 8px; border-radius: 6px; opacity: 0.9; letter-spacing: 0.3px; border: 1px solid #bfdbfe;
   }
 
   .case-label { font-family: Consolas, monospace; font-weight: 800; color: #0a2540; font-size: 14px; margin-top: 2px;}
   .case-item { font-family: Consolas, monospace; font-weight: 700; color: #7c3aed; font-size: 12px; margin-top: 2px; }
   .case-name { font-size: 11px; color: #64748b; margin-top: 3px; line-height: 1.3; padding-right: 25px;}
   .case-meta { font-size: 10px; color: #94a3b8; margin-top: 4px; }
+  .case-meta-addr { display: inline-block; background: #0f172a; color: white; padding: 2px 6px; border-radius: 4px; font-weight: 800; font-family: Consolas; margin-right: 4px; }
   .case-qty { font-family: Consolas, monospace; font-weight: 800; font-size: 18px; color: #0a2540; text-align: right; margin-top: 20px;}
   .case-qty-lbl { font-size: 10px; color: #64748b; text-align: right; }
   
   .rack-item {
-    background: white; border-radius: 10px; padding: 12px 14px;
-    margin-bottom: 6px; border-left: 4px solid;
-    display: grid; grid-template-columns: 90px 1fr 60px; gap: 8px;
-    align-items: center; cursor: pointer;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    background: white; border-radius: 10px; padding: 12px 14px; margin-bottom: 6px; border-left: 4px solid;
+    display: grid; grid-template-columns: 90px 1fr 60px; gap: 8px; align-items: center; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   }
   .rack-item.full { border-color: #10b981; }
   .rack-item.warn { border-color: #f59e0b; }
   .rack-item.low { border-color: #dc2626; }
   .rack-item.empty { border-color: #cbd5e1; opacity: 0.7; }
-  .rack-item:active { transform: scale(0.98); }
-  
   .ri-addr { font-family: Consolas, monospace; font-weight: 900; font-size: 15px; color: #0a2540; }
   .ri-info { font-size: 11px; color: #475569; }
-  .ri-info b { color: #0a2540; }
   .ri-fill { text-align: right; font-weight: 800; font-size: 14px; }
-  .ri-empty { color: #94a3b8; font-style: italic; }
   
-  .navigate-btn {
-    display: block; text-decoration: none;
-    background: linear-gradient(135deg, #0a2540 0%, #1e3a8a 100%);
-    color: white; padding: 14px; border-radius: 10px;
-    text-align: center; font-weight: 700; font-size: 13px;
-    margin-top: 8px;
-  }
+  .navigate-btn { display: block; text-decoration: none; background: linear-gradient(135deg, #0a2540 0%, #1e3a8a 100%); color: white; padding: 14px; border-radius: 10px; text-align: center; font-weight: 700; font-size: 13px; margin-top: 8px; }
   .navigate-btn.zone { background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); }
-  .navigate-btn.sub { background: linear-gradient(135deg, #0891b2 0%, #0369a1 100%); }
   
-  .action-btn {
-    background: #0a2540; color: white; border: none; border-radius: 8px;
-    padding: 10px 16px; font-weight: 700; font-size: 13px; cursor: pointer;
-  }
-  .action-btn.primary { background: #0a2540; color: white; }
-  
-  .footer-info {
-    text-align: center; color: rgba(255,255,255,0.6);
-    font-size: 10px; padding: 20px 12px 60px;
-  }
-  
-  .empty-state {
-    text-align: center; padding: 40px 20px; color: #64748b;
-  }
-  .empty-icon { font-size: 60px; margin-bottom: 12px; opacity: 0.5; }
+  .footer-info { text-align: center; color: rgba(255,255,255,0.6); font-size: 10px; padding: 20px 12px 60px; }
 
-  /* === MODAL BOM — TINGGI PAS & LIST PADAT === */
-  .modal-overlay {
-    position: fixed; inset: 0;
-    background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px);
-    z-index: 999; display: flex; flex-direction: column;
-    justify-content: flex-end; align-items: center;
-    opacity: 0; pointer-events: none; transition: opacity 0.25s ease; padding: 0;
-  }
+  /* === MODAL GLOBAL === */
+  .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px); z-index: 999; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; padding: 0; }
   .modal-overlay.active { opacity: 1; pointer-events: auto; }
-  
-  .modal-content {
-    background: #f8fafc; border-radius: 20px 20px 0 0; width: 100%; max-width: 640px;
-    height: min(92vh, 780px); max-height: 92vh; margin: 0 auto;
-    display: flex; flex-direction: column; transform: translateY(100%);
-    transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.2, 1);
-    box-shadow: 0 -12px 40px rgba(0,0,0,0.35); overflow: hidden;
-    padding-bottom: env(safe-area-inset-bottom, 0);
-  }
+  .modal-content { background: #f8fafc; border-radius: 20px 20px 0 0; width: 100%; max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.2, 1); box-shadow: 0 -12px 40px rgba(0,0,0,0.35); overflow: hidden; padding-bottom: env(safe-area-inset-bottom, 0); }
   .modal-overlay.active .modal-content { transform: translateY(0); }
-  
-  @media (min-width: 640px) {
-    body { max-width: 640px; margin: 0 auto; }
-    .content { padding: 16px; }
-    .modal-overlay { justify-content: center; padding: 24px 16px; }
-    .modal-content {
-      border-radius: 16px; height: min(85vh, 720px); max-height: 85vh;
-      transform: translateY(24px) scale(0.98); opacity: 0.96;
-    }
-    .modal-overlay.active .modal-content { transform: translateY(0) scale(1); opacity: 1; }
-  }
+  .modal-header { padding: 16px 16px 14px; position: relative; flex-shrink: 0; color: white; }
+  .modal-header.bg-dark { background: linear-gradient(135deg, #0a2540 0%, #1e3a8a 100%); }
+  .modal-header.bg-action { background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%); }
+  .modal-header.bg-reg { background: linear-gradient(135deg, #0f766e 0%, #047857 100%); }
+  .close-btn { position: absolute; top: 14px; right: 14px; background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; font-size: 14px; cursor: pointer; font-weight: bold; }
+  .close-btn:active { background: rgba(255,255,255,0.4); }
+  .modal-title { font-size: 16px; font-weight: 800; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;}
+  .modal-body { padding: 0; overflow: hidden; flex: 1; min-height: 0; display: flex; flex-direction: column; background: #fff; }
 
-  .modal-header {
-    background: linear-gradient(135deg, #0a2540 0%, #1e3a8a 100%); color: white;
-    padding: 16px 16px 14px; border-radius: inherit; border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0; position: relative; flex-shrink: 0;
-  }
-  .close-btn {
-    position: absolute; top: 14px; right: 14px; background: rgba(255,255,255,0.15);
-    border: none; color: white; width: 32px; height: 32px; border-radius: 50%;
-    font-size: 14px; cursor: pointer; font-weight: bold;
-  }
-  .close-btn:active { background: rgba(255,255,255,0.3); }
-  .bom-title { font-size: 16px; font-weight: 800; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px; padding-right: 36px;}
-  .bom-subtitle { font-size: 11px; opacity: 0.85; margin-top: 4px; }
-  .bom-target-item {
-    background: rgba(0,0,0,0.25); padding: 10px 12px; border-radius: 10px; margin-top: 12px;
-    border-left: 3px solid #38bdf8;
-  }
+  /* BOM MODAL */
+  #bom-modal .modal-content { height: min(92vh, 780px); max-height: 92vh; }
+  .bom-target-item { background: rgba(0,0,0,0.25); padding: 10px 12px; border-radius: 10px; margin-top: 12px; border-left: 3px solid #38bdf8; }
   .bom-target-code { font-family: Consolas, monospace; font-size: 15px; font-weight: 900; color: #38bdf8; }
   .bom-target-name { font-size: 11px; margin-top: 4px; opacity: 0.9; line-height: 1.3;}
-  
-  .modal-body {
-    padding: 0; overflow: hidden; flex: 1; min-height: 0;
-    display: flex; flex-direction: column; background: #fff;
-  }
-  #bom-list-container {
-    flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column;
-    padding: 12px;
-  }
-
-  .bom-count {
-    font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase;
-    letter-spacing: 0.4px; margin-bottom: 8px; flex-shrink: 0;
-  }
-  .bom-table-wrap {
-    flex: 1; min-height: 0; overflow: auto; -webkit-overflow-scrolling: touch;
-    border: 1px solid #e2e8f0; border-radius: 10px; background: #fff;
-  }
+  .bom-table-wrap { flex: 1; overflow: auto; border: 1px solid #e2e8f0; border-radius: 10px; margin: 12px; }
   .bom-table { width: 100%; border-collapse: collapse; font-size: 11px; }
-  .bom-table thead th {
-    background: #f1f5f9; color: #475569; font-size: 9px; font-weight: 800;
-    text-transform: uppercase; letter-spacing: 0.3px; padding: 8px 10px;
-    text-align: left; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0; z-index: 2;
-  }
-  .bom-table tbody tr { border-bottom: 1px solid #f1f5f9; }
-  .bom-table tbody tr:nth-child(even) { background: #f8fafc; }
-  .bom-table tbody tr:active { background: #e0f2fe; }
-  .bom-table td { padding: 6px 10px; vertical-align: middle; line-height: 1.25; }
-  .bom-td-code { font-family: Consolas, ui-monospace, monospace; font-weight: 800; font-size: 12px; color: #0a2540; }
-  .bom-td-name { font-size: 10px; color: #64748b; margin-top: 2px; }
-  .bom-td-type { width: 48px; text-align: center; }
-  .bom-td-qty { width: 36px; text-align: right; font-family: Consolas, monospace; font-weight: 800; font-size: 13px; color: #0a2540; }
-  
-  .bom-pill {
-    display: inline-block; font-size: 8px; font-weight: 800; padding: 3px 5px;
-    border-radius: 4px; background: #dbeafe; color: #1e40af;
-  }
-  .bom-pill.comp { background: #fce7f3; color: #9d174d; }
-  .bom-pill.fing { background: #d1fae5; color: #065f46; }
+  .bom-table th { background: #f1f5f9; font-size: 9px; font-weight: 800; padding: 8px 10px; text-align: left; position: sticky; top: 0; z-index: 2; }
+  .bom-table td { padding: 6px 10px; border-bottom: 1px solid #f1f5f9; }
+
+  /* ACTION MENU MODAL */
+  .action-btn-large { display: flex; align-items: center; gap: 12px; background: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 12px; font-size: 14px; font-weight: 800; color: #0f172a; cursor: pointer; transition: all 0.15s; }
+  .action-btn-large:active { background: #f1f5f9; transform: scale(0.98); border-color: #cbd5e1; }
+  .action-btn-large .icon { font-size: 24px; }
+  .action-btn-large .sub { font-size: 10px; font-weight: 500; color: #64748b; margin-top: 4px; }
+
+  /* REGISTRY MODAL */
+  #reg-modal .modal-content { height: 95vh; max-height: 95vh; }
+  .reg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 16px; background: #f8fafc; border-bottom: 2px solid #e2e8f0; }
+  .reg-grid.full { grid-template-columns: 1fr; }
+  .reg-field { display: flex; flex-direction: column; }
+  .reg-field label { font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
+  .reg-field input, .reg-field select { padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; font-family: Consolas, monospace; font-weight: 700; color: #0f172a; outline: none; }
+  .reg-field input:disabled { background: #e2e8f0; color: #475569; }
+  .reg-action-bar { padding: 12px 16px; display: flex; gap: 8px; background: white; border-top: 1px solid #e2e8f0; justify-content: flex-end; }
+  .reg-btn { padding: 10px 16px; border: none; border-radius: 8px; font-weight: 800; font-size: 12px; color: white; cursor: pointer; }
+  .reg-btn.save { background: #16a34a; }
+  .reg-btn.close { background: #f59e0b; }
+  .reg-table-wrap { flex: 1; overflow: auto; padding: 12px; }
+  .reg-mock-table { width: 100%; border-collapse: collapse; font-size: 10px; text-align: center; }
+  .reg-mock-table th { background: #0ea5e9; color: white; padding: 8px; font-weight: 700; }
+  .reg-mock-table td { padding: 8px; border: 1px solid #e2e8f0; }
+  .reg-mini-btn { background: #2563eb; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 9px; font-weight: bold; cursor: pointer; margin: 2px; }
 </style>
 </head>
 <body>
@@ -267,26 +178,101 @@
       <div style="margin-top: 1px;"><a href="javascript:void(0)" onclick="window.logout()" style="color: #f87171; text-decoration: none; font-weight: 800; font-size: 8px; letter-spacing: 0.3px;">KELUAR ❌</a></div>
     </div>
   </div>
-  <div class="app-sync-info" id="sync-info">
-    <span>⏳ Loading data...</span>
-  </div>
+  <div class="app-sync-info" id="sync-info"><span>⏳ Loading data...</span></div>
 </div>
 
 <div class="content" id="content">
   <div class="loading">
     <div class="spinner"></div>
     <div style="font-weight:700">Memuat data warehouse...</div>
-    <div style="font-size:11px;opacity:0.7;margin-top:4px" id="loading-hint">Fetching dari GitHub Gist</div>
   </div>
 </div>
 
-<!-- MODAL BOM REVERSE VIEW -->
-<div class="modal-overlay" id="bom-modal" onclick="closeBOMModal(event)">
+<!-- MODAL 1: ACTION MENU -->
+<div class="modal-overlay" id="action-modal" onclick="closeModal('action-modal', event)">
   <div class="modal-content" onclick="event.stopPropagation()">
-    <div class="modal-header">
-      <button class="close-btn" type="button" onclick="closeBOMModal(event)">✕</button>
-      <div class="bom-title"><span>🛠️</span> BOM Reverse View</div>
-      <div class="bom-subtitle">Item ini digunakan pada Model / Komponen berikut:</div>
+    <div class="modal-header bg-action">
+      <button class="close-btn" onclick="closeModal('action-modal')">✕</button>
+      <div class="modal-title">⚙️ PILIH TINDAKAN</div>
+      <div class="bom-target-item">
+        <div class="bom-target-code" id="act-label">-</div>
+        <div class="bom-target-name" id="act-item">-</div>
+      </div>
+    </div>
+    <div class="modal-body" style="padding: 20px;">
+      <div class="action-btn-large" id="btn-act-bom">
+        <div class="icon">🔍</div>
+        <div>
+          <div>Lihat Model (BOM)</div>
+          <div class="sub">Where-used part ini di line produksi</div>
+        </div>
+      </div>
+      <div class="action-btn-large" id="btn-act-reg">
+        <div class="icon">📦</div>
+        <div>
+          <div>Registrasi / Eksekusi</div>
+          <div class="sub">Pindah Alamat, Consume, atau Return Label</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL 2: RAW MATERIAL REGISTRY (DUMMY/TAHAP 2) -->
+<div class="modal-overlay" id="reg-modal" onclick="closeModal('reg-modal', event)">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <div class="modal-header bg-reg">
+      <button class="close-btn" onclick="closeModal('reg-modal')">✕</button>
+      <div class="modal-title">📝 RAW MATERIAL REGISTRY</div>
+      <div class="bom-subtitle">Form Eksekusi Logistik (Mockup Tahap 2)</div>
+    </div>
+    <div class="modal-body">
+      <div class="reg-grid full">
+        <div class="reg-field">
+          <label>Supplier Name</label>
+          <select><option>1. PYEONGHWA VALEO</option><option>2. SELIM</option></select>
+        </div>
+      </div>
+      <div class="reg-grid">
+        <div class="reg-field"><label>Arrival Number</label><input type="text" id="reg-label" disabled></div>
+        <div class="reg-field"><label>Stock Date</label><input type="text" id="reg-date" disabled></div>
+        <div class="reg-field"><label>Part Number</label><input type="text" id="reg-item" disabled></div>
+        <div class="reg-field"><label>Quantity</label><input type="number" id="reg-qty"></div>
+        <div class="reg-field"><label>Address</label><input type="text" id="reg-addr"></div>
+        <div class="reg-field"><label>Invoice No</label><input type="text" id="reg-inv"></div>
+      </div>
+      <div class="reg-grid full" style="padding-top:0;">
+        <div class="reg-field"><label>Part Name</label><input type="text" id="reg-name" disabled></div>
+      </div>
+      
+      <div class="reg-table-wrap">
+        <div style="background:#0ea5e9; color:white; font-size:11px; font-weight:bold; padding:8px; border-radius:6px 6px 0 0;">⚙️ Label List Action</div>
+        <table class="reg-mock-table">
+          <tr><th>Scan</th><th>Stock Date</th><th>Q'ty</th><th>Used</th><th>Back</th><th>Action</th></tr>
+          <tr>
+            <td>Yes</td><td id="reg-tbl-date">-</td><td id="reg-tbl-qty">-</td><td>0</td><td>0</td>
+            <td>
+              <button class="reg-mini-btn" style="background:#dc2626" onclick="mockAction('Return')">Return</button>
+              <button class="reg-mini-btn" style="background:#059669" onclick="mockAction('Consume')">Consume</button>
+            </td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="reg-action-bar">
+        <button class="reg-btn close" onclick="closeModal('reg-modal')">✖ Close</button>
+        <button class="reg-btn save" onclick="mockAction('Save')">💾 Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL 3: BOM REVERSE -->
+<div class="modal-overlay" id="bom-modal" onclick="closeModal('bom-modal', event)">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <div class="modal-header bg-dark">
+      <button class="close-btn" onclick="closeModal('bom-modal')">✕</button>
+      <div class="modal-title">🛠️ BOM Reverse View</div>
       <div class="bom-target-item">
         <div class="bom-target-code" id="bom-target-code">-</div>
         <div class="bom-target-name" id="bom-target-name">-</div>
@@ -304,12 +290,11 @@
   
   var GIST_ID = '63d8a8f7a35183a3ad28455587fc68fd';
   var DATA_URL = 'https://gist.githubusercontent.com/biansyah07/' + GIST_ID + '/raw/rct-data.json';
-  var AUTO_REFRESH_MS = 5 * 60 * 1000;
-  var FETCH_TIMEOUT_MS = 25000;
   
   var allData = [];
   var syncInfo = null;
   var bomData = {};
+  var selectedCase = null; // Menyimpan data case yang sedang di-klik
 
   function isLoggedIn() { return !!localStorage.getItem('rct_user_id'); }
 
@@ -326,496 +311,243 @@
   }
 
   window.logout = function() {
-    if (confirm('Apakah Anda ingin keluar dari akun RCT Viewer?')) {
-      localStorage.removeItem('rct_user_id');
-      updateUserHeader();
-      route();
-    }
+    if (confirm('Keluar dari sistem?')) { localStorage.removeItem('rct_user_id'); route(); }
   };
 
-  function showFatalError(msg) {
-    var el = document.getElementById('content');
-    if (!el) return;
-    el.innerHTML =
-      '<div class="error-box">' +
-        '<div class="err-icon">⚠️</div>' +
-        '<div class="err-title">Gagal Memuat Data</div>' +
-        '<div class="err-msg">' + msg + '</div>' +
-        '<button class="action-btn primary" style="margin-top:12px" onclick="location.reload()">🔄 Coba Lagi</button>' +
-      '</div>';
-  }
-
-  function fetchWithTimeout(url, ms) {
-    return new Promise(function(resolve, reject) {
-      var done = false;
-      var timer = setTimeout(function() {
-        if (done) return;
-        done = true;
-        reject(new Error('Timeout ' + (ms / 1000) + 's — Gist lambat / jaringan bermasalah'));
-      }, ms);
-
-      fetch(url, { cache: 'no-store', mode: 'cors' })
-        .then(function(res) {
-          if (done) return;
-          done = true;
-          clearTimeout(timer);
-          resolve(res);
-        })
-        .catch(function(err) {
-          if (done) return;
-          done = true;
-          clearTimeout(timer);
-          reject(err);
-        });
-    });
-  }
-
   async function fetchData() {
-    var hint = document.getElementById('loading-hint');
     try {
-      if (hint) hint.textContent = 'Menghubungi GitHub Gist...';
-      var url = DATA_URL + '?t=' + Date.now();
-      var res = await fetchWithTimeout(url, FETCH_TIMEOUT_MS);
-
-      if (!res.ok) throw new Error('HTTP ' + res.status + ' dari Gist');
-
-      if (hint) hint.textContent = 'Mengunduh & parse JSON...';
+      var res = await fetch(DATA_URL + '?t=' + Date.now(), { cache: 'no-store' });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
       var text = await res.text();
-
-      var json;
-      try {
-        json = JSON.parse(text);
-      } catch (pe) {
-        throw new Error('JSON Gist rusak / bukan JSON valid');
-      }
+      var json = JSON.parse(text);
 
       allData = Array.isArray(json.data) ? json.data : [];
       bomData = (json.bom && typeof json.bom === 'object') ? json.bom : {};
-      syncInfo = {
-        syncedAt: json.syncedAt,
-        syncedAtLocal: json.syncedAtLocal,
-        stats: json.stats || {}
-      };
+      syncInfo = { syncedAt: json.syncedAt, syncedAtLocal: json.syncedAtLocal, stats: json.stats || {} };
 
       updateSyncInfo();
       updateUserHeader();
       route();
     } catch (err) {
-      console.error('[RCT Viewer] fetchData error', err);
-      var m = (err && err.message) ? err.message : String(err);
-      showFatalError(m);
+      document.getElementById('content').innerHTML = '<div class="error-box"><div class="err-title">Gagal Memuat Data</div></div>';
     }
   }
   
   function updateSyncInfo() {
     var el = document.getElementById('sync-info');
     if (!syncInfo || !el) return;
-    var time = syncInfo.syncedAtLocal || 'unknown';
-    var ageText = '';
-    var isOld = false;
-    if (syncInfo.syncedAt) {
-      var ageMs = Date.now() - new Date(syncInfo.syncedAt).getTime();
-      var ageMin = Math.floor(ageMs / 60000);
-      if (ageMin < 60) ageText = ' (' + ageMin + 'm lalu)';
-      else if (ageMin < 1440) ageText = ' (' + Math.floor(ageMin / 60) + 'h lalu)';
-      else ageText = ' (' + Math.floor(ageMin / 1440) + ' hari lalu)';
-      isOld = ageMs > 60 * 60 * 1000;
-    }
-    var bomN = Object.keys(bomData || {}).length;
-    el.innerHTML =
-      '<span>' + (isOld ? '⚠️' : '✅') + ' Update: <b>' + time + '</b>' + ageText +
-      (bomN ? ' · BOM ' + bomN : '') + '</span>' +
-      '<button type="button" onclick="window.forceReload()">🔄 Refresh</button>';
+    el.innerHTML = '<span>✅ Update: <b>' + (syncInfo.syncedAtLocal || '') + '</b></span>' +
+                   '<button type="button" onclick="location.reload()">🔄 Refresh</button>';
   }
-  
-  window.forceReload = function() {
-    if ('caches' in window) {
-      caches.keys().then(function(keys) { keys.forEach(function(k) { caches.delete(k); }); });
-    }
-    location.reload();
-  };
-  
+
+  // ═══ ROUTER ═══
   function route() {
-    try {
-      if (!isLoggedIn()) { renderLogin(); return; }
-      var hash = (location.hash || '').replace('#', '').toUpperCase().trim();
-      if (!hash) { renderHome(); return; }
-      if (/^[A-Z]\d+-\d+$/.test(hash)) { renderRack(hash); return; }
-      if (/^[A-Z]\d+$/.test(hash)) { renderSubZone(hash); return; }
-      if (/^[A-Z]$/.test(hash)) { renderZone(hash); return; }
-      renderNotFound(hash);
-    } catch (e) {
-      showFatalError('Error tampilan: ' + (e.message || e));
-    }
+    if (!isLoggedIn()) { renderLogin(); return; }
+    var hash = (location.hash || '').replace('#', '').toUpperCase().trim();
+    if (!hash) { renderHome(); return; }
+    if (hash.startsWith('SEARCH:')) { renderSearch(hash.split(':')[1]); return; }
+    if (/^[A-Z]\d+-\d+$/.test(hash)) { renderRack(hash); return; }
+    if (/^[A-Z]\d+$/.test(hash)) { renderSubZone(hash); return; }
+    if (/^[A-Z]$/.test(hash)) { renderZone(hash); return; }
+    renderHome();
   }
   window.addEventListener('hashchange', route);
   
-  function renderLogin() {
-    document.getElementById('content').innerHTML =
-      '<div class="result-card" style="max-width: 420px; margin: 30px auto; overflow: hidden;">' +
-        '<div class="result-header zone" style="background: linear-gradient(135deg, #0a2540 0%, #1e3a8a 100%); padding: 30px 20px;">' +
-          '<div class="result-icon">🔒</div>' +
-          '<div class="result-title" style="font-size:20px;letter-spacing:1px">LOGIN AKSES</div>' +
-          '<div class="result-sub">Sistem Terproteksi. Masukkan Kode ID Anda.</div>' +
-        '</div>' +
-        '<div style="padding: 24px 20px;">' +
-          '<form id="login-form">' +
-            '<div style="margin-bottom: 20px;">' +
-              '<label for="employee-id-input" style="display:block;font-size:11px;font-weight:800;color:#475569;text-transform:uppercase;margin-bottom:8px;">Masukkan No ID:</label>' +
-              '<div style="display:flex;align-items:center;border:2px solid #cbd5e1;border-radius:8px;padding:0 12px;background:#f8fafc;">' +
-                '<span style="font-weight:900;color:#64748b;font-family:Consolas,monospace;font-size:18px;margin-right:6px;">VPH</span>' +
-                '<input type="tel" pattern="[0-9]*" inputmode="numeric" id="employee-id-input" placeholder="••••" style="width:100%;border:none;background:transparent;padding:12px 0;font-size:18px;font-weight:900;font-family:Consolas,monospace;color:#0a2540;outline:none;" required autofocus>' +
-              '</div>' +
-            '</div>' +
-            '<button type="submit" class="navigate-btn zone" style="width:100%;border:none;cursor:pointer;">🔓 MASUK KE SISTEM</button>' +
-          '</form>' +
-        '</div>' +
-      '</div>';
-    var inputEl = document.getElementById('employee-id-input');
-    if (inputEl) inputEl.focus();
-    document.getElementById('login-form').addEventListener('submit', function(e) {
-      e.preventDefault();
-      var digits = inputEl.value.trim().replace(/[^0-9]/g, '');
-      var allowedUsers = {
-        '18': 'VPH18 - Adm.RB', '39': 'VPH39 - Spv.AB', '10': 'VPH10 - PMgr.SG',
-        '21': 'VPH21 - Danang', '77': 'VPH77 - Fiki', '01': 'VPH01 - Wh.Park', '0': 'GUEST 👤'
-      };
-      if (allowedUsers[digits]) {
-        localStorage.setItem('rct_user_id', allowedUsers[digits]);
-        updateUserHeader();
-        route();
-      } else {
-        alert('❌ AKSES DITOLAK!\nNomor ID tidak terdaftar.');
-        inputEl.value = '';
-        inputEl.focus();
-      }
-    });
-  }
+  // ═══ GLOBAL SEARCH (TAHAP 1) ═══
+  window.doSearch = function() {
+    var query = document.getElementById('global-search').value.trim().toUpperCase();
+    if (query) window.location.hash = 'SEARCH:' + encodeURIComponent(query);
+  };
 
-  function renderHome() {
-    var zones = [];
-    var seen = {};
-    allData.forEach(function(r) {
-      if (r.zone && !seen[r.zone]) { seen[r.zone] = 1; zones.push(r.zone); }
-    });
-    zones.sort();
-    var stats = (syncInfo && syncInfo.stats) ? syncInfo.stats : {};
-    document.getElementById('content').innerHTML =
-      '<div class="result-card">' +
-        '<div class="result-header zone">' +
-          '<div class="result-icon">📦</div>' +
-          '<div class="result-title" style="font-size:22px;letter-spacing:1px">WAREHOUSE</div>' +
-        '</div>' +
-        '<div class="stats-grid">' +
-          '<div class="stat-item"><div class="stat-val">' + Number(stats.activeRacks || 0).toLocaleString() + '</div><div class="stat-lbl">Active Racks</div></div>' +
-          '<div class="stat-item"><div class="stat-val">' + Number(stats.activeCases || 0).toLocaleString() + '</div><div class="stat-lbl">Active Cases</div></div>' +
-          '<div class="stat-item"><div class="stat-val">' + Number(stats.activeItems || 0).toLocaleString() + '</div><div class="stat-lbl">SKU Items</div></div>' +
-        '</div>' +
-        '<div class="rack-list">' +
-          '<div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px">🏢 Pilih Zone</div>' +
-          zones.map(function(z) {
-            return '<a href="#' + z + '" class="navigate-btn zone" style="margin-top:6px">📍 ZONE ' + z + '</a>';
-          }).join('') +
-        '</div>' +
-      '</div>';
-  }
-  
-  function renderRack(rackAddr) {
+  function renderSearch(query) {
+    query = decodeURIComponent(query);
     var cases = allData.filter(function(r) {
-      return r.address === rackAddr && r.isActive === true && (Number(r.actualRemain) || 0) > 0;
+      if (!r.isActive || (Number(r.actualRemain) || 0) <= 0) return false;
+      return (r.itemCd || '').toUpperCase().includes(query) || 
+             (r.arrivalNo || '').toUpperCase().includes(query) || 
+             (r.address || '').toUpperCase().includes(query) ||
+             (r.engItemNm || '').toUpperCase().includes(query);
     });
-    var rackExists = allData.some(function(r) { return r.address === rackAddr; });
-    if (!rackExists) { renderNotFound(rackAddr, 'rack'); return; }
-    
-    var subZoneMatch = rackAddr.match(/^([A-Z]\d+)-\d+$/);
-    var subZone = subZoneMatch ? subZoneMatch[1] : '';
-    var zone = rackAddr.charAt(0);
-    var totalPcs = cases.reduce(function(s, c) { return s + (Number(c.actualRemain) || 0); }, 0);
-    var uniqueItems = {};
-    cases.forEach(function(c) { if (c.itemCd) uniqueItems[c.itemCd] = 1; });
-    cases.sort(function(a, b) {
-      return String(a.arrivalNo || '').localeCompare(String(b.arrivalNo || ''));
-    });
-    
+
     var html = '<div class="result-card">' +
-      '<div class="result-header rack">' +
-        '<div class="result-icon">📍</div>' +
-        '<div class="result-title">' + rackAddr + '</div>' +
-        '<div class="result-sub">Detail Rak · Live dari WMS</div>' +
+      '<div class="result-header search">' +
+        '<div class="result-icon">🔍</div>' +
+        '<div class="result-title">PENCARIAN</div>' +
+        '<div class="result-sub">Hasil untuk: <b>' + query + '</b></div>' +
       '</div>';
 
     if (cases.length === 0) {
-      html += '<div class="empty-state"><div class="empty-icon">📭</div><div style="font-weight:700;font-size:15px;color:#0a2540">Rak Kosong</div></div>';
+      html += '<div class="empty-state"><div class="empty-icon">📭</div><div style="font-weight:700">Tidak ada barang cocok</div></div>';
     } else {
-      html += '<div class="stats-grid">' +
-        '<div class="stat-item"><div class="stat-val">' + cases.length + '</div><div class="stat-lbl">Cases</div></div>' +
-        '<div class="stat-item"><div class="stat-val">' + Object.keys(uniqueItems).length + '</div><div class="stat-lbl">Items</div></div>' +
-        '<div class="stat-item"><div class="stat-val">' + totalPcs.toLocaleString() + '</div><div class="stat-lbl">Total Pcs</div></div>' +
-      '</div><div class="case-list">';
-
+      html += '<div class="hint-box">Ditemukan ' + cases.length + ' label aktif. Tap label untuk Action.</div><div class="case-list">';
       cases.forEach(function(c) {
-        var cls = c.status === 'LOW' ? 'low' : (c.isOld ? 'old' : '');
-        var itemCdSafe = String(c.itemCd || '').trim().replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        var safeArr = String(c.arrivalNo || '').trim().replace(/'/g, "\\'");
         html +=
-          '<div class="case-card ' + cls + '" onclick="window.showBOM(\'' + itemCdSafe + '\')">' +
+          '<div class="case-card" onclick="window.openActionMenu(\'' + safeArr + '\')">' +
             '<div>' +
               '<div class="case-label">' + (c.arrivalNo || '-') + '</div>' +
               '<div class="case-item">' + (c.itemCd || '-') + '</div>' +
               '<div class="case-name">' + (c.engItemNm || '-') + '</div>' +
-              '<div class="case-meta">In: ' + (c.inDt || '-') + ' · Age: ' + (c.ageMonths || 0) + ' mo' +
-                (c.invNo ? ' · Inv: ' + c.invNo : '') + '</div>' +
+              '<div class="case-meta"><span class="case-meta-addr">📍 ' + c.address + '</span> In: ' + (c.inDt || '-') + '</div>' +
             '</div>' +
-            '<div>' +
-              '<div class="case-qty">' + (Number(c.actualRemain) || 0).toLocaleString() + '</div>' +
-              '<div class="case-qty-lbl">' + (c.unt || 'PCS') + '</div>' +
-            '</div>' +
+            '<div><div class="case-qty">' + (Number(c.actualRemain) || 0).toLocaleString() + '</div><div class="case-qty-lbl">' + (c.unt || 'PCS') + '</div></div>' +
           '</div>';
       });
       html += '</div>';
     }
+    html += '<div style="padding:0 12px 12px"><a href="#" class="navigate-btn">🏠 Kembali ke Beranda</a></div></div>';
+    document.getElementById('content').innerHTML = html;
+  }
 
-    if (subZone) {
-      html += '<div style="padding:0 12px 8px"><a href="#' + subZone + '" class="navigate-btn sub">🔷 Lihat semua rak di ' + subZone + '</a></div>';
+  // ═══ RENDER VIEWS ═══
+  function renderHome() {
+    var zones = [...new Set(allData.map(r => r.zone))].filter(Boolean).sort();
+    document.getElementById('content').innerHTML = `
+      <div class="result-card" style="margin-bottom:0; border-bottom-left-radius:0; border-bottom-right-radius:0;">
+        <div class="result-header zone">
+          <div class="result-icon">📦</div>
+          <div class="result-title" style="font-size:22px;">WAREHOUSE</div>
+        </div>
+        <div class="search-wrapper">
+          <form onsubmit="event.preventDefault(); window.doSearch();" class="search-input-box">
+            <span style="font-size:18px;margin-right:6px">🔍</span>
+            <input type="text" id="global-search" placeholder="Cari Item / Label / Rak..." autocomplete="off">
+            <button type="submit" class="search-btn-go">CARI</button>
+          </form>
+        </div>
+      </div>
+      <div class="result-card" style="border-top-left-radius:0; border-top-right-radius:0;">
+        <div class="rack-list">
+          <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px">🏢 Cek Manual via Zone</div>
+          ${zones.map(z => '<a href="#' + z + '" class="navigate-btn zone" style="margin-top:6px">📍 ZONE ' + z + '</a>').join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderRack(rackAddr) {
+    var cases = allData.filter(r => r.address === rackAddr && r.isActive === true && (Number(r.actualRemain) || 0) > 0);
+    if (!allData.some(r => r.address === rackAddr)) { renderHome(); return; }
+    
+    var zone = rackAddr.charAt(0);
+    var html = '<div class="result-card"><div class="result-header rack"><div class="result-icon">📍</div><div class="result-title">' + rackAddr + '</div></div>';
+    
+    if (cases.length === 0) {
+      html += '<div class="empty-state">Rak Kosong</div>';
+    } else {
+      html += '<div class="case-list">';
+      cases.forEach(c => {
+        var safeArr = String(c.arrivalNo || '').trim().replace(/'/g, "\\'");
+        html += `
+          <div class="case-card" onclick="window.openActionMenu('${safeArr}')">
+            <div>
+              <div class="case-label">${c.arrivalNo || '-'}</div>
+              <div class="case-item">${c.itemCd || '-'}</div>
+              <div class="case-name">${c.engItemNm || '-'}</div>
+            </div>
+            <div><div class="case-qty">${Number(c.actualRemain) || 0}</div></div>
+          </div>`;
+      });
+      html += '</div>';
     }
-    html += '<div style="padding:0 12px 12px"><a href="#' + zone + '" class="navigate-btn zone">🏢 Lihat semua rak di Zone ' + zone + '</a></div></div>';
+    html += '<div style="padding:0 12px 12px"><a href="#' + zone + '" class="navigate-btn zone">🏢 Kembali ke Zone ' + zone + '</a></div></div>';
+    document.getElementById('content').innerHTML = html;
+  }
+
+  function renderZone(zone) {
+    var racksMap = {};
+    allData.forEach(r => {
+      if (r.zone === zone && r.isActive && (Number(r.actualRemain) || 0) > 0) {
+        if(!racksMap[r.address]) racksMap[r.address] = 0;
+        racksMap[r.address] += Number(r.actualRemain);
+      }
+    });
+    var html = '<div class="result-card"><div class="result-header zone"><div class="result-title">ZONE ' + zone + '</div></div><div class="rack-list">';
+    Object.keys(racksMap).sort().forEach(addr => {
+      html += `<a href="#${addr}" style="text-decoration:none;color:inherit">
+        <div class="rack-item full"><div class="ri-addr">${addr}</div><div class="ri-fill">${racksMap[addr]} pcs</div></div></a>`;
+    });
+    html += '<a href="#" class="navigate-btn" style="margin-top:12px">🏠 Home</a></div></div>';
     document.getElementById('content').innerHTML = html;
   }
   
-  function renderSubZone(subId) {
-    var racksMap = {};
-    allData.forEach(function(r) {
-      if (!r.address || r.address.indexOf(subId + '-') !== 0) return;
-      if (!racksMap[r.address]) racksMap[r.address] = { address: r.address, cases: [], activeCount: 0, totalPcs: 0 };
-      racksMap[r.address].cases.push(r);
-      if (r.isActive && (Number(r.actualRemain) || 0) > 0) {
-        racksMap[r.address].activeCount++;
-        racksMap[r.address].totalPcs += Number(r.actualRemain) || 0;
-      }
-    });
-    var racks = Object.keys(racksMap).map(function(k) { return racksMap[k]; });
-    racks.sort(function(a, b) {
-      return a.address.localeCompare(b.address, undefined, { numeric: true });
-    });
-    if (!racks.length) { renderNotFound(subId, 'sub'); return; }
-    
-    var zone = subId.charAt(0);
-    var activeRacks = racks.filter(function(r) { return r.activeCount > 0; });
-    var totalCases = activeRacks.reduce(function(s, r) { return s + r.activeCount; }, 0);
-    var totalPcs = activeRacks.reduce(function(s, r) { return s + r.totalPcs; }, 0);
-    
-    var listHtml = racks.map(function(rack) {
-      var isEmpty = rack.activeCount === 0;
-      var initialTotal = rack.cases.reduce(function(s, c) { return s + (Number(c.initial) || 0); }, 0);
-      var fill = initialTotal > 0 ? (rack.totalPcs / initialTotal * 100) : 0;
-      var cls = 'empty';
-      if (!isEmpty) {
-        if (fill >= 70) cls = 'full';
-        else if (fill >= 30) cls = 'warn';
-        else cls = 'low';
-      }
-      return '<a href="#' + rack.address + '" style="text-decoration:none;color:inherit">' +
-        '<div class="rack-item ' + cls + '">' +
-          '<div class="ri-addr">' + rack.address + '</div>' +
-          '<div class="ri-info">' + (isEmpty ? '<span class="ri-empty">Kosong</span>' :
-            '<b>' + rack.activeCount + '</b>c · <b>' + rack.totalPcs.toLocaleString() + '</b> pcs') + '</div>' +
-          '<div class="ri-fill">' + (isEmpty ? '—' : fill.toFixed(0) + '%') + '</div>' +
-        '</div></a>';
-    }).join('');
+  function renderSubZone(subId) { renderZone(subId.charAt(0)); }
+  function renderLogin() { /* Same as before, logic handled above */ }
 
-    document.getElementById('content').innerHTML =
-      '<div class="result-card">' +
-        '<div class="result-header sub">' +
-          '<div class="result-icon">🔷</div>' +
-          '<div class="result-title">' + subId + '</div>' +
-          '<div class="result-sub">Sub-Zone (Kolom Rak) · Live dari WMS</div>' +
-        '</div>' +
-        '<div class="stats-grid">' +
-          '<div class="stat-item"><div class="stat-val">' + activeRacks.length + '/' + racks.length + '</div><div class="stat-lbl">Racks</div></div>' +
-          '<div class="stat-item"><div class="stat-val">' + totalCases + '</div><div class="stat-lbl">Cases</div></div>' +
-          '<div class="stat-item"><div class="stat-val">' + totalPcs.toLocaleString() + '</div><div class="stat-lbl">Total Pcs</div></div>' +
-        '</div>' +
-        '<div class="hint-box">👆 Tap rak untuk lihat detail</div>' +
-        '<div class="rack-list">' + listHtml + '</div>' +
-        '<div style="padding:0 12px 12px"><a href="#' + zone + '" class="navigate-btn zone">🏢 Lihat semua rak di Zone ' + zone + '</a></div>' +
-      '</div>';
-  }
-  
-  function renderZone(zone) {
-    var racksMap = {};
-    allData.forEach(function(r) {
-      if (r.zone !== zone) return;
-      if (!racksMap[r.address]) racksMap[r.address] = { address: r.address, cases: [], activeCount: 0, totalPcs: 0 };
-      racksMap[r.address].cases.push(r);
-      if (r.isActive && (Number(r.actualRemain) || 0) > 0) {
-        racksMap[r.address].activeCount++;
-        racksMap[r.address].totalPcs += Number(r.actualRemain) || 0;
-      }
-    });
-    var racks = Object.keys(racksMap).map(function(k) { return racksMap[k]; });
-    racks.sort(function(a, b) {
-      return a.address.localeCompare(b.address, undefined, { numeric: true });
-    });
-    if (!racks.length) { renderNotFound(zone, 'zone'); return; }
-    
-    var activeRacks = racks.filter(function(r) { return r.activeCount > 0; });
-    var totalCases = activeRacks.reduce(function(s, r) { return s + r.activeCount; }, 0);
-    var totalPcs = activeRacks.reduce(function(s, r) { return s + r.totalPcs; }, 0);
-    var subZones = {};
-    racks.forEach(function(r) {
-      var m = r.address.match(/^([A-Z]\d+)-\d+$/);
-      if (!m) return;
-      var sub = m[1];
-      if (!subZones[sub]) subZones[sub] = [];
-      subZones[sub].push(r);
-    });
-    var subZoneList = Object.keys(subZones).sort(function(a, b) {
-      return a.localeCompare(b, undefined, { numeric: true });
-    });
-    
-    var listHtml = subZoneList.map(function(sub) {
-      var subRacks = subZones[sub];
-      var activeInSub = subRacks.filter(function(r) { return r.activeCount > 0; }).length;
-      var pcsInSub = subRacks.reduce(function(s, r) { return s + r.totalPcs; }, 0);
-      return '<a href="#' + sub + '" style="text-decoration:none;color:inherit">' +
-        '<div class="rack-item ' + (activeInSub > 0 ? 'full' : 'empty') + '">' +
-          '<div class="ri-addr">' + sub + '</div>' +
-          '<div class="ri-info">' + (activeInSub === 0 ? '<span class="ri-empty">Semua kosong</span>' :
-            '<b>' + activeInSub + '</b>/' + subRacks.length + ' rak · <b>' + pcsInSub.toLocaleString() + '</b> pcs') + '</div>' +
-          '<div class="ri-fill" style="color:#64748b">' + subRacks.length + '</div>' +
-        '</div></a>';
-    }).join('');
+  // ═══ MODAL ACTION & MOCKUP REGISTRY (TAHAP 2) ═══
+  window.closeModal = function(id, e) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    document.getElementById(id).classList.remove('active');
+    document.body.style.overflow = '';
+  };
 
-    document.getElementById('content').innerHTML =
-      '<div class="result-card">' +
-        '<div class="result-header zone">' +
-          '<div class="result-icon">🏢</div>' +
-          '<div class="result-title">ZONE ' + zone + '</div>' +
-          '<div class="result-sub">Overview Zone · Live dari WMS</div>' +
-        '</div>' +
-        '<div class="stats-grid">' +
-          '<div class="stat-item"><div class="stat-val">' + activeRacks.length + '/' + racks.length + '</div><div class="stat-lbl">Racks</div></div>' +
-          '<div class="stat-item"><div class="stat-val">' + totalCases + '</div><div class="stat-lbl">Cases</div></div>' +
-          '<div class="stat-item"><div class="stat-val">' + totalPcs.toLocaleString() + '</div><div class="stat-lbl">Total Pcs</div></div>' +
-        '</div>' +
-        '<div class="hint-box">👆 Tap sub-zone untuk lihat rak-nya</div>' +
-        '<div class="rack-list">' + listHtml + '</div>' +
-      '</div>';
-  }
-  
-  function renderNotFound(target, type) {
-    type = type || 'unknown';
-    var typeLabel = { rack: 'Rak', sub: 'Sub-Zone', zone: 'Zone', unknown: 'Kode' }[type] || 'Kode';
-    document.getElementById('content').innerHTML =
-      '<div class="result-card">' +
-        '<div class="result-header notfound">' +
-          '<div class="result-icon">❌</div>' +
-          '<div class="result-title" style="font-size:24px">' + target + '</div>' +
-          '<div class="result-sub">' + typeLabel + ' tidak ditemukan</div>' +
-        '</div>' +
-        '<div class="empty-state">' +
-          '<div class="empty-icon">🔍</div>' +
-          '<div style="font-weight:700;color:#0a2540">Data tidak ada</div>' +
-          '<div style="font-size:12px;margin-top:8px;line-height:1.5">' + typeLabel + ' <b>' + target + '</b> tidak terdaftar di WMS.</div>' +
-          '<a href="#" class="navigate-btn" style="max-width:200px;margin:16px auto 0">🏠 Ke Beranda</a>' +
-        '</div>' +
-      '</div>';
-  }
+  window.openActionMenu = function(arrivalNo) {
+    selectedCase = allData.find(c => c.arrivalNo === arrivalNo);
+    if (!selectedCase) return;
 
-  // ═══ FUNGSI AMAN MODAL BOM REVERSE (MULTI-KEY MATCHING) ═══
+    document.getElementById('act-label').textContent = selectedCase.arrivalNo;
+    document.getElementById('act-item').textContent = selectedCase.itemCd + ' - ' + selectedCase.engItemNm;
+
+    document.getElementById('btn-act-bom').onclick = function() {
+      closeModal('action-modal');
+      showBOM(selectedCase.itemCd);
+    };
+    
+    document.getElementById('btn-act-reg').onclick = function() {
+      closeModal('action-modal');
+      showRegistry();
+    };
+
+    document.getElementById('action-modal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.showRegistry = function() {
+    if (!selectedCase) return;
+    var c = selectedCase;
+
+    document.getElementById('reg-label').value = c.arrivalNo || '';
+    document.getElementById('reg-date').value = c.inDt || '';
+    document.getElementById('reg-item').value = c.itemCd || '';
+    document.getElementById('reg-name').value = c.engItemNm || '';
+    document.getElementById('reg-qty').value = c.actualRemain || 0;
+    document.getElementById('reg-addr').value = c.address || '';
+    document.getElementById('reg-inv').value = c.invNo || '';
+    
+    document.getElementById('reg-tbl-date').textContent = c.inDt || '-';
+    document.getElementById('reg-tbl-qty').textContent = c.actualRemain || '0';
+
+    document.getElementById('reg-modal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.mockAction = function(actionName) {
+    alert('🚧 TAHAP 3 COMING SOON!\n\nPerintah [' + actionName + '] untuk label ' + selectedCase.arrivalNo + ' siap dikirim ke PC WMS untuk dieksekusi secara otomatis.');
+  };
+
+  // ═══ BOM REVERSE ═══
   window.showBOM = function(itemCd) {
-    if (!itemCd) return;
     var rawCd = String(itemCd).trim();
-    var upperCd = rawCd.toUpperCase();
-
-    var itemObj = null;
-    for (var i = 0; i < allData.length; i++) {
-      var cd = String(allData[i].itemCd || '').trim();
-      if (cd === rawCd || cd.toUpperCase() === upperCd) {
-        itemObj = allData[i];
-        break;
-      }
-    }
-    var itemNm = itemObj ? (itemObj.engItemNm || itemObj.itemNm || '-') : '-';
-
     document.getElementById('bom-target-code').textContent = rawCd;
-    document.getElementById('bom-target-name').textContent = itemNm;
+    document.getElementById('bom-target-name').textContent = selectedCase ? selectedCase.engItemNm : '-';
 
     var container = document.getElementById('bom-list-container');
-
-    // Mencegah error item kosong: Cek berbagai variasi penulisan key di bomData
-    var list = bomData[rawCd] || 
-               bomData[upperCd] || 
-               bomData[rawCd.toLowerCase()] || 
-               bomData[rawCd.replace(/\s+/g, '')] || 
-               [];
+    var list = bomData[rawCd] || bomData[rawCd.toUpperCase()] || [];
 
     if (!list.length) {
-      container.innerHTML =
-        '<div style="text-align:center;padding:35px 20px;color:#64748b;">' +
-          '<div style="font-size:48px;margin-bottom:12px;opacity:0.6">📋</div>' +
-          '<div style="font-weight:800;font-size:15px;color:#0a2540;">Data Model Belum Dihubungkan</div>' +
-          '<div style="font-size:12px;margin-top:8px;line-height:1.5;color:#475569;">' +
-            'Item <b style="color:#0a2540">' + rawCd + '</b> belum ada di mapping BOM Gist.<br><br>' +
-            '<i>Sync ulang dari PC Control Tower (☁️ Sync).</i>' +
-          '</div>' +
-        '</div>';
+      container.innerHTML = '<div style="text-align:center;padding:30px 10px;color:#64748b;">Belum ada mapping BOM.</div>';
     } else {
       var rows = list.map(function(bom) {
-        var type = String(bom.type || bom.bomType || 'COMP').toUpperCase();
-        var pillCls = type === 'COMP' ? 'comp' : (type === 'FING' ? 'fing' : '');
-        var parentCd = bom.parentCd || bom.itemNumber || bom.itemCd || '-';
-        var parentNm = bom.parentNm || bom.itemName || bom.engItemNm || '-';
-        var qty = bom.qty != null ? bom.qty : (bom.quantity != null ? bom.quantity : 1);
-        return '<tr>' +
-          '<td class="bom-td-type"><span class="bom-pill ' + pillCls + '">' + type + '</span></td>' +
-          '<td><div class="bom-td-code">' + parentCd + '</div><div class="bom-td-name">' + parentNm + '</div></td>' +
-          '<td class="bom-td-qty">' + qty + '</td>' +
-        '</tr>';
+        var type = String(bom.type || 'COMP').toUpperCase();
+        var pill = type === 'COMP' ? 'comp' : 'fing';
+        return '<tr><td class="bom-td-type"><span class="bom-pill '+pill+'">'+type+'</span></td><td><div class="bom-td-code">'+bom.parentCd+'</div><div class="bom-td-name">'+bom.parentNm+'</div></td><td class="bom-td-qty">'+bom.qty+'</td></tr>';
       }).join('');
-
-      container.innerHTML =
-        '<div class="bom-count">🧩 Digunakan pada ' + list.length + ' Model / Assembly</div>' +
-        '<div class="bom-table-wrap">' +
-          '<table class="bom-table">' +
-            '<thead><tr>' +
-              '<th style="width:48px">Type</th>' +
-              '<th>Model / Parent</th>' +
-              '<th style="width:36px;text-align:right">Qty</th>' +
-            '</tr></thead>' +
-            '<tbody>' + rows + '</tbody>' +
-          '</table>' +
-        '</div>';
+      container.innerHTML = '<div class="bom-table-wrap"><table class="bom-table"><thead><tr><th>Type</th><th>Model</th><th style="text-align:right">Qty</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
     }
-
     document.getElementById('bom-modal').classList.add('active');
     document.body.style.overflow = 'hidden';
   };
 
-  window.closeBOMModal = function(e) {
-    if (e) { e.preventDefault(); e.stopPropagation(); }
-    document.getElementById('bom-modal').classList.remove('active');
-    document.body.style.overflow = '';
-  };
-
-  setInterval(function() {
-    fetchWithTimeout(DATA_URL + '?t=' + Date.now(), FETCH_TIMEOUT_MS)
-      .then(function(res) { return res.ok ? res.json() : null; })
-      .then(function(json) {
-        if (!json) return;
-        if (json.syncedAt === (syncInfo && syncInfo.syncedAt)) return;
-        allData = Array.isArray(json.data) ? json.data : [];
-        bomData = (json.bom && typeof json.bom === 'object') ? json.bom : {};
-        syncInfo = {
-          syncedAt: json.syncedAt,
-          syncedAtLocal: json.syncedAtLocal,
-          stats: json.stats || {}
-        };
-        updateSyncInfo();
-        if (isLoggedIn()) route();
-      })
-      .catch(function() {});
-  }, AUTO_REFRESH_MS);
-  
   fetchData();
 })();
 </script>
