@@ -8,17 +8,17 @@
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
   body { font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif; background: #0f172a; color: #0f172a; min-height: 100vh; }
-  
+
   .app-header {
     background: linear-gradient(135deg, #0a2540 0%, #1e3a8a 100%);
-    color: white; padding: 14px 16px;
+    color: white; padding: 12px 14px 10px;
     position: sticky; top: 0; z-index: 100;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   }
   .app-title { font-size: 15px; font-weight: 800; letter-spacing: 0.5px; }
   .app-sub { font-size: 10px; opacity: 0.85; margin-top: 2px; }
   .app-sync-info {
-    font-size: 10px; opacity: 0.8; margin-top: 4px;
+    font-size: 10px; opacity: 0.85; margin-top: 4px;
     display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
   }
   .app-sync-info button {
@@ -26,82 +26,96 @@
     color: white; padding: 3px 8px; border-radius: 4px;
     font-size: 10px; cursor: pointer; font-weight: 700;
   }
-  
-  .content { padding: 12px; padding-bottom: 40px; }
-  
-  .loading {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    padding: 60px 20px; color: white; text-align: center;
+
+  /* SEARCH SELALU DI HEADER */
+  .header-search {
+    display: none;
+    margin-top: 10px;
+    gap: 6px;
+    align-items: center;
   }
+  .header-search.show { display: flex; }
+  .header-search input {
+    flex: 1; border: none; border-radius: 8px;
+    padding: 10px 12px; font-size: 13px; font-weight: 700;
+    font-family: Consolas, monospace; text-transform: uppercase;
+    outline: none; color: #0f172a;
+  }
+  .header-search input::placeholder {
+    text-transform: none; font-weight: 500; font-family: -apple-system, sans-serif;
+    color: #94a3b8; font-size: 12px;
+  }
+  .header-search button {
+    background: #ea580c; color: white; border: none;
+    padding: 10px 14px; border-radius: 8px; font-weight: 800;
+    font-size: 12px; cursor: pointer; white-space: nowrap;
+  }
+  .header-search button:active { transform: scale(0.97); }
+
+  .content { padding: 12px; padding-bottom: 40px; }
+  .loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; color: white; text-align: center; }
   .spinner {
-    width: 48px; height: 48px;
-    border: 5px solid rgba(255,255,255,0.2); border-top-color: white;
-    border-radius: 50%; animation: spin 0.8s linear infinite;
-    margin-bottom: 16px;
+    width: 48px; height: 48px; border: 5px solid rgba(255,255,255,0.2);
+    border-top-color: white; border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin-bottom: 16px;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
-  
+
   .error-box { background: #fee2e2; color: #991b1b; padding: 20px; border-radius: 12px; text-align: center; margin: 20px 0; }
-  .error-box .err-icon { font-size: 40px; margin-bottom: 8px; }
-  .error-box .err-title { font-weight: 800; font-size: 15px; margin-bottom: 6px; }
-  .error-box .err-msg { font-size: 12px; line-height: 1.5; word-break: break-word; }
-  
-  .result-card { background: white; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin-bottom: 12px; animation: slideUp 0.3s ease; }
-  @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-  
-  .result-header { padding: 20px 16px; text-align: center; color: white; position: relative; }
+  .result-card {
+    background: white; border-radius: 14px; overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3); margin-bottom: 12px;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result-header { padding: 18px 16px; text-align: center; color: white; }
   .result-header.rack { background: linear-gradient(135deg, #059669 0%, #047857 100%); }
   .result-header.sub { background: linear-gradient(135deg, #0891b2 0%, #0369a1 100%); }
   .result-header.zone { background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); }
   .result-header.search { background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%); }
   .result-header.notfound { background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); }
-  
-  .result-icon { font-size: 40px; margin-bottom: 4px; }
-  .result-title { font-size: 32px; font-weight: 900; letter-spacing: 2px; line-height: 1; }
+  .result-icon { font-size: 36px; margin-bottom: 4px; }
+  .result-title { font-size: 28px; font-weight: 900; letter-spacing: 1px; line-height: 1.1; }
   .result-sub { font-size: 11px; opacity: 0.9; margin-top: 6px; }
-  
+
   .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 12px; background: #f8fafc; }
   .stat-item { background: white; padding: 10px 6px; border-radius: 8px; text-align: center; border-left: 3px solid #0891b2; }
-  .stat-val { font-size: 18px; font-weight: 900; color: #0a2540; line-height: 1; }
+  .stat-val { font-size: 18px; font-weight: 900; color: #0a2540; }
   .stat-lbl { font-size: 9px; color: #64748b; text-transform: uppercase; font-weight: 700; margin-top: 3px; }
-  
-  .hint-box { background: #eff6ff; color: #1e40af; padding: 10px 12px; font-size: 11px; text-align: center; border-radius: 6px; margin: 8px 12px; }
-  
-  /* SEARCH BAR TAHAP 1 */
-  .search-wrapper { padding: 12px; background: #f1f5f9; border-bottom: 1px solid #e2e8f0; }
-  .search-input-box { display: flex; align-items: center; background: white; border: 2px solid #cbd5e1; border-radius: 10px; padding: 4px 12px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
-  .search-input-box input { flex: 1; border: none; padding: 12px 0; font-size: 15px; font-weight: 700; outline: none; font-family: Consolas, monospace; color: #0f172a; text-transform: uppercase; }
-  .search-input-box input::placeholder { color: #94a3b8; font-weight: 500; font-family: sans-serif; text-transform: none; font-size: 13px; }
-  .search-btn-go { background: #ea580c; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-weight: 800; cursor: pointer; font-size: 12px; margin-left: 8px; transition: transform 0.1s; }
-  .search-btn-go:active { transform: scale(0.95); }
 
+  .hint-box { background: #eff6ff; color: #1e40af; padding: 10px 12px; font-size: 11px; text-align: center; border-radius: 6px; margin: 8px 12px; }
   .case-list, .rack-list { padding: 8px 12px 12px; }
-  
+
   .case-card {
-    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 8px;
-    display: grid; grid-template-columns: 1fr auto; gap: 8px; border-left: 4px solid #10b981;
-    position: relative; cursor: pointer; transition: all 0.15s ease;
+    background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;
+    padding: 12px; margin-bottom: 8px;
+    display: grid; grid-template-columns: 1fr auto; gap: 8px;
+    border-left: 4px solid #10b981; position: relative; cursor: pointer;
   }
   .case-card:active { transform: scale(0.98); background: #f1f5f9; }
   .case-card.low { border-left-color: #dc2626; background: #fef2f2; }
   .case-card.old { border-left-color: #f59e0b; background: #fffbeb; }
-  
   .case-card::after {
-    content: "⚙️ ACTION"; position: absolute; top: 12px; right: 12px; font-size: 9px; font-weight: 800; color: #1d4ed8;
-    background: #dbeafe; padding: 3px 8px; border-radius: 6px; opacity: 0.9; letter-spacing: 0.3px; border: 1px solid #bfdbfe;
+    content: "⚙️ ACTION"; position: absolute; top: 10px; right: 10px;
+    font-size: 9px; font-weight: 800; color: #1d4ed8; background: #dbeafe;
+    padding: 3px 8px; border-radius: 6px; border: 1px solid #bfdbfe;
   }
-
-  .case-label { font-family: Consolas, monospace; font-weight: 800; color: #0a2540; font-size: 14px; margin-top: 2px;}
+  .case-label { font-family: Consolas, monospace; font-weight: 800; color: #0a2540; font-size: 14px; }
   .case-item { font-family: Consolas, monospace; font-weight: 700; color: #7c3aed; font-size: 12px; margin-top: 2px; }
-  .case-name { font-size: 11px; color: #64748b; margin-top: 3px; line-height: 1.3; padding-right: 25px;}
+  .case-name { font-size: 11px; color: #64748b; margin-top: 3px; padding-right: 70px; line-height: 1.3; }
   .case-meta { font-size: 10px; color: #94a3b8; margin-top: 4px; }
-  .case-meta-addr { display: inline-block; background: #0f172a; color: white; padding: 2px 6px; border-radius: 4px; font-weight: 800; font-family: Consolas; margin-right: 4px; }
-  .case-qty { font-family: Consolas, monospace; font-weight: 800; font-size: 18px; color: #0a2540; text-align: right; margin-top: 20px;}
+  .case-meta-addr { display: inline-block; background: #0f172a; color: #fff; padding: 2px 6px; border-radius: 4px; font-weight: 800; font-family: Consolas, monospace; margin-right: 4px; }
+  .case-qty { font-family: Consolas, monospace; font-weight: 800; font-size: 18px; color: #0a2540; text-align: right; margin-top: 18px; }
   .case-qty-lbl { font-size: 10px; color: #64748b; text-align: right; }
-  
+
   .rack-item {
-    background: white; border-radius: 10px; padding: 12px 14px; margin-bottom: 6px; border-left: 4px solid;
-    display: grid; grid-template-columns: 90px 1fr 60px; gap: 8px; align-items: center; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    background: white; border-radius: 10px; padding: 12px 14px; margin-bottom: 6px;
+    border-left: 4px solid; display: grid; grid-template-columns: 90px 1fr 60px;
+    gap: 8px; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   }
   .rack-item.full { border-color: #10b981; }
   .rack-item.warn { border-color: #f59e0b; }
@@ -110,126 +124,161 @@
   .ri-addr { font-family: Consolas, monospace; font-weight: 900; font-size: 15px; color: #0a2540; }
   .ri-info { font-size: 11px; color: #475569; }
   .ri-fill { text-align: right; font-weight: 800; font-size: 14px; }
-  
-  .navigate-btn { display: block; text-decoration: none; background: linear-gradient(135deg, #0a2540 0%, #1e3a8a 100%); color: white; padding: 14px; border-radius: 10px; text-align: center; font-weight: 700; font-size: 13px; margin-top: 8px; }
-  .navigate-btn.zone { background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); }
-  
-  .footer-info { text-align: center; color: rgba(255,255,255,0.6); font-size: 10px; padding: 20px 12px 60px; }
 
-  /* === MODAL GLOBAL === */
-  .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px); z-index: 999; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; padding: 0; }
+  .navigate-btn {
+    display: block; text-decoration: none; color: white; padding: 14px; border-radius: 10px;
+    text-align: center; font-weight: 700; font-size: 13px; margin-top: 8px;
+    background: linear-gradient(135deg, #0a2540 0%, #1e3a8a 100%);
+  }
+  .navigate-btn.zone { background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); }
+  .navigate-btn.sub { background: linear-gradient(135deg, #0891b2 0%, #0369a1 100%); }
+  .empty-state { text-align: center; padding: 40px 20px; color: #64748b; }
+  .empty-icon { font-size: 48px; margin-bottom: 10px; opacity: 0.5; }
+
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(15,23,42,0.75); backdrop-filter: blur(5px);
+    z-index: 999; display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+    opacity: 0; pointer-events: none; transition: opacity 0.25s ease;
+  }
   .modal-overlay.active { opacity: 1; pointer-events: auto; }
-  .modal-content { background: #f8fafc; border-radius: 20px 20px 0 0; width: 100%; max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.2, 1); box-shadow: 0 -12px 40px rgba(0,0,0,0.35); overflow: hidden; padding-bottom: env(safe-area-inset-bottom, 0); }
+  .modal-content {
+    background: #f8fafc; border-radius: 20px 20px 0 0; width: 100%; max-width: 640px;
+    display: flex; flex-direction: column; transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.2, 1);
+    box-shadow: 0 -12px 40px rgba(0,0,0,0.35); overflow: hidden;
+    max-height: 92vh; padding-bottom: env(safe-area-inset-bottom, 0);
+  }
   .modal-overlay.active .modal-content { transform: translateY(0); }
-  .modal-header { padding: 16px 16px 14px; position: relative; flex-shrink: 0; color: white; }
+  .modal-header { padding: 16px; position: relative; flex-shrink: 0; color: white; }
   .modal-header.bg-dark { background: linear-gradient(135deg, #0a2540 0%, #1e3a8a 100%); }
   .modal-header.bg-action { background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%); }
   .modal-header.bg-reg { background: linear-gradient(135deg, #0f766e 0%, #047857 100%); }
-  .close-btn { position: absolute; top: 14px; right: 14px; background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; font-size: 14px; cursor: pointer; font-weight: bold; }
-  .close-btn:active { background: rgba(255,255,255,0.4); }
-  .modal-title { font-size: 16px; font-weight: 800; letter-spacing: 0.5px; display: flex; align-items: center; gap: 8px;}
-  .modal-body { padding: 0; overflow: hidden; flex: 1; min-height: 0; display: flex; flex-direction: column; background: #fff; }
+  .close-btn {
+    position: absolute; top: 14px; right: 14px; background: rgba(255,255,255,0.2);
+    border: none; color: white; width: 32px; height: 32px; border-radius: 50%;
+    font-size: 14px; cursor: pointer; font-weight: bold;
+  }
+  .modal-title { font-size: 15px; font-weight: 800; padding-right: 36px; }
+  .modal-sub { font-size: 11px; opacity: 0.85; margin-top: 4px; }
+  .modal-body { flex: 1; min-height: 0; overflow: auto; background: #fff; }
 
-  /* BOM MODAL */
-  #bom-modal .modal-content { height: min(92vh, 780px); max-height: 92vh; }
-  .bom-target-item { background: rgba(0,0,0,0.25); padding: 10px 12px; border-radius: 10px; margin-top: 12px; border-left: 3px solid #38bdf8; }
-  .bom-target-code { font-family: Consolas, monospace; font-size: 15px; font-weight: 900; color: #38bdf8; }
-  .bom-target-name { font-size: 11px; margin-top: 4px; opacity: 0.9; line-height: 1.3;}
-  .bom-table-wrap { flex: 1; overflow: auto; border: 1px solid #e2e8f0; border-radius: 10px; margin: 12px; }
-  .bom-table { width: 100%; border-collapse: collapse; font-size: 11px; }
-  .bom-table th { background: #f1f5f9; font-size: 9px; font-weight: 800; padding: 8px 10px; text-align: left; position: sticky; top: 0; z-index: 2; }
-  .bom-table td { padding: 6px 10px; border-bottom: 1px solid #f1f5f9; }
+  .target-box {
+    background: rgba(0,0,0,0.22); padding: 10px 12px; border-radius: 10px;
+    margin-top: 12px; border-left: 3px solid #38bdf8;
+  }
+  .target-code { font-family: Consolas, monospace; font-size: 14px; font-weight: 900; color: #38bdf8; }
+  .target-name { font-size: 11px; margin-top: 3px; opacity: 0.9; line-height: 1.3; }
 
-  /* ACTION MENU MODAL */
-  .action-btn-large { display: flex; align-items: center; gap: 12px; background: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 12px; font-size: 14px; font-weight: 800; color: #0f172a; cursor: pointer; transition: all 0.15s; }
-  .action-btn-large:active { background: #f1f5f9; transform: scale(0.98); border-color: #cbd5e1; }
+  .action-btn-large {
+    display: flex; align-items: center; gap: 12px; background: white;
+    border: 2px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 12px;
+    font-size: 14px; font-weight: 800; color: #0f172a; cursor: pointer;
+  }
+  .action-btn-large:active { background: #f1f5f9; transform: scale(0.98); }
   .action-btn-large .icon { font-size: 24px; }
   .action-btn-large .sub { font-size: 10px; font-weight: 500; color: #64748b; margin-top: 4px; }
 
-  /* REGISTRY MODAL */
   #reg-modal .modal-content { height: 95vh; max-height: 95vh; }
-  .reg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 16px; background: #f8fafc; border-bottom: 2px solid #e2e8f0; }
+  .reg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 14px 16px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
   .reg-grid.full { grid-template-columns: 1fr; }
   .reg-field { display: flex; flex-direction: column; }
   .reg-field label { font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
-  .reg-field input, .reg-field select { padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; font-family: Consolas, monospace; font-weight: 700; color: #0f172a; outline: none; }
+  .reg-field input, .reg-field select {
+    padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px;
+    font-size: 12px; font-family: Consolas, monospace; font-weight: 700; color: #0f172a;
+  }
   .reg-field input:disabled { background: #e2e8f0; color: #475569; }
-  .reg-action-bar { padding: 12px 16px; display: flex; gap: 8px; background: white; border-top: 1px solid #e2e8f0; justify-content: flex-end; }
+  .reg-action-bar { padding: 12px 16px; display: flex; gap: 8px; justify-content: flex-end; border-top: 1px solid #e2e8f0; }
   .reg-btn { padding: 10px 16px; border: none; border-radius: 8px; font-weight: 800; font-size: 12px; color: white; cursor: pointer; }
   .reg-btn.save { background: #16a34a; }
   .reg-btn.close { background: #f59e0b; }
-  .reg-table-wrap { flex: 1; overflow: auto; padding: 12px; }
+  .reg-table-wrap { padding: 12px 16px; }
   .reg-mock-table { width: 100%; border-collapse: collapse; font-size: 10px; text-align: center; }
-  .reg-mock-table th { background: #0ea5e9; color: white; padding: 8px; font-weight: 700; }
+  .reg-mock-table th { background: #0ea5e9; color: white; padding: 8px; }
   .reg-mock-table td { padding: 8px; border: 1px solid #e2e8f0; }
-  .reg-mini-btn { background: #2563eb; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 9px; font-weight: bold; cursor: pointer; margin: 2px; }
+  .reg-mini-btn { border: none; padding: 4px 8px; border-radius: 4px; font-size: 9px; font-weight: bold; color: white; cursor: pointer; margin: 2px; }
+
+  #bom-modal .modal-content { height: min(92vh, 780px); }
+  .bom-count { font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; margin: 10px 12px 6px; }
+  .bom-table-wrap { margin: 0 12px 12px; overflow: auto; border: 1px solid #e2e8f0; border-radius: 10px; max-height: 55vh; }
+  .bom-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  .bom-table th { background: #f1f5f9; font-size: 9px; font-weight: 800; padding: 8px 10px; text-align: left; position: sticky; top: 0; }
+  .bom-table td { padding: 6px 10px; border-bottom: 1px solid #f1f5f9; }
+  .bom-td-code { font-family: Consolas, monospace; font-weight: 800; font-size: 12px; color: #0a2540; }
+  .bom-td-name { font-size: 10px; color: #64748b; margin-top: 2px; }
+  .bom-td-qty { text-align: right; font-weight: 800; font-family: Consolas, monospace; }
+  .bom-pill { display: inline-block; font-size: 8px; font-weight: 800; padding: 3px 5px; border-radius: 4px; background: #dbeafe; color: #1e40af; }
+  .bom-pill.comp { background: #fce7f3; color: #9d174d; }
+  .bom-pill.fing { background: #d1fae5; color: #065f46; }
+
+  @media (min-width: 640px) {
+    body { max-width: 640px; margin: 0 auto; }
+    .modal-overlay { justify-content: center; padding: 20px; }
+    .modal-content { border-radius: 16px; }
+  }
 </style>
 </head>
 <body>
 
 <div class="app-header">
-  <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
     <div>
       <div class="app-title">🏭 RCT VIEWER</div>
       <div class="app-sub">PT VALEO PYEONGHWA ASEAN TRANSMISSION</div>
     </div>
-    <div id="user-badge" style="display: none; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 6px; padding: 4px 8px; text-align: center; min-width: 80px; flex-shrink: 0;">
-      <div style="font-size: 10px; font-weight: 800; color: #38bdf8; white-space: nowrap;" id="user-id-display">-</div>
-      <div style="margin-top: 1px;"><a href="javascript:void(0)" onclick="window.logout()" style="color: #f87171; text-decoration: none; font-weight: 800; font-size: 8px; letter-spacing: 0.3px;">KELUAR ❌</a></div>
+    <div id="user-badge" style="display:none;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:6px;padding:4px 8px;text-align:center;min-width:80px;">
+      <div style="font-size:10px;font-weight:800;color:#38bdf8;white-space:nowrap;" id="user-id-display">-</div>
+      <div style="margin-top:1px;"><a href="javascript:void(0)" onclick="window.logout()" style="color:#f87171;text-decoration:none;font-weight:800;font-size:8px;">KELUAR ❌</a></div>
     </div>
   </div>
-  <div class="app-sync-info" id="sync-info"><span>⏳ Loading data...</span></div>
+  <div class="app-sync-info" id="sync-info"><span>⏳ Loading...</span></div>
+
+  <!-- SEARCH SELALU MUNCUL SETELAH LOGIN -->
+  <form class="header-search" id="header-search" onsubmit="event.preventDefault(); window.doSearch();">
+    <input type="text" id="global-search" placeholder="🔍 Cari Item / Label / Rak..." autocomplete="off" enterkeyhint="search">
+    <button type="submit">CARI</button>
+  </form>
 </div>
 
 <div class="content" id="content">
-  <div class="loading">
-    <div class="spinner"></div>
-    <div style="font-weight:700">Memuat data warehouse...</div>
-  </div>
+  <div class="loading"><div class="spinner"></div><div style="font-weight:700;color:#fff">Memuat data...</div></div>
 </div>
 
-<!-- MODAL 1: ACTION MENU -->
+<!-- ACTION MENU -->
 <div class="modal-overlay" id="action-modal" onclick="closeModal('action-modal', event)">
-  <div class="modal-content" onclick="event.stopPropagation()">
+  <div class="modal-content" onclick="event.stopPropagation()" style="max-height:70vh">
     <div class="modal-header bg-action">
-      <button class="close-btn" onclick="closeModal('action-modal')">✕</button>
+      <button class="close-btn" type="button" onclick="closeModal('action-modal')">✕</button>
       <div class="modal-title">⚙️ PILIH TINDAKAN</div>
-      <div class="bom-target-item">
-        <div class="bom-target-code" id="act-label">-</div>
-        <div class="bom-target-name" id="act-item">-</div>
+      <div class="target-box">
+        <div class="target-code" id="act-label">-</div>
+        <div class="target-name" id="act-item">-</div>
       </div>
     </div>
-    <div class="modal-body" style="padding: 20px;">
+    <div class="modal-body" style="padding:16px;">
       <div class="action-btn-large" id="btn-act-bom">
         <div class="icon">🔍</div>
-        <div>
-          <div>Lihat Model (BOM)</div>
-          <div class="sub">Where-used part ini di line produksi</div>
-        </div>
+        <div><div>Lihat Model (BOM)</div><div class="sub">Where-used part di line produksi</div></div>
       </div>
       <div class="action-btn-large" id="btn-act-reg">
         <div class="icon">📦</div>
-        <div>
-          <div>Registrasi / Eksekusi</div>
-          <div class="sub">Pindah Alamat, Consume, atau Return Label</div>
-        </div>
+        <div><div>Registrasi / Eksekusi</div><div class="sub">Pindah alamat, Consume, atau Return</div></div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- MODAL 2: RAW MATERIAL REGISTRY (DUMMY/TAHAP 2) -->
+<!-- REGISTRY MOCK -->
 <div class="modal-overlay" id="reg-modal" onclick="closeModal('reg-modal', event)">
   <div class="modal-content" onclick="event.stopPropagation()">
     <div class="modal-header bg-reg">
-      <button class="close-btn" onclick="closeModal('reg-modal')">✕</button>
+      <button class="close-btn" type="button" onclick="closeModal('reg-modal')">✕</button>
       <div class="modal-title">📝 RAW MATERIAL REGISTRY</div>
-      <div class="bom-subtitle">Form Eksekusi Logistik (Mockup Tahap 2)</div>
+      <div class="modal-sub">Form Eksekusi Logistik (Mockup Tahap 2)</div>
     </div>
     <div class="modal-body">
       <div class="reg-grid full">
-        <div class="reg-field">
-          <label>Supplier Name</label>
+        <div class="reg-field"><label>Supplier Name</label>
           <select><option>1. PYEONGHWA VALEO</option><option>2. SELIM</option></select>
         </div>
       </div>
@@ -241,62 +290,65 @@
         <div class="reg-field"><label>Address</label><input type="text" id="reg-addr"></div>
         <div class="reg-field"><label>Invoice No</label><input type="text" id="reg-inv"></div>
       </div>
-      <div class="reg-grid full" style="padding-top:0;">
+      <div class="reg-grid full" style="padding-top:0">
         <div class="reg-field"><label>Part Name</label><input type="text" id="reg-name" disabled></div>
       </div>
-      
       <div class="reg-table-wrap">
-        <div style="background:#0ea5e9; color:white; font-size:11px; font-weight:bold; padding:8px; border-radius:6px 6px 0 0;">⚙️ Label List Action</div>
+        <div style="background:#0ea5e9;color:#fff;font-size:11px;font-weight:800;padding:8px;border-radius:6px 6px 0 0;">⚙️ Label List Action</div>
         <table class="reg-mock-table">
           <tr><th>Scan</th><th>Stock Date</th><th>Q'ty</th><th>Used</th><th>Back</th><th>Action</th></tr>
           <tr>
             <td>Yes</td><td id="reg-tbl-date">-</td><td id="reg-tbl-qty">-</td><td>0</td><td>0</td>
             <td>
-              <button class="reg-mini-btn" style="background:#dc2626" onclick="mockAction('Return')">Return</button>
-              <button class="reg-mini-btn" style="background:#059669" onclick="mockAction('Consume')">Consume</button>
+              <button type="button" class="reg-mini-btn" style="background:#dc2626" onclick="mockAction('Return')">Return</button>
+              <button type="button" class="reg-mini-btn" style="background:#059669" onclick="mockAction('Consume')">Consume</button>
             </td>
           </tr>
         </table>
       </div>
-
       <div class="reg-action-bar">
-        <button class="reg-btn close" onclick="closeModal('reg-modal')">✖ Close</button>
-        <button class="reg-btn save" onclick="mockAction('Save')">💾 Save</button>
+        <button type="button" class="reg-btn close" onclick="closeModal('reg-modal')">✖ Close</button>
+        <button type="button" class="reg-btn save" onclick="mockAction('Save')">💾 Save</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- MODAL 3: BOM REVERSE -->
+<!-- BOM -->
 <div class="modal-overlay" id="bom-modal" onclick="closeModal('bom-modal', event)">
   <div class="modal-content" onclick="event.stopPropagation()">
     <div class="modal-header bg-dark">
-      <button class="close-btn" onclick="closeModal('bom-modal')">✕</button>
+      <button class="close-btn" type="button" onclick="closeModal('bom-modal')">✕</button>
       <div class="modal-title">🛠️ BOM Reverse View</div>
-      <div class="bom-target-item">
-        <div class="bom-target-code" id="bom-target-code">-</div>
-        <div class="bom-target-name" id="bom-target-name">-</div>
+      <div class="target-box">
+        <div class="target-code" id="bom-target-code">-</div>
+        <div class="target-name" id="bom-target-name">-</div>
       </div>
     </div>
-    <div class="modal-body">
-      <div id="bom-list-container"></div>
-    </div>
+    <div class="modal-body" id="bom-list-container"></div>
   </div>
 </div>
 
 <script>
-(function() {
+(function () {
   'use strict';
-  
+
   var GIST_ID = '63d8a8f7a35183a3ad28455587fc68fd';
   var DATA_URL = 'https://gist.githubusercontent.com/biansyah07/' + GIST_ID + '/raw/rct-data.json';
-  
+
   var allData = [];
   var syncInfo = null;
   var bomData = {};
-  var selectedCase = null; // Menyimpan data case yang sedang di-klik
+  var selectedCase = null;
 
   function isLoggedIn() { return !!localStorage.getItem('rct_user_id'); }
+
+  function setSearchVisible(on) {
+    var el = document.getElementById('header-search');
+    if (!el) return;
+    if (on) el.classList.add('show');
+    else el.classList.remove('show');
+  }
 
   function updateUserHeader() {
     var userId = localStorage.getItem('rct_user_id');
@@ -305,195 +357,320 @@
     if (userId && badge && display) {
       display.textContent = userId;
       badge.style.display = 'block';
-    } else if (badge) {
-      badge.style.display = 'none';
-    }
+    } else if (badge) badge.style.display = 'none';
   }
 
-  window.logout = function() {
-    if (confirm('Keluar dari sistem?')) { localStorage.removeItem('rct_user_id'); route(); }
+  window.logout = function () {
+    if (confirm('Keluar dari sistem?')) {
+      localStorage.removeItem('rct_user_id');
+      updateUserHeader();
+      setSearchVisible(false);
+      route();
+    }
+  };
+
+  window.forceReload = function () {
+    if ('caches' in window) caches.keys().then(function (ks) { ks.forEach(function (k) { caches.delete(k); }); });
+    location.reload();
+  };
+
+  window.doSearch = function () {
+    var q = (document.getElementById('global-search').value || '').trim().toUpperCase();
+    if (!q) {
+      alert('Ketik Item / Label / Rak dulu');
+      return;
+    }
+    location.hash = 'SEARCH:' + encodeURIComponent(q);
   };
 
   async function fetchData() {
     try {
       var res = await fetch(DATA_URL + '?t=' + Date.now(), { cache: 'no-store' });
       if (!res.ok) throw new Error('HTTP ' + res.status);
-      var text = await res.text();
-      var json = JSON.parse(text);
-
+      var json = JSON.parse(await res.text());
       allData = Array.isArray(json.data) ? json.data : [];
       bomData = (json.bom && typeof json.bom === 'object') ? json.bom : {};
-      syncInfo = { syncedAt: json.syncedAt, syncedAtLocal: json.syncedAtLocal, stats: json.stats || {} };
-
+      syncInfo = {
+        syncedAt: json.syncedAt,
+        syncedAtLocal: json.syncedAtLocal,
+        stats: json.stats || {}
+      };
       updateSyncInfo();
       updateUserHeader();
       route();
-    } catch (err) {
-      document.getElementById('content').innerHTML = '<div class="error-box"><div class="err-title">Gagal Memuat Data</div></div>';
+    } catch (e) {
+      document.getElementById('content').innerHTML =
+        '<div class="error-box"><div style="font-weight:800;margin-bottom:8px">Gagal memuat data</div>' +
+        (e.message || e) +
+        '<br><br><button onclick="location.reload()" style="padding:10px 16px;border:none;border-radius:8px;background:#0a2540;color:#fff;font-weight:700">Coba Lagi</button></div>';
     }
   }
-  
+
   function updateSyncInfo() {
     var el = document.getElementById('sync-info');
-    if (!syncInfo || !el) return;
-    el.innerHTML = '<span>✅ Update: <b>' + (syncInfo.syncedAtLocal || '') + '</b></span>' +
-                   '<button type="button" onclick="location.reload()">🔄 Refresh</button>';
+    if (!el || !syncInfo) return;
+    var bomN = Object.keys(bomData || {}).length;
+    el.innerHTML =
+      '<span>✅ Update: <b>' + (syncInfo.syncedAtLocal || '-') + '</b>' +
+      (bomN ? ' · BOM ' + bomN : '') + '</span>' +
+      '<button type="button" onclick="window.forceReload()">🔄 Refresh</button>';
   }
 
-  // ═══ ROUTER ═══
   function route() {
-    if (!isLoggedIn()) { renderLogin(); return; }
-    var hash = (location.hash || '').replace('#', '').toUpperCase().trim();
+    if (!isLoggedIn()) {
+      setSearchVisible(false);
+      renderLogin();
+      return;
+    }
+    setSearchVisible(true);
+    updateUserHeader();
+
+    var hash = (location.hash || '').replace(/^#/, '').trim();
+    var upper = hash.toUpperCase();
+
     if (!hash) { renderHome(); return; }
-    if (hash.startsWith('SEARCH:')) { renderSearch(hash.split(':')[1]); return; }
-    if (/^[A-Z]\d+-\d+$/.test(hash)) { renderRack(hash); return; }
-    if (/^[A-Z]\d+$/.test(hash)) { renderSubZone(hash); return; }
-    if (/^[A-Z]$/.test(hash)) { renderZone(hash); return; }
+    if (upper.indexOf('SEARCH:') === 0) {
+      renderSearch(decodeURIComponent(hash.slice(7)));
+      return;
+    }
+    if (/^[A-Za-z]\d+-\d+$/.test(hash)) { renderRack(upper); return; }
+    if (/^[A-Za-z]\d+$/.test(hash)) { renderSubZone(upper); return; }
+    if (/^[A-Za-z]$/.test(hash)) { renderZone(upper); return; }
     renderHome();
   }
   window.addEventListener('hashchange', route);
-  
-  // ═══ GLOBAL SEARCH (TAHAP 1) ═══
-  window.doSearch = function() {
-    var query = document.getElementById('global-search').value.trim().toUpperCase();
-    if (query) window.location.hash = 'SEARCH:' + encodeURIComponent(query);
-  };
 
-  function renderSearch(query) {
-    query = decodeURIComponent(query);
-    var cases = allData.filter(function(r) {
-      if (!r.isActive || (Number(r.actualRemain) || 0) <= 0) return false;
-      return (r.itemCd || '').toUpperCase().includes(query) || 
-             (r.arrivalNo || '').toUpperCase().includes(query) || 
-             (r.address || '').toUpperCase().includes(query) ||
-             (r.engItemNm || '').toUpperCase().includes(query);
-    });
-
-    var html = '<div class="result-card">' +
-      '<div class="result-header search">' +
-        '<div class="result-icon">🔍</div>' +
-        '<div class="result-title">PENCARIAN</div>' +
-        '<div class="result-sub">Hasil untuk: <b>' + query + '</b></div>' +
+  function renderLogin() {
+    document.getElementById('content').innerHTML =
+      '<div class="result-card" style="max-width:420px;margin:24px auto">' +
+        '<div class="result-header zone" style="background:linear-gradient(135deg,#0a2540,#1e3a8a)">' +
+          '<div class="result-icon">🔒</div>' +
+          '<div class="result-title" style="font-size:20px">LOGIN AKSES</div>' +
+        '</div>' +
+        '<div style="padding:20px">' +
+          '<form id="login-form">' +
+            '<label style="font-size:11px;font-weight:800;color:#475569">No ID</label>' +
+            '<div style="display:flex;align-items:center;border:2px solid #cbd5e1;border-radius:8px;padding:0 12px;margin:8px 0 16px;background:#f8fafc">' +
+              '<span style="font-weight:900;font-family:Consolas,monospace;color:#64748b;margin-right:6px">VPH</span>' +
+              '<input id="employee-id-input" type="tel" inputmode="numeric" pattern="[0-9]*" required autofocus ' +
+                'style="flex:1;border:none;background:transparent;padding:12px 0;font-size:18px;font-weight:900;font-family:Consolas,monospace;outline:none">' +
+            '</div>' +
+            '<button type="submit" class="navigate-btn zone" style="width:100%;border:none">🔓 MASUK</button>' +
+          '</form>' +
+        '</div>' +
       '</div>';
 
-    if (cases.length === 0) {
-      html += '<div class="empty-state"><div class="empty-icon">📭</div><div style="font-weight:700">Tidak ada barang cocok</div></div>';
+    document.getElementById('login-form').onsubmit = function (e) {
+      e.preventDefault();
+      var digits = document.getElementById('employee-id-input').value.replace(/[^0-9]/g, '');
+      var map = {
+        '18': 'VPH18 - Adm.RB', '39': 'VPH39 - Spv.AB', '10': 'VPH10 - PMgr.SG',
+        '21': 'VPH21 - Danang', '77': 'VPH77 - Fiki', '01': 'VPH01 - Wh.Park', '0': 'GUEST 👤'
+      };
+      if (map[digits]) {
+        localStorage.setItem('rct_user_id', map[digits]);
+        updateUserHeader();
+        route();
+      } else {
+        alert('ID tidak terdaftar');
+      }
+    };
+  }
+
+  function renderHome() {
+    var stats = (syncInfo && syncInfo.stats) || {};
+    var zones = [];
+    var seen = {};
+    allData.forEach(function (r) {
+      if (r.zone && !seen[r.zone]) { seen[r.zone] = 1; zones.push(r.zone); }
+    });
+    zones.sort();
+
+    document.getElementById('content').innerHTML =
+      '<div class="result-card">' +
+        '<div class="result-header zone">' +
+          '<div class="result-icon">📦</div>' +
+          '<div class="result-title" style="font-size:22px">WAREHOUSE</div>' +
+          '<div class="result-sub">Gunakan kotak cari di header, atau pilih zone</div>' +
+        '</div>' +
+        '<div class="stats-grid">' +
+          '<div class="stat-item"><div class="stat-val">' + Number(stats.activeRacks || 0).toLocaleString() + '</div><div class="stat-lbl">Racks</div></div>' +
+          '<div class="stat-item"><div class="stat-val">' + Number(stats.activeCases || 0).toLocaleString() + '</div><div class="stat-lbl">Cases</div></div>' +
+          '<div class="stat-item"><div class="stat-val">' + Number(stats.activeItems || 0).toLocaleString() + '</div><div class="stat-lbl">SKU</div></div>' +
+        '</div>' +
+        '<div class="hint-box">🔍 Cari Item / Label / Rak lewat kotak oranye di atas</div>' +
+        '<div class="rack-list">' +
+          '<div style="font-size:11px;font-weight:700;color:#64748b;margin-bottom:8px">🏢 ZONE</div>' +
+          zones.map(function (z) {
+            return '<a class="navigate-btn zone" style="margin-top:6px" href="#' + z + '">📍 ZONE ' + z + '</a>';
+          }).join('') +
+        '</div>' +
+      '</div>';
+  }
+
+  function renderSearch(query) {
+    query = String(query || '').toUpperCase().trim();
+    var input = document.getElementById('global-search');
+    if (input && !input.value) input.value = query;
+
+    var cases = allData.filter(function (r) {
+      if (!r.isActive || (Number(r.actualRemain) || 0) <= 0) return false;
+      var blob = [r.itemCd, r.arrivalNo, r.address, r.engItemNm, r.invNo].join(' ').toUpperCase();
+      return blob.indexOf(query) !== -1;
+    });
+
+    var html = '<div class="result-card"><div class="result-header search">' +
+      '<div class="result-icon">🔍</div><div class="result-title" style="font-size:22px">HASIL CARI</div>' +
+      '<div class="result-sub"><b>' + query + '</b> · ' + cases.length + ' label</div></div>';
+
+    if (!cases.length) {
+      html += '<div class="empty-state"><div class="empty-icon">📭</div><div style="font-weight:700">Tidak ketemu</div></div>';
     } else {
-      html += '<div class="hint-box">Ditemukan ' + cases.length + ' label aktif. Tap label untuk Action.</div><div class="case-list">';
-      cases.forEach(function(c) {
-        var safeArr = String(c.arrivalNo || '').trim().replace(/'/g, "\\'");
-        html +=
-          '<div class="case-card" onclick="window.openActionMenu(\'' + safeArr + '\')">' +
-            '<div>' +
-              '<div class="case-label">' + (c.arrivalNo || '-') + '</div>' +
-              '<div class="case-item">' + (c.itemCd || '-') + '</div>' +
-              '<div class="case-name">' + (c.engItemNm || '-') + '</div>' +
-              '<div class="case-meta"><span class="case-meta-addr">📍 ' + c.address + '</span> In: ' + (c.inDt || '-') + '</div>' +
-            '</div>' +
-            '<div><div class="case-qty">' + (Number(c.actualRemain) || 0).toLocaleString() + '</div><div class="case-qty-lbl">' + (c.unt || 'PCS') + '</div></div>' +
-          '</div>';
+      html += '<div class="case-list">';
+      cases.forEach(function (c) {
+        html += caseCardHtml(c, true);
       });
       html += '</div>';
     }
-    html += '<div style="padding:0 12px 12px"><a href="#" class="navigate-btn">🏠 Kembali ke Beranda</a></div></div>';
+    html += '<div style="padding:0 12px 12px"><a href="#" class="navigate-btn">🏠 Beranda</a></div></div>';
     document.getElementById('content').innerHTML = html;
   }
 
-  // ═══ RENDER VIEWS ═══
-  function renderHome() {
-    var zones = [...new Set(allData.map(r => r.zone))].filter(Boolean).sort();
-    document.getElementById('content').innerHTML = `
-      <div class="result-card" style="margin-bottom:0; border-bottom-left-radius:0; border-bottom-right-radius:0;">
-        <div class="result-header zone">
-          <div class="result-icon">📦</div>
-          <div class="result-title" style="font-size:22px;">WAREHOUSE</div>
-        </div>
-        <div class="search-wrapper">
-          <form onsubmit="event.preventDefault(); window.doSearch();" class="search-input-box">
-            <span style="font-size:18px;margin-right:6px">🔍</span>
-            <input type="text" id="global-search" placeholder="Cari Item / Label / Rak..." autocomplete="off">
-            <button type="submit" class="search-btn-go">CARI</button>
-          </form>
-        </div>
-      </div>
-      <div class="result-card" style="border-top-left-radius:0; border-top-right-radius:0;">
-        <div class="rack-list">
-          <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;margin-bottom:8px">🏢 Cek Manual via Zone</div>
-          ${zones.map(z => '<a href="#' + z + '" class="navigate-btn zone" style="margin-top:6px">📍 ZONE ' + z + '</a>').join('')}
-        </div>
-      </div>
-    `;
+  function caseCardHtml(c, showAddr) {
+    var safe = String(c.arrivalNo || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    var cls = c.status === 'LOW' ? 'low' : (c.isOld ? 'old' : '');
+    return '<div class="case-card ' + cls + '" onclick="window.openActionMenu(\'' + safe + '\')">' +
+      '<div>' +
+        '<div class="case-label">' + (c.arrivalNo || '-') + '</div>' +
+        '<div class="case-item">' + (c.itemCd || '-') + '</div>' +
+        '<div class="case-name">' + (c.engItemNm || '-') + '</div>' +
+        '<div class="case-meta">' +
+          (showAddr ? '<span class="case-meta-addr">📍 ' + (c.address || '-') + '</span> ' : '') +
+          'In: ' + (c.inDt || '-') +
+        '</div>' +
+      '</div>' +
+      '<div><div class="case-qty">' + (Number(c.actualRemain) || 0).toLocaleString() + '</div>' +
+      '<div class="case-qty-lbl">' + (c.unt || 'PCS') + '</div></div>' +
+    '</div>';
   }
 
   function renderRack(rackAddr) {
-    var cases = allData.filter(r => r.address === rackAddr && r.isActive === true && (Number(r.actualRemain) || 0) > 0);
-    if (!allData.some(r => r.address === rackAddr)) { renderHome(); return; }
-    
+    var cases = allData.filter(function (r) {
+      return r.address === rackAddr && r.isActive === true && (Number(r.actualRemain) || 0) > 0;
+    });
+    if (!allData.some(function (r) { return r.address === rackAddr; })) {
+      document.getElementById('content').innerHTML =
+        '<div class="result-card"><div class="result-header notfound"><div class="result-title">' + rackAddr + '</div><div class="result-sub">Tidak ditemukan</div></div>' +
+        '<div style="padding:16px"><a href="#" class="navigate-btn">🏠 Beranda</a></div></div>';
+      return;
+    }
+    var m = rackAddr.match(/^([A-Z]\d+)/);
+    var sub = m ? m[1] : '';
     var zone = rackAddr.charAt(0);
-    var html = '<div class="result-card"><div class="result-header rack"><div class="result-icon">📍</div><div class="result-title">' + rackAddr + '</div></div>';
-    
-    if (cases.length === 0) {
-      html += '<div class="empty-state">Rak Kosong</div>';
-    } else {
-      html += '<div class="case-list">';
-      cases.forEach(c => {
-        var safeArr = String(c.arrivalNo || '').trim().replace(/'/g, "\\'");
-        html += `
-          <div class="case-card" onclick="window.openActionMenu('${safeArr}')">
-            <div>
-              <div class="case-label">${c.arrivalNo || '-'}</div>
-              <div class="case-item">${c.itemCd || '-'}</div>
-              <div class="case-name">${c.engItemNm || '-'}</div>
-            </div>
-            <div><div class="case-qty">${Number(c.actualRemain) || 0}</div></div>
-          </div>`;
-      });
+    var total = cases.reduce(function (s, c) { return s + (Number(c.actualRemain) || 0); }, 0);
+    var skus = {};
+    cases.forEach(function (c) { if (c.itemCd) skus[c.itemCd] = 1; });
+
+    var html = '<div class="result-card"><div class="result-header rack">' +
+      '<div class="result-icon">📍</div><div class="result-title">' + rackAddr + '</div>' +
+      '<div class="result-sub">Detail Rak</div></div>' +
+      '<div class="stats-grid">' +
+        '<div class="stat-item"><div class="stat-val">' + cases.length + '</div><div class="stat-lbl">Cases</div></div>' +
+        '<div class="stat-item"><div class="stat-val">' + Object.keys(skus).length + '</div><div class="stat-lbl">Items</div></div>' +
+        '<div class="stat-item"><div class="stat-val">' + total.toLocaleString() + '</div><div class="stat-lbl">Pcs</div></div>' +
+      '</div>';
+
+    if (!cases.length) html += '<div class="empty-state">Rak kosong</div>';
+    else {
+      html += '<div class="hint-box">Tap label → Action (BOM / Registry)</div><div class="case-list">';
+      cases.forEach(function (c) { html += caseCardHtml(c, false); });
       html += '</div>';
     }
-    html += '<div style="padding:0 12px 12px"><a href="#' + zone + '" class="navigate-btn zone">🏢 Kembali ke Zone ' + zone + '</a></div></div>';
+    if (sub) html += '<div style="padding:0 12px 8px"><a class="navigate-btn sub" href="#' + sub + '">🔷 Sub ' + sub + '</a></div>';
+    html += '<div style="padding:0 12px 12px"><a class="navigate-btn zone" href="#' + zone + '">🏢 Zone ' + zone + '</a></div></div>';
+    document.getElementById('content').innerHTML = html;
+  }
+
+  function renderSubZone(subId) {
+    var map = {};
+    allData.forEach(function (r) {
+      if (!r.address || r.address.indexOf(subId + '-') !== 0) return;
+      if (!map[r.address]) map[r.address] = { address: r.address, n: 0, pcs: 0 };
+      if (r.isActive && (Number(r.actualRemain) || 0) > 0) {
+        map[r.address].n++;
+        map[r.address].pcs += Number(r.actualRemain) || 0;
+      }
+    });
+    var racks = Object.keys(map).map(function (k) { return map[k]; })
+      .sort(function (a, b) { return a.address.localeCompare(b.address, undefined, { numeric: true }); });
+    if (!racks.length) { renderHome(); return; }
+    var zone = subId.charAt(0);
+    var html = '<div class="result-card"><div class="result-header sub">' +
+      '<div class="result-icon">🔷</div><div class="result-title">' + subId + '</div></div><div class="rack-list">';
+    racks.forEach(function (r) {
+      var cls = r.n ? 'full' : 'empty';
+      html += '<a href="#' + r.address + '" style="text-decoration:none;color:inherit">' +
+        '<div class="rack-item ' + cls + '"><div class="ri-addr">' + r.address + '</div>' +
+        '<div class="ri-info">' + (r.n ? ('<b>' + r.n + '</b>c · <b>' + r.pcs.toLocaleString() + '</b> pcs') : 'Kosong') + '</div>' +
+        '<div class="ri-fill">' + (r.n || '—') + '</div></div></a>';
+    });
+    html += '<a class="navigate-btn zone" href="#' + zone + '">🏢 Zone ' + zone + '</a></div></div>';
     document.getElementById('content').innerHTML = html;
   }
 
   function renderZone(zone) {
-    var racksMap = {};
-    allData.forEach(r => {
-      if (r.zone === zone && r.isActive && (Number(r.actualRemain) || 0) > 0) {
-        if(!racksMap[r.address]) racksMap[r.address] = 0;
-        racksMap[r.address] += Number(r.actualRemain);
+    var map = {};
+    allData.forEach(function (r) {
+      if (r.zone !== zone) return;
+      var m = (r.address || '').match(/^([A-Z]\d+)/);
+      if (!m) return;
+      var sub = m[1];
+      if (!map[sub]) map[sub] = { pcs: 0, n: 0 };
+      if (r.isActive && (Number(r.actualRemain) || 0) > 0) {
+        map[sub].pcs += Number(r.actualRemain) || 0;
+        map[sub].n++;
       }
     });
-    var html = '<div class="result-card"><div class="result-header zone"><div class="result-title">ZONE ' + zone + '</div></div><div class="rack-list">';
-    Object.keys(racksMap).sort().forEach(addr => {
-      html += `<a href="#${addr}" style="text-decoration:none;color:inherit">
-        <div class="rack-item full"><div class="ri-addr">${addr}</div><div class="ri-fill">${racksMap[addr]} pcs</div></div></a>`;
+    var keys = Object.keys(map).sort(function (a, b) { return a.localeCompare(b, undefined, { numeric: true }); });
+    var html = '<div class="result-card"><div class="result-header zone">' +
+      '<div class="result-icon">🏢</div><div class="result-title">ZONE ' + zone + '</div></div><div class="rack-list">';
+    keys.forEach(function (sub) {
+      html += '<a href="#' + sub + '" style="text-decoration:none;color:inherit">' +
+        '<div class="rack-item ' + (map[sub].n ? 'full' : 'empty') + '">' +
+        '<div class="ri-addr">' + sub + '</div>' +
+        '<div class="ri-info"><b>' + map[sub].pcs.toLocaleString() + '</b> pcs</div>' +
+        '<div class="ri-fill">' + map[sub].n + '</div></div></a>';
     });
-    html += '<a href="#" class="navigate-btn" style="margin-top:12px">🏠 Home</a></div></div>';
+    html += '<a href="#" class="navigate-btn" style="margin-top:12px">🏠 Beranda</a></div></div>';
     document.getElementById('content').innerHTML = html;
   }
-  
-  function renderSubZone(subId) { renderZone(subId.charAt(0)); }
-  function renderLogin() { /* Same as before, logic handled above */ }
 
-  // ═══ MODAL ACTION & MOCKUP REGISTRY (TAHAP 2) ═══
-  window.closeModal = function(id, e) {
+  window.closeModal = function (id, e) {
     if (e) { e.preventDefault(); e.stopPropagation(); }
-    document.getElementById(id).classList.remove('active');
+    var m = document.getElementById(id);
+    if (m) m.classList.remove('active');
     document.body.style.overflow = '';
   };
 
-  window.openActionMenu = function(arrivalNo) {
-    selectedCase = allData.find(c => c.arrivalNo === arrivalNo);
+  window.openActionMenu = function (arrivalNo) {
+    selectedCase = null;
+    for (var i = 0; i < allData.length; i++) {
+      if (String(allData[i].arrivalNo || '') === String(arrivalNo)) {
+        selectedCase = allData[i];
+        break;
+      }
+    }
     if (!selectedCase) return;
 
-    document.getElementById('act-label').textContent = selectedCase.arrivalNo;
-    document.getElementById('act-item').textContent = selectedCase.itemCd + ' - ' + selectedCase.engItemNm;
+    document.getElementById('act-label').textContent = selectedCase.arrivalNo || '-';
+    document.getElementById('act-item').textContent =
+      (selectedCase.itemCd || '-') + ' — ' + (selectedCase.engItemNm || '-');
 
-    document.getElementById('btn-act-bom').onclick = function() {
+    document.getElementById('btn-act-bom').onclick = function () {
       closeModal('action-modal');
       showBOM(selectedCase.itemCd);
     };
-    
-    document.getElementById('btn-act-reg').onclick = function() {
+    document.getElementById('btn-act-reg').onclick = function () {
       closeModal('action-modal');
       showRegistry();
     };
@@ -502,10 +679,9 @@
     document.body.style.overflow = 'hidden';
   };
 
-  window.showRegistry = function() {
-    if (!selectedCase) return;
+  function showRegistry() {
     var c = selectedCase;
-
+    if (!c) return;
     document.getElementById('reg-label').value = c.arrivalNo || '';
     document.getElementById('reg-date').value = c.inDt || '';
     document.getElementById('reg-item').value = c.itemCd || '';
@@ -513,40 +689,49 @@
     document.getElementById('reg-qty').value = c.actualRemain || 0;
     document.getElementById('reg-addr').value = c.address || '';
     document.getElementById('reg-inv').value = c.invNo || '';
-    
     document.getElementById('reg-tbl-date').textContent = c.inDt || '-';
     document.getElementById('reg-tbl-qty').textContent = c.actualRemain || '0';
-
     document.getElementById('reg-modal').classList.add('active');
     document.body.style.overflow = 'hidden';
+  }
+
+  window.mockAction = function (name) {
+    alert('🚧 TAHAP 3 — Coming soon\n\n[' + name + '] untuk ' +
+      (selectedCase && selectedCase.arrivalNo ? selectedCase.arrivalNo : '-') +
+      '\n\nNanti perintah dikirim ke PC untuk dieksekusi di MangoTree.');
   };
 
-  window.mockAction = function(actionName) {
-    alert('🚧 TAHAP 3 COMING SOON!\n\nPerintah [' + actionName + '] untuk label ' + selectedCase.arrivalNo + ' siap dikirim ke PC WMS untuk dieksekusi secara otomatis.');
-  };
+  function showBOM(itemCd) {
+    var raw = String(itemCd || '').trim();
+    document.getElementById('bom-target-code').textContent = raw;
+    document.getElementById('bom-target-name').textContent =
+      selectedCase ? (selectedCase.engItemNm || '-') : '-';
 
-  // ═══ BOM REVERSE ═══
-  window.showBOM = function(itemCd) {
-    var rawCd = String(itemCd).trim();
-    document.getElementById('bom-target-code').textContent = rawCd;
-    document.getElementById('bom-target-name').textContent = selectedCase ? selectedCase.engItemNm : '-';
-
-    var container = document.getElementById('bom-list-container');
-    var list = bomData[rawCd] || bomData[rawCd.toUpperCase()] || [];
+    var list = bomData[raw] || bomData[raw.toUpperCase()] || bomData[raw.toLowerCase()] || [];
+    var box = document.getElementById('bom-list-container');
 
     if (!list.length) {
-      container.innerHTML = '<div style="text-align:center;padding:30px 10px;color:#64748b;">Belum ada mapping BOM.</div>';
+      box.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div>' +
+        '<div style="font-weight:800;color:#0a2540">Belum ada BOM di Gist</div>' +
+        '<div style="font-size:12px;margin-top:8px">Sync ulang dari PC Control Tower</div></div>';
     } else {
-      var rows = list.map(function(bom) {
+      var rows = list.map(function (bom) {
         var type = String(bom.type || 'COMP').toUpperCase();
-        var pill = type === 'COMP' ? 'comp' : 'fing';
-        return '<tr><td class="bom-td-type"><span class="bom-pill '+pill+'">'+type+'</span></td><td><div class="bom-td-code">'+bom.parentCd+'</div><div class="bom-td-name">'+bom.parentNm+'</div></td><td class="bom-td-qty">'+bom.qty+'</td></tr>';
+        var pill = type === 'COMP' ? 'comp' : (type === 'FING' ? 'fing' : '');
+        return '<tr><td><span class="bom-pill ' + pill + '">' + type + '</span></td>' +
+          '<td><div class="bom-td-code">' + (bom.parentCd || '-') + '</div>' +
+          '<div class="bom-td-name">' + (bom.parentNm || '-') + '</div></td>' +
+          '<td class="bom-td-qty">' + (bom.qty != null ? bom.qty : 1) + '</td></tr>';
       }).join('');
-      container.innerHTML = '<div class="bom-table-wrap"><table class="bom-table"><thead><tr><th>Type</th><th>Model</th><th style="text-align:right">Qty</th></tr></thead><tbody>' + rows + '</tbody></table></div>';
+      box.innerHTML =
+        '<div class="bom-count">🧩 ' + list.length + ' parent model</div>' +
+        '<div class="bom-table-wrap"><table class="bom-table">' +
+        '<thead><tr><th>Type</th><th>Model</th><th style="text-align:right">Qty</th></tr></thead>' +
+        '<tbody>' + rows + '</tbody></table></div>';
     }
     document.getElementById('bom-modal').classList.add('active');
     document.body.style.overflow = 'hidden';
-  };
+  }
 
   fetchData();
 })();
