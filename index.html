@@ -53,7 +53,7 @@
   .case-card:active { transform: scale(0.98); background: #f1f5f9; }
   .case-card.low { border-left-color: #dc2626; background: #fef2f2; }
   .case-card.old { border-left-color: #f59e0b; background: #fffbeb; }
-  .case-card::after { content: "⚙️ ACTION"; position: absolute; top: 10px; right: 10px; font-size: 9px; font-weight: 800; color: #1d4ed8; background: #dbeafe; padding: 3px 8px; border-radius: 6px; border: 1px solid #bfdbfe; }
+  .case-card::after { content: "🔍 Cek Model"; position: absolute; top: 10px; right: 10px; font-size: 9px; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 3px 8px; border-radius: 6px; border: 1px solid #bae6fd; }
   .case-label { font-family: Consolas, monospace; font-weight: 800; color: #0a2540; font-size: 14px; }
   .case-item { font-family: Consolas, monospace; font-weight: 700; color: #7c3aed; font-size: 12px; margin-top: 2px; }
   .case-name { font-size: 11px; color: #64748b; margin-top: 3px; padding-right: 70px; line-height: 1.3; }
@@ -83,8 +83,6 @@
   .modal-overlay.active .modal-content { transform: translateY(0); }
   .modal-header { padding: 16px; position: relative; flex-shrink: 0; color: white; }
   .modal-header.bg-dark { background: linear-gradient(135deg, #0a2540 0%, #1e3a8a 100%); }
-  .modal-header.bg-action { background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%); }
-  .modal-header.bg-reg { background: linear-gradient(135deg, #0f766e 0%, #047857 100%); }
   .close-btn { position: absolute; top: 14px; right: 14px; background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; font-size: 14px; cursor: pointer; font-weight: bold; }
   .modal-title { font-size: 15px; font-weight: 800; padding-right: 36px; }
   .modal-sub { font-size: 11px; opacity: 0.85; margin-top: 4px; }
@@ -93,27 +91,6 @@
   .target-box { background: rgba(0,0,0,0.22); padding: 10px 12px; border-radius: 10px; margin-top: 12px; border-left: 3px solid #38bdf8; }
   .target-code { font-family: Consolas, monospace; font-size: 14px; font-weight: 900; color: #38bdf8; }
   .target-name { font-size: 11px; margin-top: 3px; opacity: 0.9; line-height: 1.3; }
-
-  .action-btn-large { display: flex; align-items: center; gap: 12px; background: white; border: 2px solid #e2e8f0; border-radius: 12px; padding: 16px; margin-bottom: 12px; font-size: 14px; font-weight: 800; color: #0f172a; cursor: pointer; }
-  .action-btn-large:active { background: #f1f5f9; transform: scale(0.98); }
-  .action-btn-large .icon { font-size: 24px; }
-  .action-btn-large .sub { font-size: 10px; font-weight: 500; color: #64748b; margin-top: 4px; }
-
-  #reg-modal .modal-content { height: 95vh; max-height: 95vh; }
-  .reg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 14px 0; border-bottom: 1px solid #e2e8f0; }
-  .reg-grid.full { grid-template-columns: 1fr; padding-top: 0; }
-  .reg-field { display: flex; flex-direction: column; }
-  .reg-field label { font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
-  .reg-field input, .reg-field select { padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 12px; font-family: Consolas, monospace; font-weight: 700; color: #0f172a; }
-  .reg-field input:disabled { background: #e2e8f0; color: #475569; }
-  .reg-action-bar { padding: 12px 0 0; display: flex; gap: 8px; justify-content: flex-end; border-top: 1px solid #e2e8f0; }
-  .reg-btn { padding: 10px 16px; border: none; border-radius: 8px; font-weight: 800; font-size: 12px; color: white; cursor: pointer; }
-  .reg-btn.save { background: #16a34a; }
-  .reg-btn.close { background: #f59e0b; }
-  .reg-mock-table { width: 100%; border-collapse: collapse; font-size: 10px; text-align: center; margin-top: 8px;}
-  .reg-mock-table th { background: #0ea5e9; color: white; padding: 8px; }
-  .reg-mock-table td { padding: 8px; border: 1px solid #e2e8f0; }
-  .reg-mini-btn { border: none; padding: 4px 8px; border-radius: 4px; font-size: 9px; font-weight: bold; color: white; cursor: pointer; margin: 2px; }
 
   #bom-modal .modal-content { height: min(92vh, 780px); }
   .bom-count { font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 6px; }
@@ -160,75 +137,7 @@
   <div class="loading"><div class="spinner"></div><div style="font-weight:700;color:#fff">Memuat data...</div></div>
 </div>
 
-<!-- ACTION MENU -->
-<div class="modal-overlay" id="action-modal" onclick="closeModal('action-modal', event)">
-  <div class="modal-content" onclick="event.stopPropagation()">
-    <div class="modal-header bg-action">
-      <button class="close-btn" type="button" onclick="closeModal('action-modal')">✕</button>
-      <div class="modal-title">⚙️ PILIH TINDAKAN</div>
-      <div class="target-box">
-        <div class="target-code" id="act-label">-</div>
-        <div class="target-name" id="act-item">-</div>
-      </div>
-    </div>
-    <div class="modal-body">
-      <div class="action-btn-large" id="btn-act-bom">
-        <div class="icon">🔍</div>
-        <div><div>Lihat Model (BOM)</div><div class="sub">Where-used part di line produksi</div></div>
-      </div>
-      <div class="action-btn-large" id="btn-act-reg">
-        <div class="icon">📦</div>
-        <div><div>Registrasi / Eksekusi</div><div class="sub">Pindah alamat, Consume, atau Return</div></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- REGISTRY MODAL -->
-<div class="modal-overlay" id="reg-modal" onclick="closeModal('reg-modal', event)">
-  <div class="modal-content" onclick="event.stopPropagation()">
-    <div class="modal-header bg-reg">
-      <button class="close-btn" type="button" onclick="closeModal('reg-modal')">✕</button>
-      <div class="modal-title">📝 RAW MATERIAL REGISTRY</div>
-      <div class="modal-sub">Form Eksekusi Logistik Real-Time WMS</div>
-    </div>
-    <div class="modal-body">
-      <div class="reg-grid full">
-        <div class="reg-field"><label>Supplier Name</label><select id="reg-supplier"><option>1. PYEONGHWA VALEO</option><option>2. SELIM</option></select></div>
-      </div>
-      <div class="reg-grid">
-        <div class="reg-field"><label>Arrival Number</label><input type="text" id="reg-label" disabled></div>
-        <div class="reg-field"><label>Stock Date</label><input type="text" id="reg-date" disabled></div>
-        <div class="reg-field"><label>Part Number</label><input type="text" id="reg-item" disabled></div>
-        <div class="reg-field"><label>Quantity</label><input type="number" id="reg-qty"></div>
-        <div class="reg-field"><label>Address</label><input type="text" id="reg-addr"></div>
-        <div class="reg-field"><label>Invoice No</label><input type="text" id="reg-inv"></div>
-      </div>
-      <div class="reg-grid full" style="border:none">
-        <div class="reg-field"><label>Part Name</label><input type="text" id="reg-name" disabled></div>
-      </div>
-      
-      <div style="background:#0ea5e9;color:#fff;font-size:11px;font-weight:800;padding:8px;border-radius:6px 6px 0 0;margin-top:12px;">⚙️ Label List Action</div>
-      <table class="reg-mock-table">
-        <tr><th>Scan</th><th>Stock Date</th><th>Q'ty</th><th>Used</th><th>Back</th><th>Action</th></tr>
-        <tr>
-          <td>Yes</td><td id="reg-tbl-date">-</td><td id="reg-tbl-qty">-</td><td>0</td><td>0</td>
-          <td>
-            <button type="button" class="reg-mini-btn" style="background:#dc2626" onclick="executeAction('Return')">Return</button>
-            <button type="button" class="reg-mini-btn" style="background:#059669" onclick="executeAction('Consume')">Consume</button>
-          </td>
-        </tr>
-      </table>
-
-      <div class="reg-action-bar">
-        <button type="button" class="reg-btn close" onclick="closeModal('reg-modal')">✖ Close</button>
-        <button type="button" class="reg-btn save" id="btn-save-reg" onclick="executeAction('Save / Pindah Alamat')">💾 Save</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- BOM -->
+<!-- MODAL BOM REVERSE VIEW -->
 <div class="modal-overlay" id="bom-modal" onclick="closeModal('bom-modal', event)">
   <div class="modal-content" onclick="event.stopPropagation()">
     <div class="modal-header bg-dark">
@@ -250,9 +159,6 @@
   var GIST_ID = '63d8a8f7a35183a3ad28455587fc68fd';
   var DATA_URL = 'https://gist.githubusercontent.com/biansyah07/' + GIST_ID + '/raw/rct-data.json';
   
-  // URL JEMBATAN GOOGLE APPS SCRIPT LO (TAHAP 3)
-  var BRIDGE_URL = 'https://script.google.com/macros/s/AKfycbzoMUJSbqJvYyzwF4H3Gg3NyHnhSUic-TycA3U7TXWC42ZHTDpJlCctqW1erMkEZRRj/exec';
-
   var allData = [];
   var syncInfo = null;
   var bomData = {};
@@ -477,7 +383,7 @@
   function caseCardHtml(c, showAddr) {
     var safe = String(c.arrivalNo || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     var cls = c.status === 'LOW' ? 'low' : (c.isOld ? 'old' : '');
-    return '<div class="case-card ' + cls + '" onclick="window.openActionMenu(\'' + safe + '\')">' +
+    return '<div class="case-card ' + cls + '" onclick="window.openBOMByLabel(\'' + safe + '\')">' +
       '<div>' +
         '<div class="case-label">' + (c.arrivalNo || '-') + '</div>' +
         '<div class="case-item">' + (c.itemCd || '-') + '</div>' +
@@ -504,7 +410,7 @@
 
     if (!cases.length) html += '<div class="empty-state">Rak kosong</div>';
     else {
-      html += '<div class="hint-box">Tap label → Action (BOM / Registry)</div><div class="case-list">';
+      html += '<div class="hint-box">Tap label untuk lihat Model (BOM Reverse)</div><div class="case-list">';
       cases.forEach(function (c) { html += caseCardHtml(c, false); });
       html += '</div>';
     }
@@ -558,75 +464,11 @@
     document.body.style.overflow = '';
   };
 
-  window.openActionMenu = function (arrivalNo) {
+  // Klik Card = Langsung Buka BOM Reverse
+  window.openBOMByLabel = function (arrivalNo) {
     selectedCase = allData.find(function(c) { return c.arrivalNo === arrivalNo; });
     if (!selectedCase) return;
-
-    document.getElementById('act-label').textContent = selectedCase.arrivalNo || '-';
-    document.getElementById('act-item').textContent = (selectedCase.itemCd || '-') + ' — ' + (selectedCase.engItemNm || '-');
-
-    document.getElementById('btn-act-bom').onclick = function () { closeModal('action-modal'); showBOM(selectedCase.itemCd); };
-    document.getElementById('btn-act-reg').onclick = function () { closeModal('action-modal'); showRegistry(); };
-
-    document.getElementById('action-modal').classList.add('active');
-    document.body.style.overflow = 'hidden';
-  };
-
-  function showRegistry() {
-    var c = selectedCase;
-    if (!c) return;
-    document.getElementById('reg-label').value = c.arrivalNo || '';
-    document.getElementById('reg-date').value = c.inDt || '';
-    document.getElementById('reg-item').value = c.itemCd || '';
-    document.getElementById('reg-name').value = c.engItemNm || '';
-    document.getElementById('reg-qty').value = c.actualRemain || 0;
-    document.getElementById('reg-addr').value = c.address || '';
-    document.getElementById('reg-inv').value = c.invNo || '';
-    document.getElementById('reg-tbl-date').textContent = c.inDt || '-';
-    document.getElementById('reg-tbl-qty').textContent = c.actualRemain || '0';
-    document.getElementById('reg-modal').classList.add('active');
-    document.body.style.overflow = 'hidden';
-  }
-
-  // ==== TAHAP 3 REAL-TIME ACTION TO GOOGLE SHEET ====
-  window.executeAction = async function (actionType) {
-    var usr = localStorage.getItem('rct_user_id') || 'GUEST';
-    var qty = document.getElementById('reg-qty').value;
-    var addr = document.getElementById('reg-addr').value;
-
-    if (!selectedCase) return;
-
-    var payload = {
-      user: usr,
-      action: actionType,
-      label: selectedCase.arrivalNo,
-      itemCd: selectedCase.itemCd,
-      qty: qty,
-      address: addr
-    };
-
-    if (!confirm("Kirim perintah [" + actionType + "] untuk label " + selectedCase.arrivalNo + " ke PC Robot?")) return;
-
-    try {
-      // Tampilkan indikator kirim
-      var btnSave = document.getElementById('btn-save-reg');
-      if (btnSave) { btnSave.disabled = true; btnSave.textContent = "⏳ Sending..."; }
-
-      // Kirim ke Google Apps Script Jembatan
-      await fetch(BRIDGE_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
-      });
-
-      alert("🚀 PERINTAH TERKIRIM!\n\nPerintah [" + actionType + "] berhasil masuk antrian PC Robot. Silakan cek beberapa saat lagi.");
-      closeModal('reg-modal');
-    } catch (err) {
-      alert("⚠️ Perintah terkirim ke antrian (background mode).");
-      closeModal('reg-modal');
-    } finally {
-      if (btnSave) { btnSave.disabled = false; btnSave.textContent = "💾 Save"; }
-    }
+    showBOM(selectedCase.itemCd);
   };
 
   function showBOM(itemCd) {
