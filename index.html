@@ -120,7 +120,7 @@
   /* === SETTINGAN KHUSUS PRINT PDF (DIRAPIHKAN) === */
   #print-area { display: none; }
   @media print {
-    @page { size: A4; margin: 15mm 10mm; } /* Margin kertas standar PDF */
+    @page { size: A4; margin: 15mm 10mm; }
     body { background: white; color: black; font-family: 'Segoe UI', Arial, sans-serif; padding: 0; margin: 0; }
     body > *:not(#print-area) { display: none !important; }
     #print-area { display: block !important; width: 100%; }
@@ -133,7 +133,7 @@
     .print-table th, .print-table td { border: 1px solid #cbd5e1; padding: 8px 6px; vertical-align: middle; }
     .print-table th { background-color: #f1f5f9 !important; -webkit-print-color-adjust: exact; font-weight: 800; color: #0a2540; text-transform: uppercase; text-align: center; font-size: 10px;}
     .print-table td { color: #0f172a; }
-    .print-table tr:nth-child(even) td { background-color: #f8fafc !important; -webkit-print-color-adjust: exact; } /* Belang-belang abu putih */
+    .print-table tr:nth-child(even) td { background-color: #f8fafc !important; -webkit-print-color-adjust: exact; }
     .print-table td.qty { text-align: right; font-weight: bold; font-family: Consolas, monospace; font-size: 12px; }
     .print-table td.center { text-align: center; }
     
@@ -215,7 +215,6 @@
     var today = getTodayString();
     var maxMs = 14 * 60 * 60 * 1000;
     
-    // Auto logout ganti hari atau lewat 14 jam
     if (loginDate && loginDate !== today) { window.logout(true); return false; }
     if (loginAt && (Date.now() - loginAt > maxMs)) { window.logout(true); return false; }
 
@@ -374,7 +373,7 @@
                 'style="flex:1;border:none;background:transparent;padding:12px 0;font-size:18px;font-weight:900;font-family:Consolas,monospace;outline:none;color:#0f172a">' +
             '</div>' +
             '<div style="font-size:10px; color:#64748b; line-height:1.4; margin-bottom:20px;">' +
-              '🔒 Silakan masukkan Nomor ID (Hanya Angka).<br>Hubungi <b>Admin WMS</b> jika Anda belum memiliki akses.' +
+              '🔒 Silakan masukkan Nomor ID Anda.<br><i>Hubungi Admin WMS jika Anda belum memiliki akses.</i>' +
             '</div>' +
             '<button type="submit" class="navigate-btn zone" style="width:100%;border:none;font-size:14px;padding:16px;">🔓 MASUK SISTEM</button>' +
           '</form>' +
@@ -437,7 +436,6 @@
     query = String(query || '').toUpperCase().trim();
     if (!query) return alert('Tidak ada pencarian.');
 
-    // Logic pencarian harus sama dengan yang di renderSearch
     var cases = allData.filter(function (r) {
       if (!r.isActive || (Number(r.actualRemain) || 0) <= 0) return false;
       var blob = [r.itemCd, r.arrivalNo, r.address, r.engItemNm, r.invNo].join(' ').toUpperCase();
@@ -456,14 +454,8 @@
 
     if (!cases.length) return alert('Tidak ada data untuk di-export.');
 
-    // Urutkan by Address -> ItemCode -> ArrivalNo
-    cases = cases.slice().sort(function (a, b) {
-      var c1 = String(a.address || '').localeCompare(String(b.address || ''), undefined, { numeric: true });
-      if (c1) return c1;
-      var c2 = String(a.itemCd || '').localeCompare(String(b.itemCd || ''));
-      if (c2) return c2;
-      return String(a.arrivalNo || '').localeCompare(String(b.arrivalNo || ''));
-    });
+    // FIFO Sort
+    cases = sortFifoByLabel(cases);
 
     function cell(v) {
       var s = String(v == null ? '' : v);
@@ -491,7 +483,7 @@
     lines.push(['', '', '', '', '', '', '', 'Keyword', cell(query), ''].join(','));
     lines.push(['', '', '', '', '', '', '', 'Exported At', cell(new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })), ''].join(','));
 
-    var csv = '\uFEFF' + lines.join('\r\n'); // UTF-8 BOM
+    var csv = '\uFEFF' + lines.join('\r\n'); 
     var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
@@ -505,20 +497,51 @@
     setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
   };
 
+  // ═══ PENGURUTAN FIFO (OLDEST FIRST) ═══
+  function fifoTime(c) {
+    var d = String(c.inDt || '').trim();
+    var m;
+    // inDt: 03/08/2026 atau 03-08-2026
+    m = d.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
+    if (m) {
+      var y1 = +m[3];
+      if (y1 < 100) y1 += 2000;
+      return new Date(y1, +m[2] - 1, +m[1]).getTime();
+    }
+    // inDt: 2026-08-03
+    m = d.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/);
+    if (m) return new Date(+m[1], +m[2] - 1, +m[3]).getTime();
+
+    // Arrival No / Label: DDMMYY-xxx  →  090425-001 = 09/04/2025
+    var a = String(c.arrivalNo || '').trim();
+    m = a.match(/^(\d{2})(\d{2})(\d{2})/);
+    if (m) {
+      var dd = +m[1], mm = +m[2], yy = +m[3];
+      return new Date(2000 + yy, mm - 1, dd).getTime();
+    }
+    return Number.MAX_SAFE_INTEGER; 
+  }
+
+  function sortFifoByLabel(cases) {
+    return (cases || []).slice().sort(function (a, b) {
+      var ta = fifoTime(a), tb = fifoTime(b);
+      if (ta !== tb) return ta - tb; // Lama -> Baru
+      return String(a.arrivalNo || '').localeCompare(String(b.arrivalNo || ''), undefined, { numeric: true });
+    });
+  }
+
   // ═══ SMART SEARCH ═══
   function renderSearch(query) {
     query = String(query || '').toUpperCase().trim();
     var input = document.getElementById('global-search');
     if (input && !input.value) input.value = query;
 
-    // 1. Filter awal (seperti biasa)
     var cases = allData.filter(function (r) {
       if (!r.isActive || (Number(r.actualRemain) || 0) <= 0) return false;
       var blob = [r.itemCd, r.arrivalNo, r.address, r.engItemNm, r.invNo].join(' ').toUpperCase();
       return blob.indexOf(query) !== -1;
     });
 
-    // 2. SMART EXACT MATCH: Jika ada yg match persis (misal 'IL1SQ'), buang yg parsial (misal 'IL1SQ(V)')
     if (query.length >= 3) {
       var exactMatches = cases.filter(function(r) {
         var ic = String(r.itemCd || '').toUpperCase();
@@ -526,8 +549,11 @@
         var ad = String(r.address || '').toUpperCase();
         return ic === query || ic === 'ID' + query || ar === query || ad === query;
       });
-      if (exactMatches.length > 0) cases = exactMatches; // Timpa hasil dengan yg exact aja!
+      if (exactMatches.length > 0) cases = exactMatches; 
     }
+
+    // Terapkan FIFO Sort!
+    cases = sortFifoByLabel(cases);
 
     var totalQty = cases.reduce(function(s, c) { return s + (Number(c.actualRemain) || 0); }, 0);
 
@@ -537,19 +563,17 @@
 
     if (!cases.length) {
       html += '<div class="empty-state"><div class="empty-icon">📭</div><div style="font-weight:700">Tidak ketemu</div></div>';
-      document.getElementById('print-area').innerHTML = ''; // Kosongkan print area
+      document.getElementById('print-area').innerHTML = ''; 
     } else {
-      // Tombol Export
       html += '<div class="export-row">' +
-        '<button type="button" onclick="window.printPDF()" class="navigate-btn pdf">🖨️ PDF / Cetak Laporan</button>' +
-        '<button type="button" onclick="window.exportExcelSearch(\'' + String(query).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')" class="navigate-btn excel">📊 Export Excel</button>' +
+        '<button type="button" onclick="window.printPDF()" class="navigate-btn pdf">🖨️ PDF / Cetak</button>' +
+        '<button type="button" onclick="window.exportExcelSearch(\'' + String(query).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')" class="navigate-btn excel">📊 Excel</button>' +
       '</div>';
       
       html += '<div class="case-list">';
       cases.forEach(function (c) { html += caseCardHtml(c, true); });
       html += '</div>';
 
-      // GENERATE PRINT HTML
       var dateNow = new Date().toLocaleString('id-ID', {timeZone: 'Asia/Jakarta'});
       var printHtml = 
         '<div class="print-header">' +
@@ -594,6 +618,10 @@
     var m = rackAddr.match(/^([A-Z]\d+)/);
     var sub = m ? m[1] : '';
     var zone = rackAddr.charAt(0);
+    
+    // Terapkan FIFO di dalam Rak
+    cases = sortFifoByLabel(cases);
+    
     var total = cases.reduce(function (s, c) { return s + (Number(c.actualRemain) || 0); }, 0);
     var skus = {}; cases.forEach(function (c) { if (c.itemCd) skus[c.itemCd] = 1; });
 
@@ -656,6 +684,7 @@
     document.body.style.overflow = '';
   };
 
+  // Klik Card = Langsung Buka BOM Reverse
   window.openBOMByLabel = function (arrivalNo) {
     selectedCase = allData.find(function(c) { return c.arrivalNo === arrivalNo; });
     if (!selectedCase) return;
@@ -689,7 +718,7 @@
     document.body.style.overflow = 'hidden';
   }
 
-  console.log('[RCT Viewer] Booting...');
+  console.log('[RCT Viewer] Booting with Smart Search, FIFO, & Export Functions...');
   fetchData();
 })();
 </script>
