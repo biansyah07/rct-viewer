@@ -49,12 +49,14 @@
   .hint-box { background: #eff6ff; color: #1e40af; padding: 10px 12px; font-size: 11px; text-align: center; border-radius: 6px; margin: 8px 12px; }
   .case-list, .rack-list { padding: 8px 12px 12px; }
 
-  .case-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 8px; display: grid; grid-template-columns: 1fr auto; gap: 8px; border-left: 4px solid #10b981; position: relative; cursor: pointer; }
+  .case-card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px; margin-bottom: 8px; display: grid; grid-template-columns: 1fr auto; gap: 8px; border-left: 4px solid #10b981; position: relative; cursor: pointer; transition: all 0.15s ease; }
+  .case-card:hover { border-color: #cbd5e1; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
   .case-card:active { transform: scale(0.98); background: #f1f5f9; }
   .case-card.low { border-left-color: #dc2626; background: #fef2f2; }
   .case-card.old { border-left-color: #f59e0b; background: #fffbeb; }
   .case-card::after { content: "🔍 Cek Model"; position: absolute; top: 10px; right: 10px; font-size: 9px; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 3px 8px; border-radius: 6px; border: 1px solid #bae6fd; }
-  .case-label { font-family: Consolas, monospace; font-weight: 800; color: #0a2540; font-size: 14px; }
+  
+  .case-label { font-family: Consolas, monospace; font-weight: 800; color: #0a2540; font-size: 14px; margin-top: 2px;}
   .case-item { font-family: Consolas, monospace; font-weight: 700; color: #7c3aed; font-size: 12px; margin-top: 2px; }
   .case-name { font-size: 11px; color: #64748b; margin-top: 3px; padding-right: 70px; line-height: 1.3; }
   .case-meta { font-size: 10px; color: #94a3b8; margin-top: 4px; }
@@ -74,32 +76,33 @@
   .navigate-btn { display: block; text-decoration: none; color: white; padding: 14px; border-radius: 10px; text-align: center; font-weight: 700; font-size: 13px; margin-top: 8px; background: linear-gradient(135deg, #0a2540 0%, #1e3a8a 100%); border: none; cursor: pointer; width: 100%; }
   .navigate-btn.zone { background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%); }
   .navigate-btn.sub { background: linear-gradient(135deg, #0891b2 0%, #0369a1 100%); }
-  .navigate-btn.pdf { background: linear-gradient(135deg, #059669 0%, #047857 100%); margin-bottom: 12px; }
+  
+  /* TOMBOL EXPORT (PDF & EXCEL) */
+  .export-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 12px 12px 0; }
+  .navigate-btn.pdf { background: linear-gradient(135deg, #059669 0%, #047857 100%); margin: 0; }
+  .navigate-btn.excel { background: linear-gradient(135deg, #0f766e 0%, #115e59 100%); margin: 0; }
+
   .empty-state { text-align: center; padding: 40px 20px; color: #64748b; }
   .empty-icon { font-size: 48px; margin-bottom: 10px; opacity: 0.5; }
 
-  /* === MODAL OVERLAY & CONTENT === */
+  /* === MODAL BOM === */
   .modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,0.75); backdrop-filter: blur(5px); z-index: 999; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.25s ease; padding: 0; }
   .modal-overlay.active { opacity: 1; pointer-events: auto; }
-  .modal-content { background: #f8fafc; border-radius: 20px 20px 0 0; width: 100%; max-width: 640px; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.2, 1); box-shadow: 0 -12px 40px rgba(0,0,0,0.35); overflow: hidden; max-height: 92vh; padding-bottom: env(safe-area-inset-bottom, 0); }
+  .modal-content { background: #f8fafc; border-radius: 20px 20px 0 0; width: 100%; max-width: 640px; height: min(92vh, 780px); max-height: 92vh; margin: 0 auto; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.2, 0.9, 0.2, 1); box-shadow: 0 -12px 40px rgba(0,0,0,0.35); overflow: hidden; padding-bottom: env(safe-area-inset-bottom, 0); }
   .modal-overlay.active .modal-content { transform: translateY(0); }
-  .modal-header { padding: 16px; position: relative; flex-shrink: 0; color: white; }
-  .modal-header.bg-dark { background: linear-gradient(135deg, #0a2540 0%, #1e3a8a 100%); }
+  .modal-header { padding: 16px; position: relative; flex-shrink: 0; color: white; background: linear-gradient(135deg, #0a2540 0%, #1e3a8a 100%); }
   .close-btn { position: absolute; top: 14px; right: 14px; background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; font-size: 14px; cursor: pointer; font-weight: bold; }
   .modal-title { font-size: 15px; font-weight: 800; padding-right: 36px; }
-  .modal-sub { font-size: 11px; opacity: 0.85; margin-top: 4px; }
   .modal-body { flex: 1; min-height: 0; overflow: auto; background: #fff; padding: 12px; }
-
   .target-box { background: rgba(0,0,0,0.22); padding: 10px 12px; border-radius: 10px; margin-top: 12px; border-left: 3px solid #38bdf8; }
   .target-code { font-family: Consolas, monospace; font-size: 14px; font-weight: 900; color: #38bdf8; }
   .target-name { font-size: 11px; margin-top: 3px; opacity: 0.9; line-height: 1.3; }
 
   /* BOM TABLE */
-  #bom-modal .modal-content { height: min(92vh, 780px); }
   .bom-count { font-size: 10px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 6px; }
   .bom-table-wrap { overflow: auto; border: 1px solid #e2e8f0; border-radius: 10px; max-height: 55vh; }
   .bom-table { width: 100%; border-collapse: collapse; font-size: 11px; }
-  .bom-table th { background: #f1f5f9; font-size: 9px; font-weight: 800; padding: 8px 10px; text-align: left; position: sticky; top: 0; }
+  .bom-table th { background: #f1f5f9; font-size: 9px; font-weight: 800; padding: 8px 10px; text-align: left; position: sticky; top: 0; z-index: 2;}
   .bom-table td { padding: 6px 10px; border-bottom: 1px solid #f1f5f9; }
   .bom-td-code { font-family: Consolas, monospace; font-weight: 800; font-size: 12px; color: #0a2540; }
   .bom-td-name { font-size: 10px; color: #64748b; margin-top: 2px; }
@@ -114,23 +117,27 @@
     .modal-content { border-radius: 16px; }
   }
 
-  /* === SETTINGAN KHUSUS PRINT PDF === */
+  /* === SETTINGAN KHUSUS PRINT PDF (DIRAPIHKAN) === */
   #print-area { display: none; }
   @media print {
-    body { background: white; color: black; font-family: Arial, Helvetica, sans-serif; padding: 0; margin: 0; }
+    @page { size: A4; margin: 15mm 10mm; } /* Margin kertas standar PDF */
+    body { background: white; color: black; font-family: 'Segoe UI', Arial, sans-serif; padding: 0; margin: 0; }
     body > *:not(#print-area) { display: none !important; }
     #print-area { display: block !important; width: 100%; }
     
-    .print-header { text-align: center; margin-bottom: 15px; border-bottom: 2px solid #000; padding-bottom: 10px; }
-    .print-header h2 { margin: 0 0 5px 0; font-size: 18px; }
-    .print-header p { margin: 0; font-size: 12px; color: #333; }
+    .print-header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #0a2540; padding-bottom: 15px; }
+    .print-header h2 { margin: 0 0 8px 0; font-size: 20px; font-weight: 900; color: #0a2540; text-transform: uppercase; }
+    .print-header p { margin: 0; font-size: 12px; color: #475569; }
     
-    .print-table { width: 100%; border-collapse: collapse; font-size: 11px; }
-    .print-table th, .print-table td { border: 1px solid #000; padding: 6px; text-align: left; vertical-align: middle; }
-    .print-table th { background-color: #e2e8f0 !important; -webkit-print-color-adjust: exact; font-weight: bold; text-transform: uppercase; font-size: 10px; }
-    .print-table td.qty { text-align: right; font-weight: bold; font-family: Consolas, monospace; }
+    .print-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 20px; }
+    .print-table th, .print-table td { border: 1px solid #cbd5e1; padding: 8px 6px; vertical-align: middle; }
+    .print-table th { background-color: #f1f5f9 !important; -webkit-print-color-adjust: exact; font-weight: 800; color: #0a2540; text-transform: uppercase; text-align: center; font-size: 10px;}
+    .print-table td { color: #0f172a; }
+    .print-table tr:nth-child(even) td { background-color: #f8fafc !important; -webkit-print-color-adjust: exact; } /* Belang-belang abu putih */
+    .print-table td.qty { text-align: right; font-weight: bold; font-family: Consolas, monospace; font-size: 12px; }
+    .print-table td.center { text-align: center; }
     
-    .print-footer { margin-top: 15px; text-align: right; font-size: 14px; font-weight: bold; }
+    .print-footer { text-align: right; font-size: 14px; font-weight: bold; color: #0a2540; border-top: 2px solid #0a2540; padding-top: 10px; }
   }
 </style>
 </head>
@@ -142,7 +149,7 @@
       <div class="app-title">🏭 RCT VIEWER</div>
       <div class="app-sub">PT VALEO PYEONGHWA ASEAN TRANSMISSION</div>
     </div>
-    <div id="user-badge" style="display:none;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:6px;padding:4px 8px;text-align:center;min-width:80px;">
+    <div id="user-badge" style="display:none;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:6px;padding:4px 8px;text-align:center;min-width:80px;flex-shrink:0;">
       <div style="font-size:10px;font-weight:800;color:#38bdf8;white-space:nowrap;" id="user-id-display">-</div>
       <div style="margin-top:1px;"><a href="javascript:void(0)" onclick="window.logout()" style="color:#f87171;text-decoration:none;font-weight:800;font-size:8px;">KELUAR ❌</a></div>
     </div>
@@ -156,7 +163,7 @@
 </div>
 
 <div class="content" id="content">
-  <div class="loading"><div class="spinner"></div><div style="font-weight:700;color:#fff">Memuat data...</div></div>
+  <div class="loading"><div class="spinner"></div><div style="font-weight:700;color:#fff" id="loading-hint">Memuat data...</div></div>
 </div>
 
 <!-- CONTAINER KHUSUS UNTUK PRINT PDF (Hanya Muncul Saat di-Print) -->
@@ -183,6 +190,8 @@
 
   var GIST_ID = '63d8a8f7a35183a3ad28455587fc68fd';
   var DATA_URL = 'https://gist.githubusercontent.com/biansyah07/' + GIST_ID + '/raw/rct-data.json';
+  var AUTO_REFRESH_MS = 5 * 60 * 1000;
+  var FETCH_TIMEOUT_MS = 25000;
   
   var allData = [];
   var syncInfo = null;
@@ -191,10 +200,10 @@
 
   function isLoggedIn() { return !!localStorage.getItem('rct_user_id'); }
 
-  // Fungsi ambil tanggal akurat standar YYYY-MM-DD zona Jakarta
+  // Tanggal standar YYYY-MM-DD zona Jakarta
   function getTodayString() {
     var d = new Date();
-    d.setHours(d.getHours() + 7); // Force offset Jakarta
+    d.setHours(d.getHours() + 7);
     return d.toISOString().slice(0, 10);
   }
 
@@ -206,7 +215,7 @@
     var today = getTodayString();
     var maxMs = 14 * 60 * 60 * 1000;
     
-    // Logout otomatis jika ganti hari ATAU lewat 14 jam
+    // Auto logout ganti hari atau lewat 14 jam
     if (loginDate && loginDate !== today) { window.logout(true); return false; }
     if (loginAt && (Date.now() - loginAt > maxMs)) { window.logout(true); return false; }
 
@@ -240,7 +249,6 @@
     localStorage.removeItem('rct_login_date');
     localStorage.removeItem('rct_login_at');
     
-    // Clear kotak search
     var s = document.getElementById('global-search');
     if (s) s.value = '';
     if ((location.hash || '').toUpperCase().indexOf('SEARCH:') === 0) location.hash = '';
@@ -261,18 +269,48 @@
     location.hash = 'SEARCH:' + encodeURIComponent(q);
   };
 
+  function fetchWithTimeout(url, ms) {
+    return new Promise(function(resolve, reject) {
+      var done = false;
+      var timer = setTimeout(function() {
+        if (done) return;
+        done = true;
+        reject(new Error('Timeout ' + (ms / 1000) + 's — Jaringan bermasalah'));
+      }, ms);
+
+      fetch(url, { cache: 'no-store', mode: 'cors' })
+        .then(function(res) {
+          if (done) return;
+          done = true;
+          clearTimeout(timer);
+          resolve(res);
+        })
+        .catch(function(err) {
+          if (done) return;
+          done = true;
+          clearTimeout(timer);
+          reject(err);
+        });
+    });
+  }
+
   async function fetchData() {
+    var hint = document.getElementById('loading-hint');
     try {
-      var res = await fetch(DATA_URL + '?t=' + Date.now(), { cache: 'no-store' });
+      if (hint) hint.textContent = 'Menghubungi Server...';
+      var res = await fetchWithTimeout(DATA_URL + '?t=' + Date.now(), FETCH_TIMEOUT_MS);
       if (!res.ok) throw new Error('HTTP ' + res.status);
+      
+      if (hint) hint.textContent = 'Memproses Data...';
       var json = JSON.parse(await res.text());
+      
       allData = Array.isArray(json.data) ? json.data : [];
       bomData = (json.bom && typeof json.bom === 'object') ? json.bom : {};
       syncInfo = { syncedAt: json.syncedAt, syncedAtLocal: json.syncedAtLocal, stats: json.stats || {} };
       
       updateSyncInfo();
       updateUserHeader();
-      route(); // route sudah diproteksi try-catch
+      route();
     } catch (e) {
       document.getElementById('content').innerHTML =
         '<div class="error-box"><div style="font-weight:800;margin-bottom:8px">Gagal memuat data</div>' +
@@ -292,7 +330,6 @@
 
   function route() {
     try {
-      // Cek sesi tiap kali navigasi
       if (!isLoggedIn() || !checkSession()) {
         setSearchVisible(false);
         renderLogin();
@@ -318,7 +355,6 @@
   window.addEventListener('hashchange', route);
 
   function renderLogin() {
-    // Clear search form jika ada sisa
     var s = document.getElementById('global-search');
     if (s) s.value = '';
 
@@ -338,7 +374,7 @@
                 'style="flex:1;border:none;background:transparent;padding:12px 0;font-size:18px;font-weight:900;font-family:Consolas,monospace;outline:none;color:#0f172a">' +
             '</div>' +
             '<div style="font-size:10px; color:#64748b; line-height:1.4; margin-bottom:20px;">' +
-              '🔒 Silakan masukkan Nomor ID Anda.<br><i>Hubungi Admin WMS jika Anda belum memiliki akses.</i>' +
+              '🔒 Silakan masukkan Nomor ID (Hanya Angka).<br>Hubungi <b>Admin WMS</b> jika Anda belum memiliki akses.' +
             '</div>' +
             '<button type="submit" class="navigate-btn zone" style="width:100%;border:none;font-size:14px;padding:16px;">🔓 MASUK SISTEM</button>' +
           '</form>' +
@@ -392,44 +428,128 @@
       '</div>';
   }
 
-  // ═══ PRINT PDF FUNGSI ═══
+  // ═══ PRINT & EXPORT EXCEL ═══
   window.printPDF = function() {
     window.print();
   };
 
-  function renderSearch(query) {
+  window.exportExcelSearch = function(query) {
     query = String(query || '').toUpperCase().trim();
-    var input = document.getElementById('global-search');
-    if (input && !input.value) input.value = query;
+    if (!query) return alert('Tidak ada pencarian.');
 
+    // Logic pencarian harus sama dengan yang di renderSearch
     var cases = allData.filter(function (r) {
       if (!r.isActive || (Number(r.actualRemain) || 0) <= 0) return false;
       var blob = [r.itemCd, r.arrivalNo, r.address, r.engItemNm, r.invNo].join(' ').toUpperCase();
       return blob.indexOf(query) !== -1;
     });
 
+    if (query.length >= 3) {
+      var exactMatches = cases.filter(function(r) {
+        var ic = String(r.itemCd || '').toUpperCase();
+        var ar = String(r.arrivalNo || '').toUpperCase();
+        var ad = String(r.address || '').toUpperCase();
+        return ic === query || ic === 'ID' + query || ar === query || ad === query;
+      });
+      if (exactMatches.length > 0) cases = exactMatches;
+    }
+
+    if (!cases.length) return alert('Tidak ada data untuk di-export.');
+
+    // Urutkan by Address -> ItemCode -> ArrivalNo
+    cases = cases.slice().sort(function (a, b) {
+      var c1 = String(a.address || '').localeCompare(String(b.address || ''), undefined, { numeric: true });
+      if (c1) return c1;
+      var c2 = String(a.itemCd || '').localeCompare(String(b.itemCd || ''));
+      if (c2) return c2;
+      return String(a.arrivalNo || '').localeCompare(String(b.arrivalNo || ''));
+    });
+
+    function cell(v) {
+      var s = String(v == null ? '' : v);
+      if (/[",\n\r]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
+      return s;
+    }
+
+    var totalQty = 0;
+    var lines = [];
+    lines.push(['No', 'Address', 'Item Code', 'Item Name', 'Arrival No', 'Invoice', 'In Date', 'Age (mo)', 'Actual Qty', 'Unit'].join(','));
+
+    cases.forEach(function (c, i) {
+      var qty = Number(c.actualRemain) || 0;
+      totalQty += qty;
+      lines.push([
+        i + 1, cell(c.address), cell(c.itemCd), cell(c.engItemNm), cell(c.arrivalNo),
+        cell(c.invNo), cell(c.inDt), cell(c.ageMonths != null ? c.ageMonths : ''),
+        qty, cell(c.unt || 'PCS')
+      ].join(','));
+    });
+
+    lines.push('');
+    lines.push(['', '', '', '', '', '', '', 'TOTAL LABEL', cases.length, ''].join(','));
+    lines.push(['', '', '', '', '', '', '', 'TOTAL QTY', totalQty, 'PCS'].join(','));
+    lines.push(['', '', '', '', '', '', '', 'Keyword', cell(query), ''].join(','));
+    lines.push(['', '', '', '', '', '', '', 'Exported At', cell(new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })), ''].join(','));
+
+    var csv = '\uFEFF' + lines.join('\r\n'); // UTF-8 BOM
+    var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    var safeName = query.replace(/[^A-Z0-9_-]+/gi, '_').slice(0, 40);
+    
+    a.href = url;
+    a.download = 'Stock_' + safeName + '_' + getTodayString() + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+  };
+
+  // ═══ SMART SEARCH ═══
+  function renderSearch(query) {
+    query = String(query || '').toUpperCase().trim();
+    var input = document.getElementById('global-search');
+    if (input && !input.value) input.value = query;
+
+    // 1. Filter awal (seperti biasa)
+    var cases = allData.filter(function (r) {
+      if (!r.isActive || (Number(r.actualRemain) || 0) <= 0) return false;
+      var blob = [r.itemCd, r.arrivalNo, r.address, r.engItemNm, r.invNo].join(' ').toUpperCase();
+      return blob.indexOf(query) !== -1;
+    });
+
+    // 2. SMART EXACT MATCH: Jika ada yg match persis (misal 'IL1SQ'), buang yg parsial (misal 'IL1SQ(V)')
+    if (query.length >= 3) {
+      var exactMatches = cases.filter(function(r) {
+        var ic = String(r.itemCd || '').toUpperCase();
+        var ar = String(r.arrivalNo || '').toUpperCase();
+        var ad = String(r.address || '').toUpperCase();
+        return ic === query || ic === 'ID' + query || ar === query || ad === query;
+      });
+      if (exactMatches.length > 0) cases = exactMatches; // Timpa hasil dengan yg exact aja!
+    }
+
     var totalQty = cases.reduce(function(s, c) { return s + (Number(c.actualRemain) || 0); }, 0);
 
-    // 1. HTML UNTUK TAMPILAN LAYAR (UI)
     var html = '<div class="result-card"><div class="result-header search">' +
       '<div class="result-icon">🔍</div><div class="result-title" style="font-size:22px">HASIL CARI</div>' +
       '<div class="result-sub"><b>' + query + '</b> · ' + cases.length + ' label</div></div>';
 
     if (!cases.length) {
       html += '<div class="empty-state"><div class="empty-icon">📭</div><div style="font-weight:700">Tidak ketemu</div></div>';
+      document.getElementById('print-area').innerHTML = ''; // Kosongkan print area
     } else {
-      // Tombol Print muncul kalau ada data
-      html += '<div style="padding:12px 12px 0;"><button onclick="window.printPDF()" class="navigate-btn pdf">🖨️ Download PDF / Cetak Laporan</button></div>';
+      // Tombol Export
+      html += '<div class="export-row">' +
+        '<button type="button" onclick="window.printPDF()" class="navigate-btn pdf">🖨️ PDF / Cetak Laporan</button>' +
+        '<button type="button" onclick="window.exportExcelSearch(\'' + String(query).replace(/\\/g, '\\\\').replace(/'/g, "\\'") + '\')" class="navigate-btn excel">📊 Export Excel</button>' +
+      '</div>';
       
       html += '<div class="case-list">';
       cases.forEach(function (c) { html += caseCardHtml(c, true); });
       html += '</div>';
-    }
-    html += '<div style="padding:0 12px 12px"><a href="#" class="navigate-btn">🏠 Beranda</a></div></div>';
-    document.getElementById('content').innerHTML = html;
 
-    // 2. HTML UNTUK PRINT / PDF GENERATOR
-    if (cases.length > 0) {
+      // GENERATE PRINT HTML
       var dateNow = new Date().toLocaleString('id-ID', {timeZone: 'Asia/Jakarta'});
       var printHtml = 
         '<div class="print-header">' +
@@ -437,42 +557,19 @@
           '<p>Keyword Pencarian: <b>' + query + '</b> &nbsp; | &nbsp; Tanggal Tarik: ' + dateNow + '</p>' +
         '</div>' +
         '<table class="print-table">' +
-          '<thead>' +
-            '<tr>' +
-              '<th style="width:5%;">No</th>' +
-              '<th style="width:15%;">Address</th>' +
-              '<th style="width:18%;">Item Code</th>' +
-              '<th style="width:30%;">Item Name</th>' +
-              '<th style="width:15%;">Arrival No</th>' +
-              '<th style="width:17%;text-align:right;">Actual Qty</th>' +
-            '</tr>' +
-          '</thead>' +
+          '<thead><tr><th style="width:5%;">No</th><th style="width:10%;">Address</th><th style="width:20%;">Item Code</th><th style="width:30%;">Item Name</th><th style="width:15%;">Arrival No</th><th style="width:20%;">Actual Qty</th></tr></thead>' +
           '<tbody>';
       
       cases.forEach(function (c, i) {
-        printHtml += 
-          '<tr>' +
-            '<td>' + (i+1) + '</td>' +
-            '<td>' + (c.address || '-') + '</td>' +
-            '<td>' + (c.itemCd || '-') + '</td>' +
-            '<td>' + (c.engItemNm || '-') + '</td>' +
-            '<td>' + (c.arrivalNo || '-') + '</td>' +
-            '<td class="qty">' + Number(c.actualRemain || 0).toLocaleString() + ' ' + (c.unt || 'PCS') + '</td>' +
-          '</tr>';
+        printHtml += '<tr><td class="center">' + (i+1) + '</td><td>' + (c.address || '-') + '</td><td>' + (c.itemCd || '-') + '</td><td>' + (c.engItemNm || '-') + '</td><td>' + (c.arrivalNo || '-') + '</td><td class="qty">' + Number(c.actualRemain || 0).toLocaleString() + ' ' + (c.unt || 'PCS') + '</td></tr>';
       });
 
-      printHtml += 
-          '</tbody>' +
-        '</table>' +
-        '<div class="print-footer">' +
-          'Total Label: ' + cases.length + ' Label <br>' +
-          'Total Quantity: ' + totalQty.toLocaleString() + ' PCS' +
-        '</div>';
-      
+      printHtml += '</tbody></table><div class="print-footer">Total Label: ' + cases.length + ' Label <br>Total Quantity: ' + totalQty.toLocaleString() + ' PCS</div>';
       document.getElementById('print-area').innerHTML = printHtml;
-    } else {
-      document.getElementById('print-area').innerHTML = '';
     }
+    
+    html += '<div style="padding:0 12px 12px"><a href="#" class="navigate-btn">🏠 Beranda</a></div></div>';
+    document.getElementById('content').innerHTML = html;
   }
 
   function caseCardHtml(c, showAddr) {
@@ -559,7 +656,6 @@
     document.body.style.overflow = '';
   };
 
-  // Klik Card = Langsung Buka BOM Reverse
   window.openBOMByLabel = function (arrivalNo) {
     selectedCase = allData.find(function(c) { return c.arrivalNo === arrivalNo; });
     if (!selectedCase) return;
@@ -571,7 +667,7 @@
     document.getElementById('bom-target-code').textContent = raw;
     document.getElementById('bom-target-name').textContent = selectedCase ? (selectedCase.engItemNm || '-') : '-';
 
-    var list = bomData[raw] || bomData[raw.toUpperCase()] || bomData[raw.toLowerCase()] || [];
+    var list = bomData[raw] || bomData[raw.toUpperCase()] || bomData[raw.toLowerCase()] || bomData[raw.replace(/\s+/g, '')] || [];
     var box = document.getElementById('bom-list-container');
 
     if (!list.length) {
@@ -593,6 +689,7 @@
     document.body.style.overflow = 'hidden';
   }
 
+  console.log('[RCT Viewer] Booting...');
   fetchData();
 })();
 </script>
