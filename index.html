@@ -54,7 +54,7 @@
   .case-card:active { transform: scale(0.98); background: #f1f5f9; }
   .case-card.low { border-left-color: #dc2626; background: #fef2f2; }
   .case-card.old { border-left-color: #f59e0b; background: #fffbeb; }
-  .case-card.feeder { border-left-color: #f97316; background: #fff7ed; }
+  .case-card.feeder { border-left-color: #ea580c; background: #fff7ed; }
   .case-card::after { content: "🔍 Cek Model"; position: absolute; top: 10px; right: 10px; font-size: 9px; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 3px 8px; border-radius: 6px; border: 1px solid #bae6fd; }
   
   .case-label { font-family: Consolas, monospace; font-weight: 800; color: #0a2540; font-size: 14px; margin-top: 2px;}
@@ -65,6 +65,9 @@
   .case-meta-addr.feeder-tag { background: #ea580c; color: #fff; }
   .case-qty { font-family: Consolas, monospace; font-weight: 800; font-size: 18px; color: #0a2540; text-align: right; margin-top: 18px; }
   .case-qty-lbl { font-size: 10px; color: #64748b; text-align: right; }
+
+  /* Section Header Feeder */
+  .section-divider { font-size: 11px; font-weight: 800; color: #c2410c; background: #ffedd5; padding: 8px 12px; border-radius: 6px; margin: 14px 0 8px; border-left: 3px solid #ea580c; display: flex; align-items: center; justify-content: space-between; }
 
   .rack-item { background: white; border-radius: 10px; padding: 12px 14px; margin-bottom: 6px; border-left: 4px solid; display: grid; grid-template-columns: 90px 1fr 60px; gap: 8px; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
   .rack-item.full { border-color: #10b981; }
@@ -128,18 +131,18 @@
     #print-area { display: block !important; width: 100%; }
     
     .print-header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #0a2540; padding-bottom: 15px; }
-    .print-header h2 { margin: 0 0 8px 0; font-size: 20px; font-weight: 900; color: #0a2540; text-transform: uppercase; }
-    .print-header p { margin: 0; font-size: 12px; color: #475569; }
+    .print-header h2 { margin: 0 0 8px 0; font-size: 18px; font-weight: 900; color: #0a2540; text-transform: uppercase; }
+    .print-header p { margin: 0; font-size: 11px; color: #475569; }
     
-    .print-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 20px; }
-    .print-table th, .print-table td { border: 1px solid #cbd5e1; padding: 8px 6px; vertical-align: middle; }
-    .print-table th { background-color: #f1f5f9 !important; -webkit-print-color-adjust: exact; font-weight: 800; color: #0a2540; text-transform: uppercase; text-align: center; font-size: 10px;}
+    .print-table { width: 100%; border-collapse: collapse; font-size: 10.5px; margin-bottom: 20px; }
+    .print-table th, .print-table td { border: 1px solid #cbd5e1; padding: 7px 6px; vertical-align: middle; }
+    .print-table th { background-color: #f1f5f9 !important; -webkit-print-color-adjust: exact; font-weight: 800; color: #0a2540; text-transform: uppercase; text-align: center; font-size: 9.5px;}
     .print-table td { color: #0f172a; }
-    .print-table tr:nth-child(even) td { background-color: #f8fafc !important; -webkit-print-color-adjust: exact; }
-    .print-table td.qty { text-align: right; font-weight: bold; font-family: Consolas, monospace; font-size: 12px; }
+    .print-table tr.feeder-row td { background-color: #fff7ed !important; -webkit-print-color-adjust: exact; }
+    .print-table td.qty { text-align: right; font-weight: bold; font-family: Consolas, monospace; font-size: 11px; }
     .print-table td.center { text-align: center; }
     
-    .print-footer { text-align: right; font-size: 12px; font-weight: bold; color: #0a2540; border-top: 2px solid #0a2540; padding-top: 10px; line-height: 1.6; }
+    .print-footer { text-align: right; font-size: 11.5px; font-weight: bold; color: #0a2540; border-top: 2px solid #0a2540; padding-top: 10px; line-height: 1.6; }
   }
 </style>
 </head>
@@ -436,14 +439,14 @@
   function isValidCase(r) {
     if (!r || !r.isActive) return false;
     var qty = Number(r.actualRemain) || 0;
-    if (qty <= 0) return false;
+    if (qty <= 0) return false; // Qty 0 atau sudah habis terconsume tidak dihitung
     
     var arrNo = String(r.arrivalNo || '').trim();
     var hasArrivalNo = (arrNo && arrNo !== '-' && arrNo !== 'null' && arrNo !== 'undefined');
 
-    // Jika di Feeder/I200: Hanya tampilkan jika memiliki label fisik (belum terconsume)
+    // Jika di Feeder / I200: Tetap valid selama qty sisa > 0 (menandakan barang masih ada di feeder/trolley)
     if (isFeederLocation(r.address)) {
-      return hasArrivalNo; 
+      return true; 
     }
 
     // Untuk Rak Gudang Biasa:
@@ -477,7 +480,8 @@
 
     if (!cases.length) return alert('Tidak ada data untuk di-export.');
 
-    cases = sortFifoByLabel(cases);
+    var whCases = sortFifoByLabel(cases.filter(function(c) { return !isFeederLocation(c.address); }));
+    var feederCases = sortFifoByLabel(cases.filter(function(c) { return isFeederLocation(c.address); }));
 
     function cell(v) {
       var s = String(v == null ? '' : v);
@@ -485,33 +489,40 @@
       return s;
     }
 
-    var totalQty = 0;
     var whQty = 0;
     var feederQty = 0;
     var lines = [];
     lines.push(['No', 'Location Type', 'Address', 'Item Code', 'Item Name', 'Arrival No', 'Invoice', 'In Date', 'Age (mo)', 'Actual Qty', 'Unit'].join(','));
 
-    cases.forEach(function (c, i) {
+    var no = 1;
+    whCases.forEach(function (c) {
       var qty = Number(c.actualRemain) || 0;
-      totalQty += qty;
-      var isFeeder = isFeederLocation(c.address);
-      if (isFeeder) feederQty += qty; else whQty += qty;
-
+      whQty += qty;
       lines.push([
-        i + 1,
-        cell(isFeeder ? 'FEEDER / TROLLEY' : 'WAREHOUSE RACK'),
-        cell(c.address), cell(c.itemCd), cell(c.engItemNm), cell(c.arrivalNo),
-        cell(c.invNo), cell(c.inDt), cell(c.ageMonths != null ? c.ageMonths : ''),
+        no++, cell('WAREHOUSE RACK'), cell(c.address), cell(c.itemCd), cell(c.engItemNm),
+        cell(c.arrivalNo), cell(c.invNo), cell(c.inDt), cell(c.ageMonths != null ? c.ageMonths : ''),
         qty, cell(c.unt || 'PCS')
       ].join(','));
     });
 
+    feederCases.forEach(function (c) {
+      var qty = Number(c.actualRemain) || 0;
+      feederQty += qty;
+      lines.push([
+        no++, cell('FEEDER / TROLLEY (BELUM CONSUME)'), cell(c.address || 'I200'), cell(c.itemCd), cell(c.engItemNm),
+        cell(c.arrivalNo || '-'), cell(c.invNo), cell(c.inDt), cell(c.ageMonths != null ? c.ageMonths : ''),
+        qty, cell(c.unt || 'PCS')
+      ].join(','));
+    });
+
+    var totalQty = whQty + feederQty;
+
     lines.push('');
     lines.push(['', '', '', '', '', '', '', 'STOK RAK GUDANG', whQty, 'PCS'].join(','));
     if (feederQty > 0) {
-      lines.push(['', '', '', '', '', '', '', 'STOK FEEDER / TROLLEY', feederQty, 'PCS'].join(','));
+      lines.push(['', '', '', '', '', '', '', 'STOK FEEDER / TROLLEY (BELUM CONSUME)', feederQty, 'PCS'].join(','));
     }
-    lines.push(['', '', '', '', '', '', '', 'TOTAL QUANTITY', totalQty, 'PCS'].join(','));
+    lines.push(['', '', '', '', '', '', '', 'TOTAL KESELURUHAN', totalQty, 'PCS'].join(','));
     lines.push(['', '', '', '', '', '', '', 'TOTAL LABEL', cases.length, 'LABEL'].join(','));
     lines.push(['', '', '', '', '', '', '', 'Keyword', cell(query), ''].join(','));
     lines.push(['', '', '', '', '', '', '', 'Exported At', cell(new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })), ''].join(','));
@@ -560,7 +571,7 @@
     });
   }
 
-  // ═══ SMART SEARCH ═══
+  // ═══ SMART SEARCH (PISAHKAN RAK GUDANG & SISA FEEDER) ═══
   function renderSearch(query) {
     query = String(query || '').toUpperCase().trim();
     var input = document.getElementById('global-search');
@@ -582,29 +593,16 @@
       if (exactMatches.length > 0) cases = exactMatches; 
     }
 
-    cases = sortFifoByLabel(cases);
+    var whCases = sortFifoByLabel(cases.filter(function(c) { return !isFeederLocation(c.address); }));
+    var feederCases = sortFifoByLabel(cases.filter(function(c) { return isFeederLocation(c.address); }));
 
-    var whQty = 0;
-    var whCasesCount = 0;
-    var feederQty = 0;
-    var feederCasesCount = 0;
-
-    cases.forEach(function(c) {
-      var q = Number(c.actualRemain) || 0;
-      if (isFeederLocation(c.address)) {
-        feederQty += q;
-        feederCasesCount++;
-      } else {
-        whQty += q;
-        whCasesCount++;
-      }
-    });
-
+    var whQty = whCases.reduce(function(acc, c) { return acc + (Number(c.actualRemain) || 0); }, 0);
+    var feederQty = feederCases.reduce(function(acc, c) { return acc + (Number(c.actualRemain) || 0); }, 0);
     var totalQty = whQty + feederQty;
 
     var subTitleText = '<b>' + query + '</b> · ' + cases.length + ' label total';
-    if (feederCasesCount > 0) {
-      subTitleText = '<b>' + query + '</b> · Gudang: ' + whCasesCount + ' label | Feeder: ' + feederCasesCount + ' label';
+    if (feederCases.length > 0) {
+      subTitleText = '<b>' + query + '</b> · Gudang: ' + whCases.length + ' label (' + whQty.toLocaleString() + ' PCS) | Feeder: ' + feederQty.toLocaleString() + ' PCS';
     }
 
     var html = '<div class="result-card"><div class="result-header search">' +
@@ -621,9 +619,19 @@
       '</div>';
       
       html += '<div class="case-list">';
-      cases.forEach(function (c) { html += caseCardHtml(c, true); });
+      
+      // Bagian 1: Stok Rak Gudang Murni
+      whCases.forEach(function (c) { html += caseCardHtml(c, true); });
+
+      // Bagian 2: Stok Feeder / Trolley Belum Terconsume (Jika ada)
+      if (feederCases.length > 0) {
+        html += '<div class="section-divider"><span>🛒 STOK FEEDER / TROLLEY (BELUM TERCONSUME PROD)</span><span>' + feederQty.toLocaleString() + ' PCS</span></div>';
+        feederCases.forEach(function (c) { html += caseCardHtml(c, true); });
+      }
+
       html += '</div>';
 
+      // CETAK PDF
       var dateNow = new Date().toLocaleString('id-ID', {timeZone: 'Asia/Jakarta'});
       var printHtml = 
         '<div class="print-header">' +
@@ -631,19 +639,22 @@
           '<p>Keyword Pencarian: <b>' + query + '</b> &nbsp; | &nbsp; Tanggal Tarik: ' + dateNow + '</p>' +
         '</div>' +
         '<table class="print-table">' +
-          '<thead><tr><th style="width:5%;">No</th><th style="width:12%;">Location</th><th style="width:18%;">Item Code</th><th style="width:30%;">Item Name</th><th style="width:15%;">Arrival No</th><th style="width:20%;">Actual Qty</th></tr></thead>' +
+          '<thead><tr><th style="width:5%;">No</th><th style="width:18%;">Location</th><th style="width:16%;">Item Code</th><th style="width:28%;">Item Name</th><th style="width:15%;">Arrival No</th><th style="width:18%;">Actual Qty</th></tr></thead>' +
           '<tbody>';
       
-      cases.forEach(function (c, i) {
-        var isFeeder = isFeederLocation(c.address);
-        var locDisplay = isFeeder ? (c.address + ' (FEEDER)') : (c.address || '-');
-        printHtml += '<tr><td class="center">' + (i+1) + '</td><td><b>' + locDisplay + '</b></td><td>' + (c.itemCd || '-') + '</td><td>' + (c.engItemNm || '-') + '</td><td>' + (c.arrivalNo || '-') + '</td><td class="qty">' + Number(c.actualRemain || 0).toLocaleString() + ' ' + (c.unt || 'PCS') + '</td></tr>';
+      var rowNo = 1;
+      whCases.forEach(function (c) {
+        printHtml += '<tr><td class="center">' + (rowNo++) + '</td><td><b>' + (c.address || '-') + '</b></td><td>' + (c.itemCd || '-') + '</td><td>' + (c.engItemNm || '-') + '</td><td>' + (c.arrivalNo || '-') + '</td><td class="qty">' + Number(c.actualRemain || 0).toLocaleString() + ' ' + (c.unt || 'PCS') + '</td></tr>';
       });
 
-      var summaryFoot = 'Total Stok Rak Gudang: ' + whQty.toLocaleString() + ' PCS (' + whCasesCount + ' Label)';
-      if (feederCasesCount > 0) {
-        summaryFoot += '<br>Total Stok Feeder / Trolley: ' + feederQty.toLocaleString() + ' PCS (' + feederCasesCount + ' Label)';
-        summaryFoot += '<br><span style="font-size:14px;color:#0a2540;">TOTAL KESELURUHAN: ' + totalQty.toLocaleString() + ' PCS (' + cases.length + ' Label)</span>';
+      feederCases.forEach(function (c) {
+        printHtml += '<tr class="feeder-row"><td class="center">' + (rowNo++) + '</td><td><b style="color:#c2410c;">🛒 ' + (c.address || 'I200') + ' (FEEDER)</b></td><td>' + (c.itemCd || '-') + '</td><td>' + (c.engItemNm || '-') + '</td><td>' + (c.arrivalNo || '-') + '</td><td class="qty" style="color:#c2410c;">' + Number(c.actualRemain || 0).toLocaleString() + ' ' + (c.unt || 'PCS') + '</td></tr>';
+      });
+
+      var summaryFoot = 'Total Stok Rak Gudang: ' + whQty.toLocaleString() + ' PCS (' + whCases.length + ' Label)';
+      if (feederCases.length > 0) {
+        summaryFoot += '<br><span style="color:#c2410c;">Total Sisa Feeder / Trolley: ' + feederQty.toLocaleString() + ' PCS (Belum Terconsume Prod)</span>';
+        summaryFoot += '<br><span style="font-size:13px;color:#0a2540;">TOTAL KESELURUHAN: ' + totalQty.toLocaleString() + ' PCS</span>';
       } else {
         summaryFoot += '<br>Total Quantity: ' + totalQty.toLocaleString() + ' PCS';
       }
@@ -664,7 +675,7 @@
     
     if (showAddr) {
       if (isFeeder) {
-        addrTag = '<span class="case-meta-addr feeder-tag">🛒 ' + (c.address || 'I200') + ' (FEEDER)</span> ';
+        addrTag = '<span class="case-meta-addr feeder-tag">🛒 ' + (c.address || 'I200') + ' (FEEDER - BELUM CONSUME)</span> ';
       } else {
         addrTag = '<span class="case-meta-addr">📍 ' + (c.address || '-') + '</span> ';
       }
