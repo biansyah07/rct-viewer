@@ -54,6 +54,7 @@
   .case-card:active { transform: scale(0.98); background: #f1f5f9; }
   .case-card.low { border-left-color: #dc2626; background: #fef2f2; }
   .case-card.old { border-left-color: #f59e0b; background: #fffbeb; }
+  .case-card.feeder { border-left-color: #f97316; background: #fff7ed; }
   .case-card::after { content: "🔍 Cek Model"; position: absolute; top: 10px; right: 10px; font-size: 9px; font-weight: 800; color: #0284c7; background: #e0f2fe; padding: 3px 8px; border-radius: 6px; border: 1px solid #bae6fd; }
   
   .case-label { font-family: Consolas, monospace; font-weight: 800; color: #0a2540; font-size: 14px; margin-top: 2px;}
@@ -61,6 +62,7 @@
   .case-name { font-size: 11px; color: #64748b; margin-top: 3px; padding-right: 70px; line-height: 1.3; }
   .case-meta { font-size: 10px; color: #94a3b8; margin-top: 4px; }
   .case-meta-addr { display: inline-block; background: #0f172a; color: #fff; padding: 2px 6px; border-radius: 4px; font-weight: 800; font-family: Consolas, monospace; margin-right: 4px; }
+  .case-meta-addr.feeder-tag { background: #ea580c; color: #fff; }
   .case-qty { font-family: Consolas, monospace; font-weight: 800; font-size: 18px; color: #0a2540; text-align: right; margin-top: 18px; }
   .case-qty-lbl { font-size: 10px; color: #64748b; text-align: right; }
 
@@ -137,7 +139,7 @@
     .print-table td.qty { text-align: right; font-weight: bold; font-family: Consolas, monospace; font-size: 12px; }
     .print-table td.center { text-align: center; }
     
-    .print-footer { text-align: right; font-size: 14px; font-weight: bold; color: #0a2540; border-top: 2px solid #0a2540; padding-top: 10px; }
+    .print-footer { text-align: right; font-size: 12px; font-weight: bold; color: #0a2540; border-top: 2px solid #0a2540; padding-top: 10px; line-height: 1.6; }
   }
 </style>
 </head>
@@ -427,6 +429,32 @@
       '</div>';
   }
 
+  // ═══ LOGIKA CERDAS: MEMISAHKAN FEEDER / TROLLEY (BELUM CONSUME VS SUDAH CONSUME) ═══
+  function isFeederLocation(addr) {
+    if (!addr) return false;
+    var u = String(addr).toUpperCase().trim();
+    return u === 'I200' || u.indexOf('FEEDER') !== -1 || u.indexOf('TROLLEY') !== -1 || u.indexOf('PROD') !== -1;
+  }
+
+  function isValidCase(r) {
+    if (!r || !r.isActive) return false;
+    var qty = Number(r.actualRemain) || 0;
+    if (qty <= 0) return false; // Qty habis / sudah terconsume
+    
+    var arrNo = String(r.arrivalNo || '').trim();
+    var hasArrivalNo = (arrNo && arrNo !== '-' && arrNo !== 'null' && arrNo !== 'undefined');
+
+    // JIKA DI LOKASI I200 (FEEDER/TROLLEY):
+    // Hanya akui jika ADA LABEL FISIKNYA (berarti ada box fisik di feeder/trolley yang BELUM terconsume).
+    // Jika tidak ada labelnya (arrivalNo kosong), itu adalah saldo virtual masa lalu yang SUDAH TERCONSUME!
+    if (isFeederLocation(r.address)) {
+      return hasArrivalNo; 
+    }
+
+    // Untuk Rak Gudang Biasa:
+    return hasArrivalNo || (r.address && /^[A-Z]\d+/i.test(r.address));
+  }
+
   // ═══ PRINT & EXPORT EXCEL ═══
   window.printPDF = function() {
     window.print();
@@ -437,7 +465,7 @@
     if (!query) return alert('Tidak ada pencarian.');
 
     var cases = allData.filter(function (r) {
-      if (!r.isActive || (Number(r.actualRemain) || 0) <= 0) return false;
+      if (!isValidCase(r)) return false;
       var blob = [r.itemCd, r.arrivalNo, r.address, r.engItemNm, r.invNo].join(' ').toUpperCase();
       return blob.indexOf(query) !== -1;
     });
@@ -464,22 +492,33 @@
     }
 
     var totalQty = 0;
+    var whQty = 0;
+    var feederQty = 0;
     var lines = [];
-    lines.push(['No', 'Address', 'Item Code', 'Item Name', 'Arrival No', 'Invoice', 'In Date', 'Age (mo)', 'Actual Qty', 'Unit'].join(','));
+    lines.push(['No', 'Location Type', 'Address', 'Item Code', 'Item Name', 'Arrival No', 'Invoice', 'In Date', 'Age (mo)', 'Actual Qty', 'Unit'].join(','));
 
     cases.forEach(function (c, i) {
       var qty = Number(c.actualRemain) || 0;
       totalQty += qty;
+      var isFeeder = isFeederLocation(c.address);
+      if (isFeeder) feederQty += qty; else whQty += qty;
+
       lines.push([
-        i + 1, cell(c.address), cell(c.itemCd), cell(c.engItemNm), cell(c.arrivalNo),
+        i + 1,
+        cell(isFeeder ? 'FEEDER / TROLLEY' : 'WAREHOUSE RACK'),
+        cell(c.address), cell(c.itemCd), cell(c.engItemNm), cell(c.arrivalNo),
         cell(c.invNo), cell(c.inDt), cell(c.ageMonths != null ? c.ageMonths : ''),
         qty, cell(c.unt || 'PCS')
       ].join(','));
     });
 
     lines.push('');
-    lines.push(['', '', '', '', '', '', '', 'TOTAL LABEL', cases.length, ''].join(','));
-    lines.push(['', '', '', '', '', '', '', 'TOTAL QTY', totalQty, 'PCS'].join(','));
+    lines.push(['', '', '', '', '', '', '', 'STOK RAK GUDANG', whQty, 'PCS'].join(','));
+    if (feederQty > 0) {
+      lines.push(['', '', '', '', '', '', '', 'STOK FEEDER / TROLLEY', feederQty, 'PCS'].join(','));
+    }
+    lines.push(['', '', '', '', '', '', '', 'TOTAL QUANTITY', totalQty, 'PCS'].join(','));
+    lines.push(['', '', '', '', '', '', '', 'TOTAL LABEL', cases.length, 'LABEL'].join(','));
     lines.push(['', '', '', '', '', '', '', 'Keyword', cell(query), ''].join(','));
     lines.push(['', '', '', '', '', '', '', 'Exported At', cell(new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })), ''].join(','));
 
@@ -501,18 +540,15 @@
   function fifoTime(c) {
     var d = String(c.inDt || '').trim();
     var m;
-    // inDt: 03/08/2026 atau 03-08-2026
     m = d.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})$/);
     if (m) {
       var y1 = +m[3];
       if (y1 < 100) y1 += 2000;
       return new Date(y1, +m[2] - 1, +m[1]).getTime();
     }
-    // inDt: 2026-08-03
     m = d.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})$/);
     if (m) return new Date(+m[1], +m[2] - 1, +m[3]).getTime();
 
-    // Arrival No / Label: DDMMYY-xxx  →  090425-001 = 09/04/2025
     var a = String(c.arrivalNo || '').trim();
     m = a.match(/^(\d{2})(\d{2})(\d{2})/);
     if (m) {
@@ -525,19 +561,19 @@
   function sortFifoByLabel(cases) {
     return (cases || []).slice().sort(function (a, b) {
       var ta = fifoTime(a), tb = fifoTime(b);
-      if (ta !== tb) return ta - tb; // Lama -> Baru
+      if (ta !== tb) return ta - tb;
       return String(a.arrivalNo || '').localeCompare(String(b.arrivalNo || ''), undefined, { numeric: true });
     });
   }
 
-  // ═══ SMART SEARCH ═══
+  // ═══ SMART SEARCH (DIPROTEKSI DARI SALDO GHOST/VIRTUAL) ═══
   function renderSearch(query) {
     query = String(query || '').toUpperCase().trim();
     var input = document.getElementById('global-search');
     if (input && !input.value) input.value = query;
 
     var cases = allData.filter(function (r) {
-      if (!r.isActive || (Number(r.actualRemain) || 0) <= 0) return false;
+      if (!isValidCase(r)) return false;
       var blob = [r.itemCd, r.arrivalNo, r.address, r.engItemNm, r.invNo].join(' ').toUpperCase();
       return blob.indexOf(query) !== -1;
     });
@@ -552,14 +588,35 @@
       if (exactMatches.length > 0) cases = exactMatches; 
     }
 
-    // Terapkan FIFO Sort!
+    // Terapkan FIFO Sort
     cases = sortFifoByLabel(cases);
 
-    var totalQty = cases.reduce(function(s, c) { return s + (Number(c.actualRemain) || 0); }, 0);
+    var whQty = 0;
+    var whCasesCount = 0;
+    var feederQty = 0;
+    var feederCasesCount = 0;
+
+    cases.forEach(function(c) {
+      var q = Number(c.actualRemain) || 0;
+      if (isFeederLocation(c.address)) {
+        feederQty += q;
+        feederCasesCount++;
+      } else {
+        whQty += q;
+        whCasesCount++;
+      }
+    });
+
+    var totalQty = whQty + feederQty;
+
+    var subTitleText = '<b>' + query + '</b> · ' + cases.length + ' label total';
+    if (feederCasesCount > 0) {
+      subTitleText = '<b>' + query + '</b> · Gudang: ' + whCasesCount + ' label | Feeder: ' + feederCasesCount + ' label';
+    }
 
     var html = '<div class="result-card"><div class="result-header search">' +
       '<div class="result-icon">🔍</div><div class="result-title" style="font-size:22px">HASIL CARI</div>' +
-      '<div class="result-sub"><b>' + query + '</b> · ' + cases.length + ' label</div></div>';
+      '<div class="result-sub">' + subTitleText + '</div></div>';
 
     if (!cases.length) {
       html += '<div class="empty-state"><div class="empty-icon">📭</div><div style="font-weight:700">Tidak ketemu</div></div>';
@@ -581,14 +638,24 @@
           '<p>Keyword Pencarian: <b>' + query + '</b> &nbsp; | &nbsp; Tanggal Tarik: ' + dateNow + '</p>' +
         '</div>' +
         '<table class="print-table">' +
-          '<thead><tr><th style="width:5%;">No</th><th style="width:10%;">Address</th><th style="width:20%;">Item Code</th><th style="width:30%;">Item Name</th><th style="width:15%;">Arrival No</th><th style="width:20%;">Actual Qty</th></tr></thead>' +
+          '<thead><tr><th style="width:5%;">No</th><th style="width:12%;">Location</th><th style="width:18%;">Item Code</th><th style="width:30%;">Item Name</th><th style="width:15%;">Arrival No</th><th style="width:20%;">Actual Qty</th></tr></thead>' +
           '<tbody>';
       
       cases.forEach(function (c, i) {
-        printHtml += '<tr><td class="center">' + (i+1) + '</td><td>' + (c.address || '-') + '</td><td>' + (c.itemCd || '-') + '</td><td>' + (c.engItemNm || '-') + '</td><td>' + (c.arrivalNo || '-') + '</td><td class="qty">' + Number(c.actualRemain || 0).toLocaleString() + ' ' + (c.unt || 'PCS') + '</td></tr>';
+        var isFeeder = isFeederLocation(c.address);
+        var locDisplay = isFeeder ? (c.address + ' (FEEDER)') : (c.address || '-');
+        printHtml += '<tr><td class="center">' + (i+1) + '</td><td><b>' + locDisplay + '</b></td><td>' + (c.itemCd || '-') + '</td><td>' + (c.engItemNm || '-') + '</td><td>' + (c.arrivalNo || '-') + '</td><td class="qty">' + Number(c.actualRemain || 0).toLocaleString() + ' ' + (c.unt || 'PCS') + '</td></tr>';
       });
 
-      printHtml += '</tbody></table><div class="print-footer">Total Label: ' + cases.length + ' Label <br>Total Quantity: ' + totalQty.toLocaleString() + ' PCS</div>';
+      var summaryFoot = 'Total Stok Rak Gudang: ' + whQty.toLocaleString() + ' PCS (' + whCasesCount + ' Label)';
+      if (feederCasesCount > 0) {
+        summaryFoot += '<br>Total Stok Feeder / Trolley: ' + feederQty.toLocaleString() + ' PCS (' + feederCasesCount + ' Label)';
+        summaryFoot += '<br><span style="font-size:14px;color:#0a2540;">TOTAL KESELURUHAN: ' + totalQty.toLocaleString() + ' PCS (' + cases.length + ' Label)</span>';
+      } else {
+        summaryFoot += '<br>Total Quantity: ' + totalQty.toLocaleString() + ' PCS';
+      }
+
+      printHtml += '</tbody></table><div class="print-footer">' + summaryFoot + '</div>';
       document.getElementById('print-area').innerHTML = printHtml;
     }
     
@@ -598,20 +665,31 @@
 
   function caseCardHtml(c, showAddr) {
     var safe = String(c.arrivalNo || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-    var cls = c.status === 'LOW' ? 'low' : (c.isOld ? 'old' : '');
+    var isFeeder = isFeederLocation(c.address);
+    var cls = isFeeder ? 'feeder' : (c.status === 'LOW' ? 'low' : (c.isOld ? 'old' : ''));
+    var addrTag = '';
+    
+    if (showAddr) {
+      if (isFeeder) {
+        addrTag = '<span class="case-meta-addr feeder-tag">🛒 ' + (c.address || 'I200') + ' (FEEDER)</span> ';
+      } else {
+        addrTag = '<span class="case-meta-addr">📍 ' + (c.address || '-') + '</span> ';
+      }
+    }
+
     return '<div class="case-card ' + cls + '" onclick="window.openBOMByLabel(\'' + safe + '\')">' +
       '<div>' +
         '<div class="case-label">' + (c.arrivalNo || '-') + '</div>' +
         '<div class="case-item">' + (c.itemCd || '-') + '</div>' +
         '<div class="case-name">' + (c.engItemNm || '-') + '</div>' +
-        '<div class="case-meta">' + (showAddr ? '<span class="case-meta-addr">📍 ' + (c.address || '-') + '</span> ' : '') + 'In: ' + (c.inDt || '-') + '</div>' +
+        '<div class="case-meta">' + addrTag + 'In: ' + (c.inDt || '-') + '</div>' +
       '</div>' +
       '<div><div class="case-qty">' + (Number(c.actualRemain) || 0).toLocaleString() + '</div><div class="case-qty-lbl">' + (c.unt || 'PCS') + '</div></div>' +
     '</div>';
   }
 
   function renderRack(rackAddr) {
-    var cases = allData.filter(function (r) { return r.address === rackAddr && r.isActive === true && (Number(r.actualRemain) || 0) > 0; });
+    var cases = allData.filter(function (r) { return r.address === rackAddr && isValidCase(r); });
     if (!allData.some(function (r) { return r.address === rackAddr; })) {
       document.getElementById('content').innerHTML = '<div class="result-card"><div class="result-header notfound"><div class="result-title">' + rackAddr + '</div><div class="result-sub">Tidak ditemukan</div></div><div style="padding:16px"><a href="#" class="navigate-btn">🏠 Beranda</a></div></div>'; return;
     }
@@ -619,7 +697,6 @@
     var sub = m ? m[1] : '';
     var zone = rackAddr.charAt(0);
     
-    // Terapkan FIFO di dalam Rak
     cases = sortFifoByLabel(cases);
     
     var total = cases.reduce(function (s, c) { return s + (Number(c.actualRemain) || 0); }, 0);
@@ -644,7 +721,7 @@
     allData.forEach(function (r) {
       if (!r.address || r.address.indexOf(subId + '-') !== 0) return;
       if (!map[r.address]) map[r.address] = { address: r.address, n: 0, pcs: 0 };
-      if (r.isActive && (Number(r.actualRemain) || 0) > 0) { map[r.address].n++; map[r.address].pcs += Number(r.actualRemain) || 0; }
+      if (isValidCase(r)) { map[r.address].n++; map[r.address].pcs += Number(r.actualRemain) || 0; }
     });
     var racks = Object.keys(map).map(function (k) { return map[k]; }).sort(function (a, b) { return a.address.localeCompare(b.address, undefined, { numeric: true }); });
     if (!racks.length) { renderHome(); return; }
@@ -666,7 +743,7 @@
       if (!m) return;
       var sub = m[1];
       if (!map[sub]) map[sub] = { pcs: 0, n: 0 };
-      if (r.isActive && (Number(r.actualRemain) || 0) > 0) { map[sub].pcs += Number(r.actualRemain) || 0; map[sub].n++; }
+      if (isValidCase(r)) { map[sub].pcs += Number(r.actualRemain) || 0; map[sub].n++; }
     });
     var keys = Object.keys(map).sort(function (a, b) { return a.localeCompare(b, undefined, { numeric: true }); });
     var html = '<div class="result-card"><div class="result-header zone"><div class="result-icon">🏢</div><div class="result-title">ZONE ' + zone + '</div></div><div class="rack-list">';
