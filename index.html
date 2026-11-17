@@ -119,7 +119,7 @@
     .modal-content { border-radius: 16px; }
   }
 
-  /* === SETTINGAN KHUSUS PRINT PDF (DIRAPIHKAN) === */
+  /* === SETTINGAN KHUSUS PRINT PDF === */
   #print-area { display: none; }
   @media print {
     @page { size: A4; margin: 15mm 10mm; }
@@ -168,7 +168,7 @@
   <div class="loading"><div class="spinner"></div><div style="font-weight:700;color:#fff" id="loading-hint">Memuat data...</div></div>
 </div>
 
-<!-- CONTAINER KHUSUS UNTUK PRINT PDF (Hanya Muncul Saat di-Print) -->
+<!-- CONTAINER KHUSUS UNTUK PRINT PDF -->
 <div id="print-area"></div>
 
 <!-- MODAL BOM REVERSE VIEW -->
@@ -192,7 +192,6 @@
 
   var GIST_ID = '4cddce2de821366b213ff96299c01b9f';
   var DATA_URL = 'https://gist.githubusercontent.com/biansyah07/' + GIST_ID + '/raw/rct-data.json';
-  var AUTO_REFRESH_MS = 5 * 60 * 1000;
   var FETCH_TIMEOUT_MS = 25000;
   
   var allData = [];
@@ -202,14 +201,12 @@
 
   function isLoggedIn() { return !!localStorage.getItem('rct_user_id'); }
 
-  // Tanggal standar YYYY-MM-DD zona Jakarta
   function getTodayString() {
     var d = new Date();
     d.setHours(d.getHours() + 7);
     return d.toISOString().slice(0, 10);
   }
 
-  // Cek Hari & Sesi Max 14 Jam
   function checkSession() {
     if (!isLoggedIn()) return false;
     var loginDate = localStorage.getItem('rct_login_date') || '';
@@ -429,7 +426,7 @@
       '</div>';
   }
 
-  // ═══ LOGIKA CERDAS: MEMISAHKAN FEEDER / TROLLEY (BELUM CONSUME VS SUDAH CONSUME) ═══
+  // ═══ LOGIKA MEMISAHKAN FEEDER / TROLLEY (BELUM CONSUME VS SUDAH CONSUME) ═══
   function isFeederLocation(addr) {
     if (!addr) return false;
     var u = String(addr).toUpperCase().trim();
@@ -439,14 +436,12 @@
   function isValidCase(r) {
     if (!r || !r.isActive) return false;
     var qty = Number(r.actualRemain) || 0;
-    if (qty <= 0) return false; // Qty habis / sudah terconsume
+    if (qty <= 0) return false;
     
     var arrNo = String(r.arrivalNo || '').trim();
     var hasArrivalNo = (arrNo && arrNo !== '-' && arrNo !== 'null' && arrNo !== 'undefined');
 
-    // JIKA DI LOKASI I200 (FEEDER/TROLLEY):
-    // Hanya akui jika ADA LABEL FISIKNYA (berarti ada box fisik di feeder/trolley yang BELUM terconsume).
-    // Jika tidak ada labelnya (arrivalNo kosong), itu adalah saldo virtual masa lalu yang SUDAH TERCONSUME!
+    // Jika di Feeder/I200: Hanya tampilkan jika memiliki label fisik (belum terconsume)
     if (isFeederLocation(r.address)) {
       return hasArrivalNo; 
     }
@@ -482,7 +477,6 @@
 
     if (!cases.length) return alert('Tidak ada data untuk di-export.');
 
-    // FIFO Sort
     cases = sortFifoByLabel(cases);
 
     function cell(v) {
@@ -536,7 +530,7 @@
     setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
   };
 
-  // ═══ PENGURUTAN FIFO (OLDEST FIRST) ═══
+  // ═══ FIFO SORT (OLDEST FIRST) ═══
   function fifoTime(c) {
     var d = String(c.inDt || '').trim();
     var m;
@@ -566,7 +560,7 @@
     });
   }
 
-  // ═══ SMART SEARCH (DIPROTEKSI DARI SALDO GHOST/VIRTUAL) ═══
+  // ═══ SMART SEARCH ═══
   function renderSearch(query) {
     query = String(query || '').toUpperCase().trim();
     var input = document.getElementById('global-search');
@@ -588,7 +582,6 @@
       if (exactMatches.length > 0) cases = exactMatches; 
     }
 
-    // Terapkan FIFO Sort
     cases = sortFifoByLabel(cases);
 
     var whQty = 0;
@@ -761,7 +754,6 @@
     document.body.style.overflow = '';
   };
 
-  // Klik Card = Langsung Buka BOM Reverse
   window.openBOMByLabel = function (arrivalNo) {
     selectedCase = allData.find(function(c) { return c.arrivalNo === arrivalNo; });
     if (!selectedCase) return;
