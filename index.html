@@ -429,7 +429,7 @@
       '</div>';
   }
 
-  // ═══ LOGIKA MEMISAHKAN FEEDER / TROLLEY (BELUM CONSUME VS SUDAH CONSUME) ═══
+  // ═══ FILTER CERDAS: PROTEKSI DARI SALDO GAIB (35 JUTA DIBUANG) ═══
   function isFeederLocation(addr) {
     if (!addr) return false;
     var u = String(addr).toUpperCase().trim();
@@ -439,14 +439,15 @@
   function isValidCase(r) {
     if (!r || !r.isActive) return false;
     var qty = Number(r.actualRemain) || 0;
-    if (qty <= 0) return false; // Qty 0 atau sudah habis terconsume tidak dihitung
+    if (qty <= 0) return false;
     
     var arrNo = String(r.arrivalNo || '').trim();
     var hasArrivalNo = (arrNo && arrNo !== '-' && arrNo !== 'null' && arrNo !== 'undefined');
 
-    // Jika di Feeder / I200: Tetap valid selama qty sisa > 0 (menandakan barang masih ada di feeder/trolley)
+    // DI FEEDER / I200: HANYA DIAKUI JIKA MEMILIKI LABEL FISIK!
+    // Saldo virtual tanpa label (seperti 35 juta) otomatis dibuang (return false).
     if (isFeederLocation(r.address)) {
-      return true; 
+      return hasArrivalNo; 
     }
 
     // Untuk Rak Gudang Biasa:
@@ -571,7 +572,7 @@
     });
   }
 
-  // ═══ SMART SEARCH (PISAHKAN RAK GUDANG & SISA FEEDER) ═══
+  // ═══ SMART SEARCH ═══
   function renderSearch(query) {
     query = String(query || '').toUpperCase().trim();
     var input = document.getElementById('global-search');
@@ -623,7 +624,7 @@
       // Bagian 1: Stok Rak Gudang Murni
       whCases.forEach(function (c) { html += caseCardHtml(c, true); });
 
-      // Bagian 2: Stok Feeder / Trolley Belum Terconsume (Jika ada)
+      // Bagian 2: Stok Feeder / Trolley Belum Terconsume (Jika ada fisik labelnya)
       if (feederCases.length > 0) {
         html += '<div class="section-divider"><span>🛒 STOK FEEDER / TROLLEY (BELUM TERCONSUME PROD)</span><span>' + feederQty.toLocaleString() + ' PCS</span></div>';
         feederCases.forEach(function (c) { html += caseCardHtml(c, true); });
